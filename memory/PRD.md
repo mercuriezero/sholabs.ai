@@ -15,7 +15,7 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 
 ## Implemented (2026-08-15)
 - Sticky glass nav with logo, anchor links, "Book a growth call" CTA, mobile menu.
-- Hero: eyebrow, H1 with stripe-gradient text, subheadline, 94% stat callout, prompt-box CTA (typewriter phrases ~4s cycle, 4 quick-action chips, POST /api/leads + sonner toast).
+- Hero: eyebrow, H1 with stripe-gradient text, subheadline "New revenue from LLMs. Video that converts — 89% of buyers say it seals the deal.", prompt-box CTA (typewriter phrases ~4s cycle, 4 quick-action chips, POST /api/leads + sonner toast), reassurance line "No pitch deck. A 20-minute working session and a written 90-day plan." (2026-08-15 revision replaced the 94% stat callout per user request).
 - Services portal: 4 pill tabs auto-cycling every 3s (GEO Leads blue, AI Videos magenta, Voice AI green, Fractional CXO orange), each with mock product UI panel and per-service CTA.
 - "Why now" stats strip (94%, 3–4, 2–4 wks, 10–20 hrs).
 - FAQ: 6 genuine GEO/LLM Q&As, animated accordion, matching FAQPage JSON-LD in head.

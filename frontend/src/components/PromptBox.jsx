@@ -142,8 +142,8 @@ export default function PromptBox() {
           </div>
         </div>
       </div>
-      <p className="mt-4 text-xs text-neutral-400" data-testid="prompt-hint">
-        Describe your growth goal — a strategist replies with a plan, not a sales deck.
+      <p className="mt-4 text-xs font-medium text-neutral-500 md:text-sm" data-testid="prompt-hint">
+        No pitch deck. A 20-minute working session and a written 90-day plan.
       </p>
     </div>
   );

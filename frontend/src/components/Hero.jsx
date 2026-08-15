@@ -38,7 +38,7 @@ export default function Hero() {
           className="mt-8 font-display text-5xl font-bold leading-[1.05] tracking-tighter text-black md:text-6xl lg:text-[72px]"
         >
           Human intelligence + AI for{" "}
-          <span className="glassy-brand-text">marketing, sales, and growth.</span>
+          <span className="glassy-brand-text">marketing, sales &amp; growth.</span>
         </motion.h1>
 
         <motion.p
@@ -49,27 +49,11 @@ export default function Hero() {
           data-testid="hero-subheadline"
           className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-neutral-500 md:text-lg"
         >
-          Deploy the complete growth engine with a high-performing Fractional AI Marketing CXO — strategy,
-          execution, and AI systems shipping together every week.
+          New revenue from LLMs. Video that converts —{" "}
+          <strong className="font-semibold text-black">89% of buyers</strong> say it seals the deal.
         </motion.p>
 
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          custom={3}
-          data-testid="hero-stat-callout"
-          className="mx-auto mt-8 flex max-w-2xl items-start gap-4 rounded-2xl border border-black/5 bg-neutral-50 p-5 text-left"
-        >
-          <span className="stripe-gradient mt-1 h-10 w-1.5 shrink-0 rounded-full" aria-hidden="true" />
-          <p className="text-sm leading-relaxed text-neutral-600 md:text-base">
-            <strong className="font-semibold text-black">94% of B2B buyers</strong> now use LLMs to research
-            vendors — and AI cites only <strong className="font-semibold text-black">3–4 brands per answer</strong>.
-            High On AI makes sure you're one of them.
-          </p>
-        </motion.div>
-
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={4} className="mt-12">
+        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={3} className="mt-12">
           <PromptBox />
         </motion.div>
       </div>
