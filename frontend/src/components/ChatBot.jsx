@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp, Sparkles, X } from "lucide-react";
+import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -79,6 +80,9 @@ export default function ChatBot() {
             });
           }
           if (payload.error) throw new Error(payload.error);
+          if (payload.captured) {
+            toast.success("Details received · our team will reach out within 24 hours.");
+          }
         }
       }
     } catch {

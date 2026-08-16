@@ -53,6 +53,7 @@ class Lead(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     prompt: str
+    email: str = ""
     source: str = "hero_prompt"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -332,6 +333,7 @@ async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: s
 
 # ---------- Instant plan agent ----------
 URL_RE = re.compile(r"(https?://[^\s]+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s]*)?)", re.I)
+EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 
 SYSTEM_PROMPT = """You are the High On AI strategy engine · a senior growth strategist for an AI-powered marketing agency.
 Given a visitor's website and/or growth goal, produce an instant, concise growth plan.
@@ -765,6 +767,7 @@ HOW TO BEHAVE:
 - Plain text only: no markdown headings, no bullet spam, no em dashes. Short lines are fine.
 - Diagnose before prescribing: if the visitor's goal is unclear, ask one smart question, then recommend.
 - Always end with a concrete next step when relevant: the free instant plan on the homepage, the project estimator on /fractional-cxo, a success pack, or the working session link.
+- When a visitor shows buying intent (starting out, pricing fit, pilots, booking, timelines), naturally ask for their name and work email so the team can follow up within 24 hours. Keep it light, one line. When they share it, thank them warmly and confirm the team will reach out.
 - Never invent pricing, discounts, results or capabilities beyond what is listed. If something is not listed, say the team confirms scope in the working session.
 - On competitor questions: stay factual and brief, then pivot to outcomes and the pilot."""
 
@@ -815,7 +818,23 @@ async def chat_stream(input: ChatInput):
                 {"id": str(uuid.uuid4()), "session_id": input.session_id, "role": "user", "text": input.message, "created_at": now},
                 {"id": str(uuid.uuid4()), "session_id": input.session_id, "role": "assistant", "text": reply, "created_at": now},
             ])
-            yield f"data: {json.dumps({'done': True})}\n\n"
+            captured = ""
+            match = EMAIL_RE.search(input.message)
+            if match:
+                captured = match.group(0).lower()
+                existing = await db.leads.find_one({"source": "concierge_chat", "email": captured})
+                if not existing:
+                    lead = Lead(
+                        prompt=f"Concierge chat lead · last message: {input.message[:400]}",
+                        email=captured,
+                        source="concierge_chat",
+                    )
+                    ldoc = lead.model_dump()
+                    ldoc["created_at"] = ldoc["created_at"].isoformat()
+                    await db.leads.insert_one(ldoc)
+                    if OWNER_EMAIL and EMAIL_KEY:
+                        asyncio.create_task(notify_owner(lead))
+            yield f"data: {json.dumps({'done': True, 'captured': captured})}\n\n"
         except Exception:
             logger.exception("Chat failed")
             yield f"data: {json.dumps({'error': 'Something glitched. Please try again.'})}\n\n"

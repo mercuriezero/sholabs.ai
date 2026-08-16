@@ -84,6 +84,11 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Owner teaching: POST/GET/DELETE /api/chat/teach (owner-only) stored in db.bot_knowledge and injected into the system prompt as ground truth. UI in OwnerTools ("Train the AI concierge") on /account. Verified: taught fact was used by the bot in its next answer; test data cleaned up.
 - Nav reworked to Odoo-style: Services / Pricing (/fractional-cxo#cxo-packs, hash scroll fixed in ScrollToTop) / Command Center / Help.
 
+## Rev 11 (2026-08-16) — Service visuals in hero + chat lead capture
+- KeywordField expanded beyond LLM names: service chips with lucide icons (AI Video, Voice AI, AI SDR, Social Media, Outbound, UGC Ads, Booked Meetings) mixed with LLM/GEO tokens, all in the 3-depth parallax field.
+- Concierge lead capture: bot now asks for name + work email on buying intent (system prompt); backend detects emails in visitor messages, saves a lead (source=concierge_chat, email field, dedupe), fires owner alert, and emits a captured SSE event → visitor sees a confirmation toast. Verified e2e (lead saved, owner alerted, dedupe), test data cleaned.
+- Lead model now carries optional email field.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
