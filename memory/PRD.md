@@ -41,10 +41,18 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - /dashboard: Revenue collected KPI + payment signals in live feed; GET /api/payments public with masked emails.
 - Verified: register/login/me curl chain, live Razorpay order created (order_TQMzBC4J1khkbp), 401 on unauthenticated order, UI signup → login → amount → Razorpay live checkout modal opened with prefill. Real charge NOT completed (live keys).
 
+## Rev 5 (2026-08-16) — Receipts, webhook, priced packages
+- Branded receipt email (stripe header, amount, package, payment ID) auto-sent to the payer on /api/payments/verify and on webhook capture (deduped via prior status check). Verified end-to-end via test send.
+- Razorpay webhook: POST /api/payments/webhook handles payment.captured; verifies X-Razorpay-Signature when RAZORPAY_WEBHOOK_SECRET is set (env placeholder added, empty), and ALWAYS cross-checks payment via Razorpay API before marking paid (forgery-safe without secret). User must register this webhook URL in Razorpay dashboard.
+- Priced packages (ASSUMED pricing, user to confirm): pilot tiers on plan card — Pilot Sprint ₹24,999 / Growth Pilot ₹49,999 / Full Engine Pilot ₹99,999; Fractional CXO hourly success packs — 25h ₹49,999 / 50h ₹94,999 / 100h ₹1,79,999 / 200h ₹3,39,999 (~₹2,000/hr with volume discounts). Custom amount still available everywhere.
+- package_name stored on payment docs and shown in dashboard feed.
+- Fix: auth/payment modals now render via createPortal (hover transforms were trapping the fixed overlay).
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: OWNER_EMAIL in backend/.env is EMPTY — lead email alerts are verified working (test send id returned) but paused until the user shares their real notification email address.
-- P1: Auth-protect /dashboard (currently public demo data); Razorpay webhook for payment.captured events; payment success email receipt to customer.
+- P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
+- P1: Confirm/adjust package pricing (currently assumed). Auth-protect /dashboard (currently public demo data).
 - P1: Case studies / testimonials / client logos section (real proof points from user).
 - P1: Connect pillar KPIs on /dashboard to real data sources (currently labeled sample).
 - P2: Forgot/reset password flow; blog/insights hub for GEO; llms.txt; sitemap.xml/robots.txt.

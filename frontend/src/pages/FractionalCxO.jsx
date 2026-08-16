@@ -1,8 +1,16 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, Compass, Eye, Megaphone, Users, CalendarClock, BarChart3, Check } from "lucide-react";
 import Footer from "@/components/Footer";
+import PayButton from "@/components/PayButton";
 
 const CAL = "https://cal.com/sunnyrai/30min";
+
+const CXO_PACKS = [
+  { name: "Starter Pack · 25 hours", hours: "25", price: 49999, desc: "Growth audit, written 90-day plan, weekly cadence" },
+  { name: "Momentum Pack · 50 hours", hours: "50", price: 94999, desc: "Strategy plus one pillar shipped end-to-end" },
+  { name: "Scale Pack · 100 hours", hours: "100", price: 179999, desc: "Two pillars and team leadership for a full quarter" },
+  { name: "Embedded Pack · 200 hours", hours: "200", price: 339999, desc: "Your fractional growth department, fully embedded" },
+];
 
 const AUDIENCES = [
   {
@@ -187,7 +195,36 @@ export default function FractionalCxO() {
           </div>
         </section>
 
-        <section className="border-t border-black/5 py-20 md:py-24" data-testid="cxo-faq">
+        <section className="border-t border-black/5 py-20 md:py-24" data-testid="cxo-packs">
+          <div className="mx-auto max-w-6xl px-6">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Hourly success packs</p>
+            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-black md:text-4xl">
+              Buy CXO hours <span className="glassy-brand-text">like a product.</span>
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500 md:text-base">
+              No retainer negotiations, no lock-ins. Pick a pack, we start this week — unused hours roll over for
+              90 days.
+            </p>
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {CXO_PACKS.map((p) => (
+                <div key={p.name} className="flex flex-col rounded-3xl border border-black/5 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg" data-testid={`cxo-pack-${p.hours}`}>
+                  <p className="font-display text-4xl font-bold tracking-tight text-black">
+                    {p.hours}<span className="text-lg font-semibold text-neutral-400"> hrs</span>
+                  </p>
+                  <p className="mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-brand-orange">{p.name.split(" · ")[0]}</p>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-500">{p.desc}</p>
+                  <p className="mt-5 font-display text-2xl font-bold text-black">₹{p.price.toLocaleString("en-IN")}</p>
+                  <p className="text-xs text-neutral-400">≈ ₹{Math.round(p.price / Number(p.hours)).toLocaleString("en-IN")}/hour</p>
+                  <div className="mt-5">
+                    <PayButton label="Book this pack" testid={`cxo-pack-pay-${p.hours}`} context="cxo" initialPackage={p} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-black/5 bg-neutral-50/60 py-20 md:py-24" data-testid="cxo-faq">
           <div className="mx-auto max-w-4xl px-6">
             <h2 className="font-display text-3xl font-semibold tracking-tight text-black md:text-4xl">Straight answers</h2>
             <div className="mt-10 space-y-4">

@@ -53,7 +53,7 @@ export default function CommandCenter() {
     ...plans.map((p) => ({ type: "plan", text: p.prompt, time: p.created_at })),
     ...payments.map((p) => ({
       type: "payment",
-      text: `₹${(p.amount / 100).toLocaleString("en-IN")} from ${p.name || p.email || "a client"}`,
+      text: `₹${(p.amount / 100).toLocaleString("en-IN")}${p.package_name ? ` · ${p.package_name}` : ""} from ${p.name || p.email || "a client"}`,
       time: p.paid_at || p.created_at,
     })),
   ].sort((a, b) => new Date(b.time) - new Date(a.time));

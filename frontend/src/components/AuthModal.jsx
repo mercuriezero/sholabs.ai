@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Chrome, Loader2, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -33,7 +34,7 @@ export default function AuthModal({ open, onClose, onSuccess }) {
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -142,6 +143,7 @@ export default function AuthModal({ open, onClose, onSuccess }) {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

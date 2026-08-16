@@ -272,7 +272,7 @@ export default function PromptBox() {
                 >
                   Build this with us <ArrowUpRight className="h-4 w-4" />
                 </a>
-                <PayButton label="Upgrade — pay now" testid="plan-pay-button" />
+                <PayButton label="Choose your pilot" testid="plan-pay-button" context="pilot" />
                 <p className="text-xs text-neutral-400">Brief saved — our team has it too.</p>
               </motion.div>
             )}

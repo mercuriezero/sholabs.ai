@@ -85,6 +85,7 @@ class LoginInput(BaseModel):
 
 class OrderInput(BaseModel):
     amount_rupees: float = Field(gt=0, le=500000)
+    package_name: str = Field(default="", max_length=80)
 
 
 class VerifyInput(BaseModel):
@@ -257,6 +258,36 @@ async def notify_owner(lead: Lead):
         await send_email(to=OWNER_EMAIL, subject=subject, html=html)
     except Exception:
         logger.exception("Owner notification failed")
+
+
+async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: str, payment_id: str):
+    try:
+        amount = f"₹{amount_paise / 100:,.0f}"
+        subject = f"Payment received — {amount} · High On AI"
+        stripe = "".join(
+            f'<td style="background:{c};height:6px;font-size:0">&nbsp;</td>'
+            for c in ["#FFD900", "#2BBCC4", "#1FA84A", "#E200C4", "#ED1C24", "#2B39D1", "#F7941E", "#91268F"]
+        )
+        pkg = f'<p style="margin:0 0 8px"><strong>Package:</strong> {escape(package_name)}</p>' if package_name else ""
+        greeting = f"Hi {escape(name)}," if name else "Hi,"
+        html = (
+            '<table role="presentation" width="100%" style="border-collapse:collapse">'
+            f'<tr>{stripe}</tr>'
+            '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;color:#111">'
+            '<h2 style="margin:0 0 4px">Payment received</h2>'
+            f'<p style="margin:0 0 20px;color:#555">{greeting} thank you — your payment is confirmed.</p>'
+            f'<p style="margin:0 0 8px;font-size:28px"><strong>{escape(amount)}</strong> <span style="color:#555;font-size:14px">INR</span></p>'
+            f'{pkg}'
+            f'<p style="margin:0 0 8px"><strong>Payment ID:</strong> {escape(payment_id)}</p>'
+            f'<p style="margin:0 0 20px"><strong>Date (UTC):</strong> {escape(datetime.now(timezone.utc).isoformat())}</p>'
+            '<p style="margin:0 0 20px;color:#555">What happens next: our growth team reviews your brief and reaches out within 24 hours to kick off.</p>'
+            f'<p style="margin:0"><a href="{escape(SITE_URL)}">High On AI</a> · Human intelligence + AI for marketing, sales &amp; growth</p>'
+            f'<p style="font-size:12px;color:#888;margin-top:24px">Sent by {escape(EMAIL_FROM_NAME)} · QuantumAI OS Pvt Ltd · This is your payment receipt.</p>'
+            '</td></tr></table>'
+        )
+        await send_email(to=to, subject=subject, html=html)
+    except Exception:
+        logger.exception("Receipt email failed")
 
 
 # ---------- Instant plan agent ----------
@@ -502,6 +533,7 @@ async def create_order(input: OrderInput, request: Request):
         "email": user.get("email", ""),
         "amount": amount_paise,
         "currency": "INR",
+        "package_name": input.package_name.strip(),
         "status": "created",
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -523,11 +555,70 @@ async def verify_payment(input: VerifyInput, request: Request):
         )
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid payment signature")
+    payment = await db.payments.find_one({"order_id": input.razorpay_order_id, "user_id": user["user_id"]}, {"_id": 0})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Order not found")
     await db.payments.update_one(
         {"order_id": input.razorpay_order_id, "user_id": user["user_id"]},
         {"$set": {"status": "paid", "payment_id": input.razorpay_payment_id, "paid_at": datetime.now(timezone.utc).isoformat()}},
     )
+    if payment.get("status") != "paid" and payment.get("email") and EMAIL_KEY:
+        asyncio.create_task(send_receipt(
+            to=payment["email"],
+            name=payment.get("name", ""),
+            amount_paise=payment["amount"],
+            package_name=payment.get("package_name", ""),
+            payment_id=input.razorpay_payment_id,
+        ))
     return {"status": "paid"}
+
+
+@api_router.post("/payments/webhook")
+async def razorpay_webhook(request: Request):
+    payload = await request.body()
+    secret = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "")
+    if secret:
+        signature = request.headers.get("X-Razorpay-Signature", "")
+        try:
+            await asyncio.to_thread(rzp_client.utility.verify_webhook_signature, payload.decode(), signature, secret)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid webhook signature")
+    try:
+        event = json.loads(payload)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    if event.get("event") != "payment.captured":
+        return {"status": "ignored"}
+    entity = event.get("payload", {}).get("payment", {}).get("entity", {})
+    order_id = entity.get("order_id", "")
+    payment_id = entity.get("id", "")
+    if not order_id or not payment_id:
+        return {"status": "ignored"}
+    # Cross-check with Razorpay API — defense in depth when no webhook secret is configured
+    try:
+        fetched = await asyncio.to_thread(rzp_client.payment.fetch, payment_id)
+    except Exception:
+        logger.exception("Webhook payment fetch failed")
+        raise HTTPException(status_code=502, detail="Could not confirm payment")
+    if fetched.get("status") != "captured" or fetched.get("order_id") != order_id:
+        return {"status": "mismatch"}
+    payment = await db.payments.find_one({"order_id": order_id}, {"_id": 0})
+    if not payment:
+        return {"status": "unknown_order"}
+    if payment.get("status") != "paid":
+        await db.payments.update_one(
+            {"order_id": order_id},
+            {"$set": {"status": "paid", "payment_id": payment_id, "paid_at": datetime.now(timezone.utc).isoformat()}},
+        )
+        if payment.get("email") and EMAIL_KEY:
+            asyncio.create_task(send_receipt(
+                to=payment["email"],
+                name=payment.get("name", ""),
+                amount_paise=payment["amount"],
+                package_name=payment.get("package_name", ""),
+                payment_id=payment_id,
+            ))
+    return {"status": "processed"}
 
 
 @api_router.get("/payments")
