@@ -231,16 +231,16 @@ export default function PromptBox() {
             data-testid="plan-result"
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
+              <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
                 <Sparkles className="h-4 w-4 text-brand-magenta" />
                 Your instant plan
               </div>
               {phase === "done" ? (
-                <span className="rounded-full bg-brand-green/10 px-3 py-1 font-mono text-[10px] font-medium uppercase tracking-widest text-brand-green">
+                <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-medium uppercase tracking-widest text-brand-green">
                   Ready
                 </span>
               ) : (
-                <span className="rounded-full bg-brand-blue/10 px-3 py-1 font-mono text-[10px] font-medium uppercase tracking-widest text-brand-blue">
+                <span className="rounded-full bg-brand-blue/10 px-3 py-1 text-[10px] font-medium uppercase tracking-widest text-brand-blue">
                   Generating
                 </span>
               )}

@@ -12,7 +12,7 @@ export default function Pilot() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="relative overflow-hidden rounded-[36px] border border-black/5 bg-white p-10 text-center shadow-[0_32px_90px_-30px_rgba(10,10,10,0.18)] md:p-16">
           <div className="stripe-gradient absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">
             Proof over promises
           </p>
           <h2 className="mx-auto mt-5 max-w-3xl font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="pilot-heading">

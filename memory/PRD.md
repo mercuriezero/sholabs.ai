@@ -92,6 +92,10 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 ## Rev 12 (2026-08-16) — Hero video wall
 - KeywordField reworked from LLM chips to floating UGC/ad video cards (Founder UGC ad, Product demo, Customer story with LIVE badge, Ad creative V3, Launch teaser, AI avatar ad): play buttons, duration badges, view counts, simulated playback via animated progress bars + light-sweep flash, per-card brand tint. Only 5 LLM/GEO chips remain for flavor. Depth layers + mouse parallax retained; static frames under reduced motion.
 
+## Rev 13 (2026-08-16) — Typography sweep
+- Demo window header: traffic-light dots replaced with stripe-gradient bar; "highon.ai · instant plan" now semibold sans.
+- font-mono (JetBrains Mono) removed from every component site-wide (eyebrows, chips, badges, dashboard labels, feeds now render in Inter/Outfit). Zero font-mono classes remain.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.

@@ -16,7 +16,7 @@ export default function UseCases() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div>
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">
               01 · The new buyer journey
             </p>
             <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="use-cases-heading">
@@ -45,7 +45,7 @@ export default function UseCases() {
                 </p>
               </div>
               <div className="mt-5 rounded-2xl border border-black/5 bg-neutral-50 p-5">
-                <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-neutral-400">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-400">
                   <Sparkles className="h-3.5 w-3.5 text-brand-blue" /> AI answer
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-600">

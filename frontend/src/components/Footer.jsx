@@ -15,7 +15,7 @@ export default function Footer() {
             </p>
           </div>
           <nav aria-label="Services">
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Services</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Services</p>
             <ul className="mt-5 space-y-3 text-sm">
               {[
                 ["LLM Revenue", "services"],
@@ -37,7 +37,7 @@ export default function Footer() {
             </ul>
           </nav>
           <nav aria-label="Company">
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Company</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Company</p>
             <ul className="mt-5 space-y-3 text-sm">
               <li><a href={window.location.pathname === "/" ? "#process" : "/#process"} data-testid="footer-link-process" className="text-neutral-600 transition-colors hover:text-black">Process</a></li>
               <li><a href={window.location.pathname === "/" ? "#why-us" : "/#why-us"} data-testid="footer-link-why-us" className="text-neutral-600 transition-colors hover:text-black">Why us</a></li>

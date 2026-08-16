@@ -78,22 +78,20 @@ function DemoCard() {
     <div className="relative" data-testid="process-demo">
       <div className="absolute -inset-3 rounded-[36px] bg-brand-magenta/5" aria-hidden="true" />
       <div className="relative rounded-[28px] border border-black/5 bg-white p-6 shadow-[0_32px_90px_-30px_rgba(10,10,10,0.25)] md:p-7">
-        <div className="flex items-center gap-1.5 border-b border-black/5 pb-4">
-          <span className="h-2.5 w-2.5 rounded-full bg-brand-red/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-brand-yellow/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-brand-green/70" />
-          <span className="ml-3 font-mono text-[11px] text-neutral-400">highon.ai · instant plan</span>
+        <div className="flex items-center gap-2.5 border-b border-black/5 pb-4">
+          <span className="stripe-gradient h-4 w-1.5 rounded-full" aria-hidden="true" />
+          <span className="text-xs font-semibold tracking-wide text-neutral-500">highon.ai · instant plan</span>
         </div>
 
         <div className="mt-5 space-y-3">
           <div className="flex items-center rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <span className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-widest text-neutral-400">Website</span>
+            <span className="w-16 shrink-0 text-[10px] uppercase tracking-widest text-neutral-400">Website</span>
             <span className={`text-sm text-black ${!typingGoal && phase === "typing" ? "type-caret" : ""}`} data-testid="demo-url">
               {typedUrl}
             </span>
           </div>
           <div className="flex items-center rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <span className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-widest text-neutral-400">Goal</span>
+            <span className="w-16 shrink-0 text-[10px] uppercase tracking-widest text-neutral-400">Goal</span>
             <span className={`text-sm text-black ${typingGoal ? "type-caret" : ""}`} data-testid="demo-goal">
               {typedGoal}
             </span>
@@ -123,7 +121,7 @@ function DemoCard() {
                 </motion.div>
               ))}
               {shown === PLAN_LINES.length && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-1 font-mono text-[10px] uppercase tracking-widest text-brand-green">
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-1 text-[10px] uppercase tracking-widest text-brand-green">
                   Plan ready · no call needed
                 </motion.p>
               )}
@@ -143,7 +141,7 @@ export default function Process() {
     <section id="process" className="scroll-mt-20 border-t border-black/5 py-24 md:py-32" data-testid="process-section">
       <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20">
         <div>
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">01 · How it works</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">01 · How it works</p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="process-heading">
             No sales call to get started. No waiting on a strategist. <span className="text-neutral-400">Just:</span>
           </h2>

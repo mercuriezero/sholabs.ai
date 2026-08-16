@@ -10,7 +10,7 @@ export default function Stats() {
     <section id="why-now" className="scroll-mt-20 border-y border-black/5 bg-neutral-50/60 py-20 md:py-24" data-testid="stats-section">
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Why now</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Why now</p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="stats-heading">
             The shortlist moved into the answer box
           </h2>

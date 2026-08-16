@@ -35,7 +35,7 @@ export default function Hero() {
           <span className="stripe-gradient h-1 w-10 rounded-full" aria-hidden="true" />
           <span
             data-testid="hero-eyebrow"
-            className="font-mono text-sm font-medium uppercase tracking-[0.3em] text-neutral-600 md:text-base"
+            className="text-sm font-medium uppercase tracking-[0.3em] text-neutral-600 md:text-base"
           >
             Full-Stack H.I.A.I. Engine
           </span>

@@ -53,7 +53,7 @@ export default function Dashboard() {
     <section id="dashboard" className="scroll-mt-20 border-t border-black/5 bg-neutral-50/60 py-24 md:py-32" data-testid="dashboard-section">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">03 · Command center</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">03 · Command center</p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="dashboard-heading">
             One dashboard. Every signal. <span className="glassy-brand-text">Live.</span>
           </h2>
@@ -86,7 +86,7 @@ export default function Dashboard() {
                   <p className="text-xs text-neutral-400">Every pillar, one live view</p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand-green/10 px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-widest text-brand-green" data-testid="dashboard-live-badge">
+              <span className="inline-flex items-center gap-2 rounded-full bg-brand-green/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-brand-green" data-testid="dashboard-live-badge">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-green opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-green" />
@@ -98,7 +98,7 @@ export default function Dashboard() {
             <div className="grid gap-4 p-6 sm:grid-cols-3 md:p-8">
               {KPIS.map((k) => (
                 <div key={k.label} className="rounded-2xl border border-black/5 bg-neutral-50/70 p-5" data-testid={`kpi-${k.label.replace(/\s+/g, "-")}`}>
-                  <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em]" style={{ color: k.color }}>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.18em]" style={{ color: k.color }}>
                     {k.label}
                   </p>
                   <p className="mt-2 font-display text-3xl font-bold tracking-tight text-black">{k.value}</p>
@@ -109,7 +109,7 @@ export default function Dashboard() {
             </div>
 
             <div className="border-t border-black/5 px-6 py-5 md:px-8">
-              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">Live signal feed</p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">Live signal feed</p>
               <ul className="mt-3 space-y-2.5" data-testid="signal-feed">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {visible.map((f) => (
@@ -126,7 +126,7 @@ export default function Dashboard() {
                         <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: f.color }} />
                         {f.text}
                       </span>
-                      <span className="shrink-0 font-mono text-[11px] text-neutral-400">{f.time}</span>
+                      <span className="shrink-0 text-[11px] text-neutral-400">{f.time}</span>
                     </motion.li>
                   ))}
                 </AnimatePresence>

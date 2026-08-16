@@ -86,7 +86,7 @@ export default function StackCalculator() {
                     {initials}
                   </span>
                   <span className="text-center text-[11px] font-medium leading-tight text-neutral-600">{t.name}</span>
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-neutral-400">{t.cat}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-neutral-400">{t.cat}</span>
                 </button>
               );
             })}
@@ -145,7 +145,7 @@ export default function StackCalculator() {
                 ))}
               </ul>
               <div className="mt-4 flex items-baseline justify-between border-t border-black/10 pt-4">
-                <span className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-500">Total</span>
+                <span className="text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-500">Total</span>
                 <span className="font-display text-xl font-bold text-black" data-testid="stack-total">{inr(monthly)} / month</span>
               </div>
 

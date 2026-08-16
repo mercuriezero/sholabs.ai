@@ -88,7 +88,7 @@ export default function OwnerTools({ onLogged }) {
 
   return (
     <section className="mt-14 rounded-[28px] border-2 border-dashed border-brand-orange/30 bg-brand-orange/[0.04] p-6 md:p-8" data-testid="owner-tools">
-      <p className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-brand-orange">
+      <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-brand-orange">
         <ShieldCheck className="h-4 w-4" /> Owner tools · only you see this
       </p>
       <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-black">Log client hours</h2>
@@ -112,7 +112,7 @@ export default function OwnerTools({ onLogged }) {
                   <p className="mt-0.5 text-xs text-neutral-400">{p.email}</p>
                 </div>
                 {p.hours_total > 0 && (
-                  <span className={`rounded-full px-3 py-1 font-mono text-[11px] font-medium ${remaining < 5 ? "bg-brand-red/10 text-brand-red" : "bg-neutral-100 text-neutral-600"}`} data-testid={`owner-remaining-${p.id}`}>
+                  <span className={`rounded-full px-3 py-1 text-[11px] font-medium ${remaining < 5 ? "bg-brand-red/10 text-brand-red" : "bg-neutral-100 text-neutral-600"}`} data-testid={`owner-remaining-${p.id}`}>
                     {remaining} / {p.hours_total} hrs left
                   </span>
                 )}
@@ -144,7 +144,7 @@ export default function OwnerTools({ onLogged }) {
       )}
 
       <div className="mt-10 border-t border-brand-orange/20 pt-8">
-        <p className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-brand-purple">
+        <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-brand-purple">
           <Brain className="h-4 w-4" /> Train the AI concierge
         </p>
         <p className="mt-2 text-sm text-neutral-500">

@@ -88,7 +88,7 @@ export default function CommandCenter() {
             </h1>
             <p className="mt-2 text-sm text-neutral-500">Every pillar, one live view. Refreshes automatically.</p>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-brand-green/10 px-4 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest text-brand-green" data-testid="dash-live-badge">
+          <span className="inline-flex items-center gap-2 rounded-full bg-brand-green/10 px-4 py-1.5 text-[11px] font-medium uppercase tracking-widest text-brand-green" data-testid="dash-live-badge">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-green opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-green" />
@@ -105,20 +105,20 @@ export default function CommandCenter() {
             { label: "Latest signal", value: latest, sub: "most recent activity" },
           ].map((k) => (
             <div key={k.label} className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">{k.label}</p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">{k.label}</p>
               <p className="mt-2 font-display text-3xl font-bold tracking-tight text-black">{k.value}</p>
               <p className="text-xs text-neutral-500">{k.sub}</p>
             </div>
           ))}
         </div>
 
-        <p className="mt-12 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+        <p className="mt-12 text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
           Pillar targets · sample until connected
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {SAMPLE_KPIS.map((k) => (
             <div key={k.label} className="rounded-3xl border border-black/5 bg-neutral-50/70 p-6" data-testid={`dash-kpi-${k.label.replace(/\s+/g, "-")}`}>
-              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em]" style={{ color: k.color }}>{k.label}</p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em]" style={{ color: k.color }}>{k.label}</p>
               <p className="mt-2 font-display text-3xl font-bold tracking-tight text-black">{k.value}</p>
               <p className="text-xs text-neutral-500">{k.sub}</p>
             </div>
@@ -126,7 +126,7 @@ export default function CommandCenter() {
         </div>
 
         <div className="mt-12 rounded-3xl border border-black/5 bg-white p-6 shadow-sm md:p-8">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">Live signal feed</p>
+          <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">Live signal feed</p>
           {feed.length === 0 ? (
             <p className="mt-4 text-sm text-neutral-400" data-testid="dash-feed-empty">
               No signals yet · submit a brief on the homepage to see it land here in real time.
@@ -151,7 +151,7 @@ export default function CommandCenter() {
                       {f.text}
                     </span>
                   </span>
-                  <span className="shrink-0 font-mono text-[11px] text-neutral-400">{timeAgo(f.time)}</span>
+                  <span className="shrink-0 text-[11px] text-neutral-400">{timeAgo(f.time)}</span>
                 </li>
               ))}
             </ul>

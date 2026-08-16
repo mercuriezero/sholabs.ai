@@ -38,7 +38,7 @@ const SERVICES = [
 function GeoPanel({ color }) {
   return (
     <div className="flex h-full flex-col gap-4 p-6 md:p-8">
-      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-neutral-500">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
         <Sparkles className="h-3.5 w-3.5" style={{ color }} /> AI answer preview
       </div>
       <div className="rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
@@ -65,7 +65,7 @@ function GeoPanel({ color }) {
 function VideoPanel({ color }) {
   return (
     <div className="flex h-full flex-col gap-4 p-6 md:p-8">
-      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-neutral-500">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
         <Clapperboard className="h-3.5 w-3.5" style={{ color }} /> This week's render queue
       </div>
       <div className="grid flex-1 grid-cols-3 gap-3">
@@ -74,7 +74,7 @@ function VideoPanel({ color }) {
             <div className="h-16 rounded-xl md:h-24" style={{ background: `linear-gradient(135deg, ${color}22, ${color}55)` }} />
             <div className="mt-3">
               <p className="text-xs font-semibold text-black md:text-sm">{t}</p>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-wider" style={{ color }}>
+              <p className="mt-1 text-[10px] uppercase tracking-wider" style={{ color }}>
                 {i === 2 ? "Rendering" : "Shipped"}
               </p>
             </div>
@@ -91,7 +91,7 @@ function VideoPanel({ color }) {
 function VoicePanel({ color }) {
   return (
     <div className="flex h-full flex-col gap-4 p-6 md:p-8">
-      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-neutral-500">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
         <AudioLines className="h-3.5 w-3.5" style={{ color }} /> Voice AI SDR · live
       </div>
       <div className="flex flex-1 flex-col justify-center rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
@@ -135,7 +135,7 @@ export default function Portal() {
     <section id="services" className="scroll-mt-20 py-24 md:py-32" data-testid="services-section">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400" data-testid="services-eyebrow">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400" data-testid="services-eyebrow">
             02 · One engine. Three growth pillars.
           </p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="services-heading">

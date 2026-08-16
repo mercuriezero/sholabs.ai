@@ -30,7 +30,7 @@ export default function SuccessPacks() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Hourly success packs</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Hourly success packs</p>
             <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-black md:text-4xl" data-testid="packs-heading">
               Buy CXO hours <span className="glassy-brand-text">like a product.</span>
             </h2>
@@ -53,7 +53,7 @@ export default function SuccessPacks() {
             <thead>
               <tr>
                 <th className="w-60 p-5 text-left align-bottom">
-                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">
+                  <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">
                     What's included
                   </span>
                 </th>
@@ -91,7 +91,7 @@ export default function SuccessPacks() {
               ))}
               <tr>
                 <th scope="row" className="px-5 py-5 text-left align-middle">
-                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">Investment</span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">Investment</span>
                   <span className="mt-1 block text-xs text-neutral-400">Flat $30/hour</span>
                 </th>
                 {CXO_PACKS.map((p) => (

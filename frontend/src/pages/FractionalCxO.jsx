@@ -88,7 +88,7 @@ export default function FractionalCxO() {
           <div className="relative mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
             <div className="flex items-center justify-center gap-3">
               <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
-              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500" data-testid="cxo-eyebrow">
+              <span className="text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500" data-testid="cxo-eyebrow">
                 Fractional AI CXO
               </span>
               <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
@@ -125,7 +125,7 @@ export default function FractionalCxO() {
 
         <section className="border-t border-black/5 bg-neutral-50/60 py-20 md:py-24" data-testid="cxo-scope">
           <div className="mx-auto max-w-6xl px-6">
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Scope of ownership</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Scope of ownership</p>
             <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-black md:text-4xl">What your CXO owns</h2>
             <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {SCOPE.map((s) => (
@@ -148,9 +148,9 @@ export default function FractionalCxO() {
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-black/5 bg-neutral-50/70">
-                    <th className="px-6 py-4 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-400"> </th>
-                    <th className="px-6 py-4 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-400">Full-time CMO</th>
-                    <th className="px-6 py-4 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-brand-orange">Fractional AI CXO</th>
+                    <th className="px-6 py-4 text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-400"> </th>
+                    <th className="px-6 py-4 text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-400">Full-time CMO</th>
+                    <th className="px-6 py-4 text-[11px] font-medium uppercase tracking-[0.15em] text-brand-orange">Fractional AI CXO</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/5">
@@ -173,13 +173,13 @@ export default function FractionalCxO() {
 
         <section className="border-t border-black/5 bg-neutral-50/60 py-20 md:py-24" data-testid="cxo-plan">
           <div className="mx-auto max-w-6xl px-6">
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">The first 90 days</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">The first 90 days</p>
             <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-black md:text-4xl">A plan, not a probation period</h2>
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               {PHASES.map((p) => (
                 <div key={p.phase} className="relative overflow-hidden rounded-3xl border border-black/5 bg-white p-7 shadow-sm" data-testid={`cxo-phase-${PHASES.indexOf(p)}`}>
                   <span className="absolute inset-x-0 top-0 h-1" style={{ background: p.color }} aria-hidden="true" />
-                  <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em]" style={{ color: p.color }}>{p.phase}</p>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.18em]" style={{ color: p.color }}>{p.phase}</p>
                   <h3 className="mt-3 font-display text-xl font-semibold text-black">{p.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-neutral-500">{p.desc}</p>
                 </div>

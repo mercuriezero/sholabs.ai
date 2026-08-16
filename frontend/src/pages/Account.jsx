@@ -76,7 +76,7 @@ export default function Account() {
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3" data-testid="account-kpis">
               <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-                <p className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-green">
+                <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-brand-green">
                   <Clock className="h-3.5 w-3.5" /> Hours remaining
                 </p>
                 <p className="mt-2 font-display text-4xl font-bold tracking-tight text-black" data-testid="account-hours-remaining">
@@ -85,14 +85,14 @@ export default function Account() {
                 <p className="text-xs text-neutral-500">of {data?.hours_total ?? 0} hours purchased</p>
               </div>
               <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-                <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-orange">Hours used</p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-brand-orange">Hours used</p>
                 <p className="mt-2 font-display text-4xl font-bold tracking-tight text-black" data-testid="account-hours-used">
                   {data ? data.hours_used : " · "}
                 </p>
                 <p className="text-xs text-neutral-500">logged by your High On AI team</p>
               </div>
               <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-                <p className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-blue">
+                <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-brand-blue">
                   <IndianRupee className="h-3.5 w-3.5" /> Total invested
                 </p>
                 <p className="mt-2 font-display text-4xl font-bold tracking-tight text-black" data-testid="account-spend">
@@ -122,7 +122,7 @@ export default function Account() {
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <p className="font-display text-lg font-semibold text-black">{p.package_name || "Custom payment"}</p>
-                            <p className="mt-1 font-mono text-[11px] text-neutral-400">
+                            <p className="mt-1 text-[11px] text-neutral-400">
                               {new Date(p.paid_at || p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · {p.payment_id}
                             </p>
                           </div>

@@ -32,7 +32,7 @@ function Chip({ t, icon: Icon, x, y, d, i, mx, my, reduce }) {
       <motion.span
         animate={reduce ? undefined : { y: [0, -12, 0] }}
         transition={{ repeat: Infinity, duration: 6 + (i % 5), ease: "easeInOut", delay: i * 0.45 }}
-        className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-black/5 bg-white/70 px-3 py-1.5 font-mono text-[11px] font-medium text-neutral-500 shadow-sm backdrop-blur-sm"
+        className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-black/5 bg-white/70 px-3 py-1.5 text-[11px] font-medium text-neutral-500 shadow-sm backdrop-blur-sm"
       >
         {Icon ? (
           <Icon className="h-3.5 w-3.5 text-brand-green" />
@@ -70,17 +70,17 @@ function VideoCard({ t, views, dur, live, color, x, y, d, i, mx, my, reduce }) {
             </span>
           </span>
           {live && (
-            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-brand-red px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-white">
+            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-brand-red px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
               <span className="h-1 w-1 animate-pulse rounded-full bg-white" /> Live
             </span>
           )}
-          <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 font-mono text-[9px] text-white">
+          <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[9px] text-white">
             {dur}
           </span>
         </div>
         <div className="p-2.5">
           <p className="text-[11px] font-semibold leading-tight text-black">{t}</p>
-          <p className="mt-0.5 font-mono text-[9px] text-neutral-400">{views} views</p>
+          <p className="mt-0.5 text-[9px] text-neutral-400">{views} views</p>
           <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-neutral-100">
             {reduce ? (
               <span className="block h-full w-2/3 rounded-full" style={{ background: color }} />

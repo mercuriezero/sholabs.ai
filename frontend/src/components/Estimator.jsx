@@ -116,7 +116,7 @@ export default function Estimator({ open, onClose }) {
               {estimate ? (
                 <div className="flex flex-wrap items-center justify-between gap-6">
                   <div>
-                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">
                       Estimated scope · {estimate.hours} hours
                     </p>
                     <p className="mt-1 font-display text-3xl font-bold tracking-tight text-black" data-testid="estimator-cost">
