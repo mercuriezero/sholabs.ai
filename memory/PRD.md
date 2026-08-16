@@ -117,6 +117,9 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 ## Rev 19 (2026-08-16) — Mobile hero fix
 - KeywordField now responsive (useIsMobile): showreel card moves to bottom-right on mobile, second card hidden, chips repositioned to margins (UGC Ads / AI SDR hidden on small screens). ChatGPT chip nudged above eyebrow to avoid overlap. Verified at 390x844: no collisions, video still plays.
 
+## Rev 20 (2026-08-16) — ChatGPT models confirmation
+- OpenAI ChatGPT models confirmed integrated: plan agent (server.py:408) and concierge (server.py:805) both run openai/gpt-5.4 (playbook-recommended) via EMERGENT_LLM_KEY, streaming SSE, chats persisted in db.chats. Live-verified. Newer models available if wanted: gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna / gpt-5.5 (one-line model swap each).
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
