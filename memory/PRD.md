@@ -69,6 +69,11 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Em dash (—) banned: swept all src/, public/index.html, backend server.py emails/prompts; zero remain.
 - Verified: hero keyword field + bigger eyebrow render; demo types → generates → shows plan lines; portal tabs = LLM Revenue/AI Videos/Voice AI; marquee & use-cases gone (count 0); backend healthy post-sed.
 
+## Rev 8 (2026-08-16) — Success pack table + project estimator + stack calculator
+- /fractional-cxo packs section replaced with Odoo-style comparison table (SuccessPacks.jsx): 4 brand-colored tier columns (Starter orange / Momentum cyan / Scale green / Embedded purple), 9-row feature matrix with per-column checks, investment row with Book buttons (PayButton, Razorpay).
+- Project Estimator (Estimator.jsx, purple "Project Estimator" button): company size input + 5 need checkboxes (GEO 20h, video 15h, outbound/voice 15h, CXO 25h, RevOps 8h) with size multipliers (1x/1.2x/1.4x/1.6x) → estimated hours, ₹ cost at flat $30/hr (₹2,600), recommended pack with one-click Book (auth-gated, preselected) or Cal.com link. Modal layering fixed (auth z-100, payment z-110 above estimator z-95).
+- "The stack you'd otherwise need" static table replaced with interactive StackCalculator.jsx (Odoo-style): 18 selectable tool tiles with brand-color monograms across 6 categories, users stepper (per-user vs flat pricing), live "Tools to replace" ledger, yearly total vs ₹99,999 Full Engine Pilot, yellow-highlighted yearly savings. Verified interactively (totals recompute on tool/user changes).
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.

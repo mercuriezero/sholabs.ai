@@ -124,7 +124,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[90] flex items-center justify-center p-6"
+            className="fixed inset-0 z-[110] flex items-center justify-center p-6"
             data-testid="amount-modal"
           >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAmountOpen(false)} aria-hidden="true" />

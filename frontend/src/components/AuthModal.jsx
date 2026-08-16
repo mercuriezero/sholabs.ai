@@ -41,7 +41,7 @@ export default function AuthModal({ open, onClose, onSuccess }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[80] flex items-center justify-center p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
           data-testid="auth-modal"
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
