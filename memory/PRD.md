@@ -74,6 +74,10 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Project Estimator (Estimator.jsx, purple "Project Estimator" button): company size input + 5 need checkboxes (GEO 20h, video 15h, outbound/voice 15h, CXO 25h, RevOps 8h) with size multipliers (1x/1.2x/1.4x/1.6x) → estimated hours, ₹ cost at flat $30/hr (₹2,600), recommended pack with one-click Book (auth-gated, preselected) or Cal.com link. Modal layering fixed (auth z-100, payment z-110 above estimator z-95).
 - "The stack you'd otherwise need" static table replaced with interactive StackCalculator.jsx (Odoo-style): 18 selectable tool tiles with brand-color monograms across 6 categories, users stepper (per-user vs flat pricing), live "Tools to replace" ledger, yearly total vs ₹99,999 Full Engine Pilot, yellow-highlighted yearly savings. Verified interactively (totals recompute on tool/user changes).
 
+## Rev 9 (2026-08-16) — Market-calibrated pricing (researched Aug 2026)
+- StackCalculator repriced from published 2026 competitor pricing: Profound $399 / Peec €205 / AthenaHQ $295 / Otterly $189 / HeyGen $69 per seat / Synthesia $89 / Arcads $110 / Apollo $59 per seat / Clay $149 / Smartlead $94 / Outreach ~$115 per seat / impact.com $500 / PartnerStack ~$1k / GRIN $1.5k / CreatorIQ $3k+ / Aspire $2k / Clari ~$75 per seat (INR at ~₹87/USD). Right panel reframed: monthly stack total vs High On AI engine ₹1,30,000/mo (50 hrs flat $30/hr) with yearly savings + % (52% at defaults).
+- Estimator: each need now carries a researched market benchmark for equivalent agency+tools scope (GEO ₹2.2L, video ₹1.6L, outbound/voice ₹1.3L, fractional CXO ₹2.6L, RevOps ₹1L) — result panel shows "Agencies + tools ≈ ₹X" and "You save ~N%" (verified 65-75% band across selections).
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.

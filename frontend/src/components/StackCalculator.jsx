@@ -3,30 +3,30 @@ import { Check, Minus, Plus } from "lucide-react";
 
 const BRAND = ["#F7941E", "#2BBCC4", "#1FA84A", "#E200C4", "#2B39D1", "#91268F", "#ED1C24", "#FFD900"];
 
-// Typical 2026 list prices, small-team plans. per: "user" = ₹/user/month, "flat" = ₹/month.
+// Published 2026 list prices (researched Aug 2026), INR at ~₹87/USD. per: "user" = ₹/user/month, "flat" = ₹/month.
 const TOOLS = [
-  { name: "Profound", cat: "AI visibility", price: 12000, per: "flat" },
-  { name: "Peec AI", cat: "AI visibility", price: 7500, per: "flat" },
-  { name: "AthenaHQ", cat: "AI visibility", price: 24000, per: "flat" },
-  { name: "Otterly.AI", cat: "AI visibility", price: 5000, per: "flat" },
-  { name: "HeyGen", cat: "AI video", price: 5500, per: "flat" },
-  { name: "Synthesia", cat: "AI video", price: 7500, per: "flat" },
-  { name: "Arcads", cat: "AI video", price: 9000, per: "flat" },
-  { name: "Apollo", cat: "Outbound", price: 1000, per: "user" },
+  { name: "Profound", cat: "AI visibility", price: 35000, per: "flat" },
+  { name: "Peec AI", cat: "AI visibility", price: 19000, per: "flat" },
+  { name: "AthenaHQ", cat: "AI visibility", price: 26000, per: "flat" },
+  { name: "Otterly.AI", cat: "AI visibility", price: 16000, per: "flat" },
+  { name: "HeyGen", cat: "AI video", price: 6000, per: "user" },
+  { name: "Synthesia", cat: "AI video", price: 8000, per: "flat" },
+  { name: "Arcads", cat: "AI video", price: 9500, per: "flat" },
+  { name: "Apollo", cat: "Outbound", price: 5000, per: "user" },
   { name: "Clay", cat: "Outbound", price: 13000, per: "flat" },
   { name: "Smartlead", cat: "Outbound", price: 8000, per: "flat" },
-  { name: "Outreach", cat: "Outbound", price: 3500, per: "user" },
-  { name: "impact.com", cat: "Partners", price: 41000, per: "flat" },
-  { name: "PartnerStack", cat: "Partners", price: 41000, per: "flat" },
-  { name: "GRIN", cat: "Creators", price: 60000, per: "flat" },
-  { name: "CreatorIQ", cat: "Creators", price: 100000, per: "flat" },
-  { name: "Aspire", cat: "Creators", price: 60000, per: "flat" },
-  { name: "Clari", cat: "RevOps", price: 3000, per: "user" },
-  { name: "HubSpot Ops Hub", cat: "RevOps", price: 800, per: "user" },
+  { name: "Outreach", cat: "Outbound", price: 10000, per: "user" },
+  { name: "impact.com", cat: "Partners", price: 43000, per: "flat" },
+  { name: "PartnerStack", cat: "Partners", price: 60000, per: "flat" },
+  { name: "GRIN", cat: "Creators", price: 130000, per: "flat" },
+  { name: "CreatorIQ", cat: "Creators", price: 260000, per: "flat" },
+  { name: "Aspire", cat: "Creators", price: 175000, per: "flat" },
+  { name: "Clari", cat: "RevOps", price: 6500, per: "user" },
+  { name: "HubSpot Ops Hub", cat: "RevOps", price: 1800, per: "user" },
 ];
 
 const DEFAULT_SELECTED = ["Profound", "HeyGen", "Apollo", "PartnerStack", "Clari"];
-const PILOT_PRICE = 99999;
+const ENGINE_MONTHLY = 130000; // 50 CXO hours at flat $30/hr, every pillar included
 
 const inr = (n) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 
@@ -46,8 +46,9 @@ export default function StackCalculator() {
     return { lines, monthly: lines.reduce((s, l) => s + l.cost, 0) };
   }, [selected, users]);
 
-  const yearly = monthly * 12;
-  const savings = Math.max(0, yearly - PILOT_PRICE);
+  const monthlySavings = Math.max(0, monthly - ENGINE_MONTHLY);
+  const savings = monthlySavings * 12;
+  const savingsPct = monthly > 0 ? Math.round((monthlySavings / monthly) * 100) : 0;
 
   return (
     <div className="mt-8 rounded-3xl border border-black/5 bg-white p-6 shadow-sm md:p-10" data-testid="stack-calculator">
@@ -145,12 +146,12 @@ export default function StackCalculator() {
               </ul>
               <div className="mt-4 flex items-baseline justify-between border-t border-black/10 pt-4">
                 <span className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-500">Total</span>
-                <span className="font-display text-xl font-bold text-black" data-testid="stack-total">{inr(yearly)} / year</span>
+                <span className="font-display text-xl font-bold text-black" data-testid="stack-total">{inr(monthly)} / month</span>
               </div>
 
               <div className="mt-6 flex items-baseline justify-between">
-                <span className="text-sm text-neutral-500">High On AI Full Engine Pilot</span>
-                <span className="font-display text-lg font-bold text-black">{inr(PILOT_PRICE)} one-time</span>
+                <span className="text-sm text-neutral-500">High On AI engine · 50 hrs, every pillar</span>
+                <span className="font-display text-lg font-bold text-black">{inr(ENGINE_MONTHLY)} / month</span>
               </div>
 
               <div className="mt-6 rounded-2xl bg-brand-yellow/25 p-5">
@@ -159,8 +160,13 @@ export default function StackCalculator() {
                   <span className="bg-brand-yellow/70 box-decoration-clone px-1">{inr(savings)}</span>
                   <span className="text-lg font-semibold text-neutral-500"> / year</span>
                 </p>
+                {savingsPct > 0 && (
+                  <p className="mt-1 text-sm font-semibold text-brand-green" data-testid="stack-savings-pct">
+                    {savingsPct}% less than your current stack
+                  </p>
+                )}
                 <p className="mt-2 text-xs text-neutral-500">
-                  One pilot price, every pillar covered · typical list prices, small-team plans
+                  Flat $30/hour · competitor list prices researched Aug 2026, small-team plans
                 </p>
               </div>
             </>

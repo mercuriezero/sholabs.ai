@@ -9,11 +9,11 @@ const CAL = "https://cal.com/sunnyrai/30min";
 const RATE = 2600; // flat $30/hour, charged in INR
 
 const NEEDS = [
-  { id: "geo", label: "AI visibility (GEO)", sub: "Get cited by ChatGPT, Gemini and Perplexity", hours: 20 },
-  { id: "video", label: "AI video engine", sub: "Weekly videos, scripted, generated, repurposed", hours: 15 },
-  { id: "voice", label: "Outbound + Voice AI", sub: "Agents that qualify leads and book meetings", hours: 15 },
-  { id: "cxo", label: "Fractional CXO leadership", sub: "Strategy, weekly cadence, team ownership", hours: 25 },
-  { id: "revops", label: "Live dashboard + RevOps", sub: "One command center for every signal", hours: 8 },
+  { id: "geo", label: "AI visibility (GEO)", sub: "Get cited by ChatGPT, Gemini and Perplexity", hours: 20, market: 220000 },
+  { id: "video", label: "AI video engine", sub: "Weekly videos, scripted, generated, repurposed", hours: 15, market: 160000 },
+  { id: "voice", label: "Outbound + Voice AI", sub: "Agents that qualify leads and book meetings", hours: 15, market: 130000 },
+  { id: "cxo", label: "Fractional CXO leadership", sub: "Strategy, weekly cadence, team ownership", hours: 25, market: 260000 },
+  { id: "revops", label: "Live dashboard + RevOps", sub: "One command center for every signal", hours: 8, market: 100000 },
 ];
 
 function sizeMultiplier(size) {
@@ -28,12 +28,15 @@ export default function Estimator({ open, onClose }) {
   const [selected, setSelected] = useState(["geo", "cxo"]);
 
   const estimate = useMemo(() => {
-    const base = NEEDS.filter((n) => selected.includes(n.id)).reduce((s, n) => s + n.hours, 0);
+    const chosen = NEEDS.filter((n) => selected.includes(n.id));
+    const base = chosen.reduce((s, n) => s + n.hours, 0);
     if (!base) return null;
     const hours = Math.ceil(base * sizeMultiplier(parseInt(size, 10) || 1));
     const cost = hours * RATE;
+    const market = chosen.reduce((s, n) => s + n.market, 0);
+    const savingsPct = Math.min(75, Math.max(0, Math.round((1 - cost / market) * 100)));
     const pack = CXO_PACKS.find((p) => p.hours >= hours) || CXO_PACKS[CXO_PACKS.length - 1];
-    return { hours, cost, pack };
+    return { hours, cost, market, savingsPct, pack };
   }, [size, selected]);
 
   const toggle = (id) =>
@@ -120,6 +123,12 @@ export default function Estimator({ open, onClose }) {
                       ₹{estimate.cost.toLocaleString("en-IN")}
                     </p>
                     <p className="mt-1 text-xs text-neutral-400">Flat $30/hour · indicative, confirmed in your working session</p>
+                    <p className="mt-3 text-sm text-neutral-600">
+                      Agencies + tools for this scope: ≈ ₹{estimate.market.toLocaleString("en-IN")}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-brand-green" data-testid="estimator-savings">
+                      You save ~{estimate.savingsPct}%
+                    </p>
                     <p className="mt-3 text-sm text-neutral-600">
                       Recommended:{" "}
                       <span className="font-semibold" style={{ color: estimate.pack.color }} data-testid="estimator-recommendation">
