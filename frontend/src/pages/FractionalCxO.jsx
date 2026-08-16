@@ -109,6 +109,8 @@ export default function FractionalCxO() {
           </div>
         </section>
 
+        <SuccessPacks />
+
         <section className="border-t border-black/5 py-20 md:py-24" data-testid="cxo-audience">
           <div className="mx-auto max-w-6xl px-6">
             <h2 className="font-display text-3xl font-semibold tracking-tight text-black md:text-4xl">Is this you?</h2>
@@ -187,8 +189,6 @@ export default function FractionalCxO() {
             </div>
           </div>
         </section>
-
-        <SuccessPacks />
 
         <section className="border-t border-black/5 bg-neutral-50/60 py-20 md:py-24" data-testid="cxo-faq">
           <div className="mx-auto max-w-4xl px-6">

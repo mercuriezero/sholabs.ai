@@ -96,6 +96,11 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Demo window header: traffic-light dots replaced with stripe-gradient bar; "highon.ai · instant plan" now semibold sans.
 - font-mono (JetBrains Mono) removed from every component site-wide (eyebrows, chips, badges, dashboard labels, feeds now render in Inter/Outfit). Zero font-mono classes remain.
 
+## Rev 14 (2026-08-16) — Pricing reorder + lean hero
+- Success packs table moved to the top of /fractional-cxo (immediately after the hero).
+- Packs now: Trial 4h ₹10,400 (red) · Starter 25h ₹65,000 (orange) · Momentum 50h ₹1,30,000 (cyan) · Scale 100h ₹2,60,000 (green). 200h Embedded removed everywhere (table, PayButton packages, feature matrix re-flagged to 4 columns).
+- Hero background reduced to exactly two video cards (Founder UGC ad, Ad creative V3); small chips retained.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.

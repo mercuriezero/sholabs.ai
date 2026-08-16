@@ -3,11 +3,7 @@ import { AudioLines, Play } from "lucide-react";
 
 const CARDS = [
   { t: "Founder UGC ad", views: "12.4k", dur: "0:32", x: "3%", y: "12%", d: 1.8, color: "#E200C4" },
-  { t: "Product demo", views: "8.1k", dur: "0:45", x: "81%", y: "9%", d: 1, color: "#2B39D1" },
-  { t: "Customer story", views: "21k", dur: "1:04", x: "2%", y: "60%", d: 1, color: "#1FA84A", live: true },
-  { t: "Ad creative · V3", views: "4.2k", dur: "0:18", x: "83%", y: "64%", d: 1.8, color: "#F7941E" },
-  { t: "Launch teaser", views: "16.9k", dur: "0:27", x: "30%", y: "88%", d: 0.6, color: "#91268F" },
-  { t: "AI avatar ad", views: "9.8k", dur: "0:38", x: "58%", y: "87%", d: 1, color: "#2BBCC4" },
+  { t: "Ad creative · V3", views: "4.2k", dur: "0:18", x: "83%", y: "60%", d: 1.8, color: "#F7941E" },
 ];
 
 const CHIPS = [

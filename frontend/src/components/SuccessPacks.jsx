@@ -4,20 +4,20 @@ import PayButton from "@/components/PayButton";
 import Estimator from "@/components/Estimator";
 
 export const CXO_PACKS = [
+  { name: "Trial Pack · 4 hours", hours: 4, price: 10400, color: "#ED1C24", tag: "Audit snapshot + quick wins in a week" },
   { name: "Starter Pack · 25 hours", hours: 25, price: 65000, color: "#F7941E", tag: "Audit + written 90-day plan" },
   { name: "Momentum Pack · 50 hours", hours: 50, price: 130000, color: "#2BBCC4", tag: "One pillar shipped end-to-end" },
   { name: "Scale Pack · 100 hours", hours: 100, price: 260000, color: "#1FA84A", tag: "Two pillars + team leadership" },
-  { name: "Embedded Pack · 200 hours", hours: 200, price: 520000, color: "#91268F", tag: "Your fractional growth department" },
 ];
 
 const FEATURES = [
   ["Growth audit + written 90-day plan", [1, 1, 1, 1]],
-  ["Weekly growth cadence + Slack access", [1, 1, 1, 1]],
+  ["Weekly growth cadence + Slack access", [0, 1, 1, 1]],
   ["GEO / AI visibility execution", [0, 1, 1, 1]],
-  ["AI video production", [0, 1, 1, 1]],
+  ["AI video production", [0, 0, 1, 1]],
   ["Board-ready live dashboard", [0, 1, 1, 1]],
-  ["Agentic outbound + Voice AI", [0, 0, 1, 1]],
-  ["Team, agency and budget leadership", [0, 0, 1, 1]],
+  ["Agentic outbound + Voice AI", [0, 0, 0, 1]],
+  ["Team, agency and budget leadership", [0, 0, 0, 1]],
   ["Named senior CXO on your account", [0, 0, 1, 1]],
   ["Priority 48h turnaround", [0, 0, 0, 1]],
 ];
