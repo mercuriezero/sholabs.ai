@@ -45,13 +45,15 @@ export default function Nav() {
           )}
           {user && (
             <div className="flex items-center gap-2.5" data-testid="nav-user-menu">
-              {user.picture ? (
-                <img src={user.picture} alt="" className="h-8 w-8 rounded-full" referrerPolicy="no-referrer" />
-              ) : (
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black font-display text-xs font-bold text-white">
-                  {(user.name || user.email || "U")[0].toUpperCase()}
-                </span>
-              )}
+              <a href="/account" data-testid="nav-account-link" aria-label="My account" className="transition-transform hover:-translate-y-0.5">
+                {user.picture ? (
+                  <img src={user.picture} alt="" className="h-8 w-8 rounded-full" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black font-display text-xs font-bold text-white">
+                    {(user.name || user.email || "U")[0].toUpperCase()}
+                  </span>
+                )}
+              </a>
               <button onClick={logout} data-testid="nav-logout-button" aria-label="Log out" className="text-neutral-400 transition-colors hover:text-black">
                 <LogOut className="h-4 w-4" />
               </button>

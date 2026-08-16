@@ -7,6 +7,7 @@ import AuthCallback from "@/components/AuthCallback";
 import Landing from "@/pages/Landing";
 import FractionalCxO from "@/pages/FractionalCxO";
 import CommandCenter from "@/pages/CommandCenter";
+import Account from "@/pages/Account";
 
 function AppRouter() {
   const location = useLocation();
@@ -19,6 +20,7 @@ function AppRouter() {
       <Route path="/" element={<Landing />} />
       <Route path="/fractional-cxo" element={<FractionalCxO />} />
       <Route path="/dashboard" element={<CommandCenter />} />
+      <Route path="/account" element={<Account />} />
     </Routes>
   );
 }

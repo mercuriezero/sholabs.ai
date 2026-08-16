@@ -84,7 +84,7 @@ class LoginInput(BaseModel):
 
 
 class OrderInput(BaseModel):
-    amount_rupees: float = Field(gt=0, le=500000)
+    amount_rupees: float = Field(gt=0, le=1000000)
     package_name: str = Field(default="", max_length=80)
 
 
@@ -258,6 +258,28 @@ async def notify_owner(lead: Lead):
         await send_email(to=OWNER_EMAIL, subject=subject, html=html)
     except Exception:
         logger.exception("Owner notification failed")
+
+
+async def notify_owner_payment(*, name: str, email: str, amount_paise: int, package_name: str, payment_id: str):
+    if not OWNER_EMAIL or not EMAIL_KEY:
+        return
+    try:
+        amount = f"₹{amount_paise / 100:,.0f}"
+        subject = f"Payment received — {amount} · {name or email}"
+        html = (
+            '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#111">'
+            '<h2 style="margin:0 0 12px">Payment received</h2>'
+            f'<p style="margin:0 0 8px"><strong>Amount:</strong> {escape(amount)} INR</p>'
+            f'<p style="margin:0 0 8px"><strong>Customer:</strong> {escape(name or "")} ({escape(email)})</p>'
+            f'<p style="margin:0 0 8px"><strong>Package:</strong> {escape(package_name or "Custom amount")}</p>'
+            f'<p style="margin:0 0 16px"><strong>Payment ID:</strong> {escape(payment_id)}</p>'
+            f'<p style="margin:0"><a href="{escape(SITE_URL)}/dashboard">Open the command center</a></p>'
+            f'<p style="font-size:12px;color:#888;margin-top:24px">Sent by {escape(EMAIL_FROM_NAME)} · instant payment alert</p>'
+            '</td></tr></table>'
+        )
+        await send_email(to=OWNER_EMAIL, subject=subject, html=html)
+    except Exception:
+        logger.exception("Owner payment alert failed")
 
 
 async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: str, payment_id: str):
@@ -570,6 +592,13 @@ async def verify_payment(input: VerifyInput, request: Request):
             package_name=payment.get("package_name", ""),
             payment_id=input.razorpay_payment_id,
         ))
+        asyncio.create_task(notify_owner_payment(
+            name=payment.get("name", ""),
+            email=payment["email"],
+            amount_paise=payment["amount"],
+            package_name=payment.get("package_name", ""),
+            payment_id=input.razorpay_payment_id,
+        ))
     return {"status": "paid"}
 
 
@@ -618,7 +647,47 @@ async def razorpay_webhook(request: Request):
                 package_name=payment.get("package_name", ""),
                 payment_id=payment_id,
             ))
+            asyncio.create_task(notify_owner_payment(
+                name=payment.get("name", ""),
+                email=payment["email"],
+                amount_paise=payment["amount"],
+                package_name=payment.get("package_name", ""),
+                payment_id=payment_id,
+            ))
     return {"status": "processed"}
+
+
+class LogHoursInput(BaseModel):
+    payment_id: str
+    hours: float = Field(gt=0, le=100)
+
+
+@api_router.get("/account/summary")
+async def account_summary(request: Request):
+    user = await get_current_user(request)
+    payments = await db.payments.find({"user_id": user["user_id"], "status": "paid"}, {"_id": 0}).to_list(100)
+    for p in payments:
+        m = re.search(r"(\d+)\s*hours?", p.get("package_name", ""))
+        p["hours_total"] = int(m.group(1)) if m else 0
+        p["hours_used"] = p.get("hours_used", 0)
+    return {
+        "user": {"name": user.get("name", ""), "email": user.get("email", "")},
+        "payments": payments,
+        "hours_total": sum(p["hours_total"] for p in payments),
+        "hours_used": sum(p["hours_used"] for p in payments),
+        "spend_total": sum(p.get("amount", 0) for p in payments),
+    }
+
+
+@api_router.post("/account/log-hours")
+async def log_hours(input: LogHoursInput, request: Request):
+    user = await get_current_user(request)
+    if not OWNER_EMAIL or user.get("email") != OWNER_EMAIL:
+        raise HTTPException(status_code=403, detail="Owner only")
+    result = await db.payments.update_one({"id": input.payment_id}, {"$inc": {"hours_used": input.hours}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    return {"status": "logged"}
 
 
 @api_router.get("/payments")

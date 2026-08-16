@@ -6,10 +6,10 @@ import PayButton from "@/components/PayButton";
 const CAL = "https://cal.com/sunnyrai/30min";
 
 const CXO_PACKS = [
-  { name: "Starter Pack · 25 hours", hours: "25", price: 49999, desc: "Growth audit, written 90-day plan, weekly cadence" },
-  { name: "Momentum Pack · 50 hours", hours: "50", price: 94999, desc: "Strategy plus one pillar shipped end-to-end" },
-  { name: "Scale Pack · 100 hours", hours: "100", price: 179999, desc: "Two pillars and team leadership for a full quarter" },
-  { name: "Embedded Pack · 200 hours", hours: "200", price: 339999, desc: "Your fractional growth department, fully embedded" },
+  { name: "Starter Pack · 25 hours", hours: "25", price: 65000, desc: "Growth audit, written 90-day plan, weekly cadence" },
+  { name: "Momentum Pack · 50 hours", hours: "50", price: 130000, desc: "Strategy plus one pillar shipped end-to-end" },
+  { name: "Scale Pack · 100 hours", hours: "100", price: 260000, desc: "Two pillars and team leadership for a full quarter" },
+  { name: "Embedded Pack · 200 hours", hours: "200", price: 520000, desc: "Your fractional growth department, fully embedded" },
 ];
 
 const AUDIENCES = [
@@ -214,7 +214,7 @@ export default function FractionalCxO() {
                   <p className="mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-brand-orange">{p.name.split(" · ")[0]}</p>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-500">{p.desc}</p>
                   <p className="mt-5 font-display text-2xl font-bold text-black">₹{p.price.toLocaleString("en-IN")}</p>
-                  <p className="text-xs text-neutral-400">≈ ₹{Math.round(p.price / Number(p.hours)).toLocaleString("en-IN")}/hour</p>
+                  <p className="text-xs text-neutral-400">Flat $30/hour · unused hours roll over 90 days</p>
                   <div className="mt-5">
                     <PayButton label="Book this pack" testid={`cxo-pack-pay-${p.hours}`} context="cxo" initialPackage={p} />
                   </div>

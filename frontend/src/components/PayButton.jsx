@@ -16,10 +16,10 @@ const PILOT_PACKAGES = [
 ];
 
 const CXO_PACKS = [
-  { name: "Starter Pack · 25 hours", price: 49999, desc: "Growth audit, written 90-day plan, weekly cadence" },
-  { name: "Momentum Pack · 50 hours", price: 94999, desc: "Strategy plus one pillar shipped end-to-end" },
-  { name: "Scale Pack · 100 hours", price: 179999, desc: "Two pillars and team leadership for a full quarter" },
-  { name: "Embedded Pack · 200 hours", price: 339999, desc: "Your fractional growth department, fully embedded" },
+  { name: "Starter Pack · 25 hours", price: 65000, desc: "Growth audit, written 90-day plan, weekly cadence" },
+  { name: "Momentum Pack · 50 hours", price: 130000, desc: "Strategy plus one pillar shipped end-to-end" },
+  { name: "Scale Pack · 100 hours", price: 260000, desc: "Two pillars and team leadership for a full quarter" },
+  { name: "Embedded Pack · 200 hours", price: 520000, desc: "Your fractional growth department, fully embedded" },
 ];
 
 function loadRazorpay() {

@@ -48,11 +48,16 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - package_name stored on payment docs and shown in dashboard feed.
 - Fix: auth/payment modals now render via createPortal (hover transforms were trapping the fixed overlay).
 
+## Rev 6 (2026-08-16) — Real pricing, owner alerts, hours tracker
+- CXO packs repriced to flat $30/hr (charged in INR ≈ ₹2,600/hr): 25h ₹65,000 / 50h ₹1,30,000 / 100h ₹2,60,000 / 200h ₹5,20,000. Order cap raised to ₹10,00,000. Pilot tiers unchanged (₹24,999/₹49,999/₹99,999 — still assumed).
+- OWNER_EMAIL=ssup@sohighon.ai active: instant email alerts on every new brief AND every payment received (notify_owner_payment on verify + webhook).
+- Hours Balance Tracker: /account page (login-gated) — hours remaining/used/invested KPIs, per-pack progress bars. Owner logs consumed hours via POST /api/account/log-hours (restricted to OWNER_EMAIL). Nav avatar links to /account.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
-- P0: OWNER_EMAIL in backend/.env is EMPTY — lead email alerts are verified working (test send id returned) but paused until the user shares their real notification email address.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
-- P1: Confirm/adjust package pricing (currently assumed). Auth-protect /dashboard (currently public demo data).
+- P1: Confirm pilot tier pricing (₹24,999/₹49,999/₹99,999 assumed). Auth-protect /dashboard (currently public demo data).
+- P1: Owner UI for logging hours (currently API-only, owner-gated).
 - P1: Case studies / testimonials / client logos section (real proof points from user).
 - P1: Connect pillar KPIs on /dashboard to real data sources (currently labeled sample).
 - P2: Forgot/reset password flow; blog/insights hub for GEO; llms.txt; sitemap.xml/robots.txt.
