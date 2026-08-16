@@ -2,7 +2,7 @@ import { motion, useReducedMotion, useTransform } from "framer-motion";
 import { AudioLines, Bot, Play, Users } from "lucide-react";
 
 const CARDS = [
-  { t: "Founder UGC ad", views: "12.4k", dur: "0:32", x: "3%", y: "12%", d: 1.8, color: "#E200C4" },
+  { t: "Engine showreel", views: "12.4k", dur: "0:04", x: "3%", y: "12%", d: 1.8, color: "#E200C4", src: "/hero-ad.mp4" },
   { t: "Ad creative · V3", views: "4.2k", dur: "0:18", x: "83%", y: "60%", d: 1.8, color: "#F7941E" },
 ];
 
@@ -43,7 +43,7 @@ function Chip({ t, icon: Icon, x, y, d, i, mx, my, reduce }) {
   );
 }
 
-function VideoCard({ t, views, dur, live, color, x, y, d, i, mx, my, reduce }) {
+function VideoCard({ t, views, dur, live, color, src, x, y, d, i, mx, my, reduce }) {
   const tx = useTransform(mx, (v) => v * 1.6 * d);
   const ty = useTransform(my, (v) => v * 1.1 * d);
   return (
@@ -54,19 +54,36 @@ function VideoCard({ t, views, dur, live, color, x, y, d, i, mx, my, reduce }) {
         className="w-36 overflow-hidden rounded-2xl border border-black/5 bg-white shadow-md md:w-44"
       >
         <div className="relative h-20 md:h-24" style={{ background: `linear-gradient(135deg, ${color}26, ${color}59)` }}>
-          {!reduce && (
-            <motion.span
-              className="absolute inset-y-0 w-1/2 bg-white/25 blur-md"
-              animate={{ x: ["-120%", "260%"] }}
-              transition={{ repeat: Infinity, duration: 2.8 + i * 0.5, ease: "easeInOut", repeatDelay: 1.2 }}
-              aria-hidden="true"
-            />
+          {src ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-label={t}
+              onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+              className="absolute inset-0 h-full w-full object-cover"
+            >
+              <source src={`${src.replace(/\.mp4$/, "")}.webm`} type="video/webm" />
+              <source src={src} type="video/mp4" />
+            </video>
+          ) : (
+            <>
+              {!reduce && (
+                <motion.span
+                  className="absolute inset-y-0 w-1/2 bg-white/25 blur-md"
+                  animate={{ x: ["-120%", "260%"] }}
+                  transition={{ repeat: Infinity, duration: 2.8 + i * 0.5, ease: "easeInOut", repeatDelay: 1.2 }}
+                  aria-hidden="true"
+                />
+              )}
+              <span className="absolute inset-0 flex items-center justify-center">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md">
+                  <Play className="ml-0.5 h-4 w-4 fill-black text-black" />
+                </span>
+              </span>
+            </>
           )}
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md">
-              <Play className="ml-0.5 h-4 w-4 fill-black text-black" />
-            </span>
-          </span>
           {live && (
             <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-brand-red px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
               <span className="h-1 w-1 animate-pulse rounded-full bg-white" /> Live
@@ -79,18 +96,20 @@ function VideoCard({ t, views, dur, live, color, x, y, d, i, mx, my, reduce }) {
         <div className="p-2.5">
           <p className="text-[11px] font-semibold leading-tight text-black">{t}</p>
           <p className="mt-0.5 text-[9px] text-neutral-400">{views} views</p>
-          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-neutral-100">
-            {reduce ? (
-              <span className="block h-full w-2/3 rounded-full" style={{ background: color }} />
-            ) : (
-              <motion.span
-                className="block h-full rounded-full"
-                style={{ background: color }}
-                animate={{ width: ["4%", "96%"] }}
-                transition={{ repeat: Infinity, duration: 5 + i, ease: "linear", repeatDelay: 0.6 }}
-              />
-            )}
-          </div>
+          {!src && (
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-neutral-100">
+              {reduce ? (
+                <span className="block h-full w-2/3 rounded-full" style={{ background: color }} />
+              ) : (
+                <motion.span
+                  className="block h-full rounded-full"
+                  style={{ background: color }}
+                  animate={{ width: ["4%", "96%"] }}
+                  transition={{ repeat: Infinity, duration: 5 + i, ease: "linear", repeatDelay: 0.6 }}
+                />
+              )}
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.span>

@@ -105,6 +105,9 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Pilot section now features "Lowest-friction start: Trial Pack · 4 hours · ₹10,400" with a working green PayButton (preselected in payment modal).
 - Hero field rebalanced: ChatGPT/GEO/AI SDR moved to sharp near layer (were blurred at depth 0.6); GEO relocated out from behind the sticky nav; lower-left empty space filled with Perplexity + AI SDR chips; UGC Ads added mid-left. Two video cards retained.
 
+## Rev 16 (2026-08-16) — Real video in hero
+- Lead hero card ("Engine showreel") now plays an actual looping clip: brand-stripe motion graphic rendering "Get Cited. Get Watched. Get Chosen." over the logo stripes, rendered locally to /public/hero-ad.mp4 (H.264) + hero-ad.webm (VP9 fallback for open-source Chromium). Muted, autoplay, loop, playsInline with explicit play() on canPlay. Verified playing (currentTime advanced) in the test browser. User can replace /public/hero-ad.* with real ad creative later.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
