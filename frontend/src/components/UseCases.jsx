@@ -17,7 +17,7 @@ export default function UseCases() {
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div>
             <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">
-              The new buyer journey
+              01 · The new buyer journey
             </p>
             <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="use-cases-heading">
               Be the answer <span className="glassy-brand-text">AI gives.</span>

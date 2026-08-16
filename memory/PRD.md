@@ -35,8 +35,15 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 
 ## Backlog
 - P0: (done) Cal.com booking link wired.
-- P1: Admin view for captured leads; email notification on new lead (Resend).
+- P0: OWNER_EMAIL in backend/.env is EMPTY — lead email alerts are verified working (test send id returned) but paused until the user shares their real notification email address.
+- P1: Auth-protect /dashboard (currently public demo data).
 - P1: Case studies / testimonials / client logos section (real proof points from user).
-- P1: Wire the hero prompt box to a real AI plan-generation agent ("Get your plan, instantly" promise).
+- P1: Connect pillar KPIs on /dashboard to real data sources (currently labeled sample).
 - P2: Blog/insights hub for GEO content moat; llms.txt; sitemap.xml/robots.txt.
 - P2: OG share image (designed 1200x630) instead of logo.
+
+## Rev 3 (2026-08-15) — Instant Plan Agent + alerts + live dashboard + motion upgrade
+- Instant Plan Agent: POST /api/plan/stream (SSE) — saves brief as lead, detects+fetches website text (httpx, 4k chars), streams a tailored 3-pillar plan via gpt-5.4 (Emergent universal key), persists to plans collection. PromptBox renders streaming plan card with markdown formatting + "Build this with us" Cal.com CTA.
+- Lead notifications: managed Resend proxy (EMERGENT_EMAIL_KEY), server-side template + guardrail gate, fires on every new brief. OWNER_EMAIL empty → alerts paused pending user's email.
+- Live command center at /dashboard: real briefs/plans KPIs + auto-refreshing signal feed; landing "See the Dashboard" now links there.
+- Motion: Lenis smooth scrolling (anchor-aware), masked line-by-line hero reveal, mouse-parallax brand orbs, editorial marquee strip, numbered chapter eyebrows (01–06), section scroll-reveals via Reveal wrapper.

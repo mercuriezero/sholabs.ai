@@ -29,9 +29,6 @@
     * {
         @apply border-border;
     }
-    html {
-        scroll-behavior: smooth;
-    }
     body {
         @apply bg-white text-foreground font-sans;
         -webkit-font-smoothing: antialiased;
@@ -102,6 +99,22 @@
 @keyframes caret-blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 38s linear infinite;
+}
+
+@keyframes marquee-scroll {
+    to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        animation: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

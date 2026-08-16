@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import ScrollToTop from "@/components/ScrollToTop";
 import Landing from "@/pages/Landing";
 import FractionalCxO from "@/pages/FractionalCxO";
+import CommandCenter from "@/pages/CommandCenter";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/fractional-cxo" element={<FractionalCxO />} />
+          <Route path="/dashboard" element={<CommandCenter />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="bottom-right" richColors />

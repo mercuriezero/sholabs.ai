@@ -36,7 +36,7 @@ export default function Process() {
     <section id="process" className="scroll-mt-20 py-24 md:py-32" data-testid="process-section">
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">How it works</p>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">04 · How it works</p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="process-heading">
             No sales call to get started. No waiting on a strategist. <span className="text-neutral-400">Just:</span>
           </h2>

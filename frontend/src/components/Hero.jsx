@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import PromptBox from "@/components/PromptBox";
 
 const fadeUp = {
@@ -11,9 +11,24 @@ const fadeUp = {
 };
 
 export default function Hero() {
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const orbX = useSpring(mx, { stiffness: 40, damping: 18 });
+  const orbY = useSpring(my, { stiffness: 40, damping: 18 });
+  const orb2X = useTransform(orbX, (v) => v * -1.5);
+  const orb2Y = useTransform(orbY, (v) => v * -1.2);
+
+  const onMouseMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.set((e.clientX - r.left - r.width / 2) / 36);
+    my.set((e.clientY - r.top - r.height / 2) / 36);
+  };
+
   return (
-    <section id="top" className="relative overflow-hidden" data-testid="hero-section">
+    <section id="top" className="relative overflow-hidden" data-testid="hero-section" onMouseMove={onMouseMove}>
       <div className="hero-grid-bg pointer-events-none absolute inset-0" aria-hidden="true" />
+      <motion.div style={{ x: orbX, y: orbY }} className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-brand-magenta/10 blur-3xl" aria-hidden="true" />
+      <motion.div style={{ x: orb2X, y: orb2Y }} className="pointer-events-none absolute -right-24 top-56 h-80 w-80 rounded-full bg-brand-blue/10 blur-3xl" aria-hidden="true" />
       <div className="relative mx-auto max-w-4xl px-6 pb-24 pt-20 text-center md:pt-28">
         <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0} className="flex items-center justify-center gap-3">
           <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
@@ -26,17 +41,31 @@ export default function Hero() {
           <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
         </motion.div>
 
-        <motion.h1
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          custom={1}
+        <h1
           data-testid="hero-headline"
           className="mt-8 font-display text-5xl font-bold leading-[1.05] tracking-tighter text-black md:text-6xl lg:text-[72px]"
         >
-          Human intelligence + AI for{" "}
-          <span className="glassy-brand-text">marketing, sales &amp; growth.</span>
-        </motion.h1>
+          <span className="block overflow-hidden pb-1">
+            <motion.span
+              className="block"
+              initial={{ y: "110%" }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            >
+              Human intelligence + AI for
+            </motion.span>
+          </span>
+          <span className="block overflow-hidden pb-2">
+            <motion.span
+              className="glassy-brand-text block"
+              initial={{ y: "110%" }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.9, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            >
+              marketing, sales &amp; growth.
+            </motion.span>
+          </span>
+        </h1>
 
         <motion.p
           variants={fadeUp}

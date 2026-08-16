@@ -136,7 +136,7 @@ export default function Portal() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400" data-testid="services-eyebrow">
-            One engine. Three growth pillars.
+            02 · One engine. Three growth pillars.
           </p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="services-heading">
             Growth teams build on <span className="glassy-brand-text">High On AI</span>

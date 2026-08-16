@@ -53,7 +53,7 @@ export default function Dashboard() {
     <section id="dashboard" className="scroll-mt-20 border-t border-black/5 bg-neutral-50/60 py-24 md:py-32" data-testid="dashboard-section">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Command center</p>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">03 · Command center</p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="dashboard-heading">
             One dashboard. Every signal. <span className="glassy-brand-text">Live.</span>
           </h2>
@@ -142,9 +142,7 @@ export default function Dashboard() {
             attention, without asking us.
           </p>
           <a
-            href="https://cal.com/sunnyrai/30min"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/dashboard"
             data-testid="dashboard-cta"
             className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >

@@ -36,7 +36,7 @@ export default function FAQ() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
           <div>
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">FAQ</p>
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">06 · FAQ</p>
             <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="faq-heading">
               Asked by founders. Answered straight.
             </h2>
