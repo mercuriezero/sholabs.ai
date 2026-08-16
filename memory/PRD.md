@@ -114,6 +114,9 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 ## Rev 18 (2026-08-16) — Full services lineup in portal
 - Services portal expanded from 3 to 7 motions: LLM Revenue, AI Videos, Voice AI + new AI SDR (red, sequence/reply panel), Social Media (cyan, weekly content grid), UGC Ads (purple, creative A/B/C testing with winner), Affiliate & Partners (orange, partner pipeline feed). Eyebrow updated to "One engine. Every growth motion." All tabs verified rendering and cycling.
 
+## Rev 19 (2026-08-16) — Mobile hero fix
+- KeywordField now responsive (useIsMobile): showreel card moves to bottom-right on mobile, second card hidden, chips repositioned to margins (UGC Ads / AI SDR hidden on small screens). ChatGPT chip nudged above eyebrow to avoid overlap. Verified at 390x844: no collisions, video still plays.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
