@@ -108,6 +108,9 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 ## Rev 16 (2026-08-16) — Real video in hero
 - Lead hero card ("Engine showreel") now plays an actual looping clip: brand-stripe motion graphic rendering "Get Cited. Get Watched. Get Chosen." over the logo stripes, rendered locally to /public/hero-ad.mp4 (H.264) + hero-ad.webm (VP9 fallback for open-source Chromium). Muted, autoplay, loop, playsInline with explicit play() on canPlay. Verified playing (currentTime advanced) in the test browser. User can replace /public/hero-ad.* with real ad creative later.
 
+## Rev 17 (2026-08-16) — Hero clip swapped
+- hero-ad.mp4/webm replaced with a hook-style ad concept: "94% of buyers ask AI first. Does it name you?" (magenta stat, blue punchline, shimmering stripe bar, "high on ai" sign-off). Verified playing in-browser (clock advancing, loop restarts).
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
