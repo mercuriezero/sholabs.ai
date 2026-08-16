@@ -5,13 +5,13 @@ import { Sparkles, Clapperboard, AudioLines, Check, TrendingUp } from "lucide-re
 const SERVICES = [
   {
     id: "geo",
-    tab: "GEO Leads",
+    tab: "LLM Revenue",
     color: "#2B39D1",
     soft: "rgba(43,57,209,0.06)",
     border: "rgba(43,57,209,0.18)",
     icon: Sparkles,
     heading: "Get noticed on ChatGPT, Gemini & Perplexity",
-    body: "We turn your brand into the answer AI engines cite — entity-rich content, structured data, and the third-party proof LLMs cross-check before recommending a vendor.",
+    body: "We turn your brand into the answer AI engines cite · entity-rich content, structured data, and the third-party proof LLMs cross-check before recommending a vendor.",
   },
   {
     id: "video",
@@ -21,7 +21,7 @@ const SERVICES = [
     border: "rgba(226,0,196,0.18)",
     icon: Clapperboard,
     heading: "An AI video engine that never sleeps",
-    body: "Category-defining videos scripted, generated, and shipped weekly — product stories, founder clips, and ad creative at a pace no studio can match.",
+    body: "Category-defining videos scripted, generated, and shipped weekly · product stories, founder clips, and ad creative at a pace no studio can match.",
   },
   {
     id: "voice",
@@ -31,7 +31,7 @@ const SERVICES = [
     border: "rgba(31,168,74,0.18)",
     icon: AudioLines,
     heading: "Voice AI agents that book real meetings",
-    body: "Human-grade voice agents qualify inbound, revive cold lists, and follow up in seconds — every call transcribed, scored, and synced to your CRM.",
+    body: "Human-grade voice agents qualify inbound, revive cold lists, and follow up in seconds · every call transcribed, scored, and synced to your CRM.",
   },
 ];
 
@@ -44,7 +44,7 @@ function GeoPanel({ color }) {
       <div className="rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
         <p className="text-sm font-semibold text-black">"Which agencies get B2B brands cited by AI search?"</p>
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Based on current sources, the most-cited options include <span className="font-semibold" style={{ color }}>your brand</span> — recognized
+          Based on current sources, the most-cited options include <span className="font-semibold" style={{ color }}>your brand</span> · recognized
           for GEO programs covering ChatGPT, Gemini, and Perplexity…
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -105,7 +105,7 @@ function VoicePanel({ color }) {
           ))}
         </div>
         <p className="mt-4 text-center text-sm text-neutral-600">
-          "Hi Riya — noticed your team is scaling outbound. Worth a 12-minute call Thursday?"
+          "Hi Riya · noticed your team is scaling outbound. Worth a 12-minute call Thursday?"
         </p>
       </div>
       <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
@@ -142,7 +142,7 @@ export default function Portal() {
             Growth teams build on <span className="glassy-brand-text">High On AI</span>
           </h2>
           <p className="mt-4 text-base text-neutral-500 md:text-lg">
-            Every service runs on the same H.I.A.I. operating system — so channels compound instead of compete.
+            Every service runs on the same H.I.A.I. operating system · so channels compound instead of compete.
           </p>
         </div>
 

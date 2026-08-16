@@ -19,7 +19,7 @@ const AUDIENCES = [
   },
   {
     title: "Founder-led team, channel sprawl",
-    desc: "Some SEO here, a freelancer there, a CRM nobody trusts. You need one operating system — and someone accountable for the number.",
+    desc: "Some SEO here, a freelancer there, a CRM nobody trusts. You need one operating system · and someone accountable for the number.",
   },
   {
     title: "Scale-up entering a new market",
@@ -29,22 +29,22 @@ const AUDIENCES = [
 
 const SCOPE = [
   { icon: Compass, title: "Growth strategy & positioning", desc: "Category narrative, ICP, messaging, and the 90-day plan the whole company executes against." },
-  { icon: Eye, title: "GEO & AI visibility", desc: "Getting your brand cited by ChatGPT, Gemini, and Perplexity as a core channel — not an afterthought." },
+  { icon: Eye, title: "GEO & AI visibility", desc: "Getting your brand cited by ChatGPT, Gemini, and Perplexity as a core channel · not an afterthought." },
   { icon: Megaphone, title: "Demand engine", desc: "AI video, agentic outbound, paid, and partnerships run as one system with shared context." },
-  { icon: Users, title: "Team, agencies & budget", desc: "Hiring plans, vendor management, and budget allocation against pipeline — not impressions." },
+  { icon: Users, title: "Team, agencies & budget", desc: "Hiring plans, vendor management, and budget allocation against pipeline · not impressions." },
   { icon: CalendarClock, title: "Weekly operating cadence", desc: "A growth meeting that ships decisions, async updates in your tools, and zero status-theater." },
-  { icon: BarChart3, title: "Board-ready reporting", desc: "One live dashboard mapping every pillar to revenue — ready for investors without a slide rebuild." },
+  { icon: BarChart3, title: "Board-ready reporting", desc: "One live dashboard mapping every pillar to revenue · ready for investors without a slide rebuild." },
 ];
 
 const VS = [
-  ["Annual cost", "$250k+ salary, bonus & equity", "A fraction — pay for outcomes, not overhead"],
+  ["Annual cost", "$250k+ salary, bonus & equity", "A fraction · pay for outcomes, not overhead"],
   ["Time to impact", "3–6 months of ramp-up", "Weeks to first signal"],
   ["Tooling", "You still buy and wire the stack", "The H.I.A.I. engine comes included"],
   ["Risk", "One resume, one bet", "A proven operating system with human leadership"],
 ];
 
 const PHASES = [
-  { phase: "Days 1–30", title: "Audit & plan", desc: "Full growth audit — AI visibility, funnel, stack, team. You get a written 90-day plan with owners and KPIs.", color: "#2BBCC4" },
+  { phase: "Days 1–30", title: "Audit & plan", desc: "Full growth audit · AI visibility, funnel, stack, team. You get a written 90-day plan with owners and KPIs.", color: "#2BBCC4" },
   { phase: "Days 31–60", title: "Build the engine", desc: "GEO pillar live, first videos shipped, outbound sequences running, dashboard wired to real data.", color: "#E200C4" },
   { phase: "Days 61–90", title: "Scale what works", desc: "Double down on the pillar producing signal, cut what's not, and hand you a rhythm your team can keep.", color: "#1FA84A" },
 ];
@@ -52,15 +52,15 @@ const PHASES = [
 const FAQS = [
   {
     q: "How many hours per week do we get?",
-    a: "Typically 10–20 hours, flexed to your stage. Enough for strategy, cadence, and hands-on reviews — the engine's AI systems handle the production volume.",
+    a: "Typically 10–20 hours, flexed to your stage. Enough for strategy, cadence, and hands-on reviews · the engine's AI systems handle the production volume.",
   },
   {
     q: "Who do we actually work with?",
-    a: "A senior growth leader from the High On AI team, backed by the full H.I.A.I. engine — researchers, video systems, and voice agents. One accountable human, one machine behind them.",
+    a: "A senior growth leader from the High On AI team, backed by the full H.I.A.I. engine · researchers, video systems, and voice agents. One accountable human, one machine behind them.",
   },
   {
     q: "What does it cost?",
-    a: "A monthly retainer sized to scope — consistently far below a full-time CMO's fully-loaded cost. Book a working session and we'll scope it against your goals, not a rate card.",
+    a: "A monthly retainer sized to scope · consistently far below a full-time CMO's fully-loaded cost. Book a working session and we'll scope it against your goals, not a rate card.",
   },
 ];
 
@@ -104,8 +104,8 @@ export default function FractionalCxO() {
               C-level growth leadership, <span className="glassy-brand-text">without the C-level hire.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-neutral-500 md:text-lg">
-              A Fractional AI Marketing CXO owns your growth number — positioning, demand generation, GEO, and the
-              AI stack that automates them — in 10–20 hours a week, for a fraction of a full-time salary.
+              A Fractional AI Marketing CXO owns your growth number · positioning, demand generation, GEO, and the
+              AI stack that automates them · in 10–20 hours a week, for a fraction of a full-time salary.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="cxo-hero-cta" className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg">
@@ -202,7 +202,7 @@ export default function FractionalCxO() {
               Buy CXO hours <span className="glassy-brand-text">like a product.</span>
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500 md:text-base">
-              No retainer negotiations, no lock-ins. Pick a pack, we start this week — unused hours roll over for
+              No retainer negotiations, no lock-ins. Pick a pack, we start this week · unused hours roll over for
               90 days.
             </p>
             <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -244,7 +244,7 @@ export default function FractionalCxO() {
               Your growth number deserves <span className="glassy-brand-text">an owner.</span>
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-base text-neutral-500">
-              Twenty minutes. Your funnel, our engine, a written 90-day plan — whether or not we work together.
+              Twenty minutes. Your funnel, our engine, a written 90-day plan · whether or not we work together.
             </p>
             <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="cxo-final-cta-button" className="mt-8 inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg">
               Book your working session <ArrowUpRight className="h-4 w-4" />

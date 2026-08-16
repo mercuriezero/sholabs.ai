@@ -15,7 +15,7 @@ const PHRASES = [
 ];
 
 const CHIPS = [
-  { label: "GEO Leads", prompt: PHRASES[0] },
+  { label: "LLM Revenue", prompt: PHRASES[0] },
   { label: "AI Videos", prompt: PHRASES[2] },
   { label: "Voice AI", prompt: PHRASES[3] },
 ];
@@ -273,7 +273,7 @@ export default function PromptBox() {
                   Build this with us <ArrowUpRight className="h-4 w-4" />
                 </a>
                 <PayButton label="Choose your pilot" testid="plan-pay-button" context="pilot" />
-                <p className="text-xs text-neutral-400">Brief saved — our team has it too.</p>
+                <p className="text-xs text-neutral-400">Brief saved · our team has it too.</p>
               </motion.div>
             )}
           </motion.div>

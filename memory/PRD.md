@@ -61,6 +61,14 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Verified: owner flow e2e (registered temp owner, logged 21h → 4 remaining → alert triggered + flag set; UI log 0.5h → 3.5; temp owner user deleted after test).
 - Google sign-in (Emergent-managed OAuth) verified live: "Continue with Google" → auth.emergentagent.com → real Google accounts sign-in page; backend session exchange rejects missing/invalid session IDs correctly. Post-Google-account callback untested (needs a real Google account).
 
+## Rev 7 (2026-08-16) — Hero keyword field, visual process demo, copy rules
+- Hero: grid background replaced with a floating 3D keyword field (KeywordField.jsx) — ChatGPT/Gemini/Perplexity/Claude/GEO/AEO/LLM SEO/AI Overviews/Citations/Share of Voice/Entity Graph/Answer Engine chips at 3 depth layers (blur+opacity+scale), per-token mouse parallax, slow float loops, container perspective tilt. Eyebrow enlarged (text-sm/base, thicker stripe bars).
+- "GEO Leads" renamed to "LLM Revenue" (portal tab, hero chip, footer link).
+- Editorial marquee removed; "Be the answer AI gives" (UseCases) section removed.
+- Process section moved to position 01 and reworked: left = heading + compact numbered steps; right = self-playing DemoCard that types a website + goal, spins up, and reveals a staggered plan output on a ~14s loop (static final state under reduced motion).
+- Em dash (—) banned: swept all src/, public/index.html, backend server.py emails/prompts; zero remain.
+- Verified: hero keyword field + bigger eyebrow render; demo types → generates → shows plan lines; portal tabs = LLM Revenue/AI Videos/Voice AI; marquee & use-cases gone (count 0); backend healthy post-sed.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.

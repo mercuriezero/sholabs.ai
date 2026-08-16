@@ -37,7 +37,7 @@ export default function OwnerTools({ onLogged }) {
         body: JSON.stringify({ payment_id: paymentId, hours: h }),
       });
       if (!r.ok) throw new Error();
-      toast.success("Hours logged — client balance updated (low-balance alert auto-sends under 5 hrs).");
+      toast.success("Hours logged · client balance updated (low-balance alert auto-sends under 5 hrs).");
       setHours((prev) => ({ ...prev, [paymentId]: "" }));
       load();
       onLogged?.();
@@ -69,7 +69,7 @@ export default function OwnerTools({ onLogged }) {
               <li key={p.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-black/5 bg-white p-5" data-testid={`owner-payment-${p.id}`}>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-black">
-                    {p.package_name || "Custom payment"} — {p.name || p.email}
+                    {p.package_name || "Custom payment"} · {p.name || p.email}
                   </p>
                   <p className="mt-0.5 text-xs text-neutral-400">{p.email}</p>
                 </div>

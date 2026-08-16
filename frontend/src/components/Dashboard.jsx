@@ -19,7 +19,7 @@ const PILLARS = [
     name: "Get Chosen",
     color: "#F7941E",
     icon: Target,
-    desc: "Pipeline generated, reply rates, partner-sourced revenue, deal velocity — one feed, not four CRMs.",
+    desc: "Pipeline generated, reply rates, partner-sourced revenue, deal velocity · one feed, not four CRMs.",
   },
 ];
 
@@ -32,9 +32,9 @@ const KPIS = [
 const FEED = [
   { text: 'Cited by Perplexity for "best growth engine for B2B SaaS"', time: "2m ago", color: "#2B39D1" },
   { text: "Founder-led demo crossed 10k views", time: "14m ago", color: "#E200C4" },
-  { text: "New reply from outbound sequence — routed to pipeline", time: "31m ago", color: "#F7941E" },
+  { text: "New reply from outbound sequence · routed to pipeline", time: "31m ago", color: "#F7941E" },
   { text: 'Gemini now lists you in "top AI video agencies"', time: "42m ago", color: "#2B39D1" },
-  { text: "Voice agent booked a demo — 12-min call confirmed", time: "1h ago", color: "#F7941E" },
+  { text: "Voice agent booked a demo · 12-min call confirmed", time: "1h ago", color: "#F7941E" },
   { text: "Watch-through on launch video passed 70%", time: "2h ago", color: "#E200C4" },
 ];
 
@@ -59,7 +59,7 @@ export default function Dashboard() {
           </h2>
           <p className="mt-4 text-base text-neutral-500 md:text-lg">
             Three pillars, seventeen tactics, zero reason to check five different tools to know if it's working.
-            Every pillar feeds one command center — real-time, not end-of-month.
+            Every pillar feeds one command center · real-time, not end-of-month.
           </p>
         </div>
 
@@ -82,7 +82,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3">
                 <img src="/logo.webp" alt="" className="h-6 w-auto rounded" />
                 <div>
-                  <p className="text-sm font-semibold text-black">High On AI — command center</p>
+                  <p className="text-sm font-semibold text-black">High On AI · command center</p>
                   <p className="text-xs text-neutral-400">Every pillar, one live view</p>
                 </div>
               </div>
@@ -138,7 +138,7 @@ export default function Dashboard() {
         <div className="mx-auto mt-10 max-w-3xl text-center">
           <p className="text-sm leading-relaxed text-neutral-500 md:text-base">
             No vanity metrics. No "check back next week." Just the KPIs that map straight to revenue, scored and
-            surfaced by AI the moment they move — so you always know which pillar is working and which needs
+            surfaced by AI the moment they move · so you always know which pillar is working and which needs
             attention, without asking us.
           </p>
           <a

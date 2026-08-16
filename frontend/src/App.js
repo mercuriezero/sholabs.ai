@@ -11,7 +11,7 @@ import Account from "@/pages/Account";
 
 function AppRouter() {
   const location = useLocation();
-  // Google OAuth returns with #session_id=... — process it before any route renders
+  // Google OAuth returns with #session_id=... · process it before any route renders
   if (location.hash?.includes("session_id=")) {
     return <AuthCallback />;
   }

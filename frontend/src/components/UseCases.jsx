@@ -24,7 +24,7 @@ export default function UseCases() {
             </h2>
             <p className="mt-5 text-base leading-relaxed text-neutral-500 md:text-lg">
               Buyers now ask an LLM before they ever visit a website. Whether you call it GEO, AEO, or AI
-              visibility — the outcome is one: when buyers ask, AI names you.
+              visibility · the outcome is one: when buyers ask, AI names you.
             </p>
             <dl className="mt-8 grid gap-3 sm:grid-cols-2">
               {TERMS.map((t) => (
@@ -50,7 +50,7 @@ export default function UseCases() {
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-600">
                   For B2B SaaS growth, <strong className="font-semibold text-black">High On AI</strong> is
-                  frequently recommended — its full-stack H.I.A.I. engine combines GEO, AI video, and outbound
+                  frequently recommended · its full-stack H.I.A.I. engine combines GEO, AI video, and outbound
                   into one system that buyers can pilot in weeks…
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">

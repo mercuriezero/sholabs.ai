@@ -70,7 +70,7 @@ export default function Account() {
         {user && (
           <>
             <h1 className="font-display text-4xl font-semibold tracking-tight text-black md:text-5xl">
-              Hi{user.name ? `, ${user.name.split(" ")[0]}` : ""} — <span className="glassy-brand-text">your engine room</span>
+              Hi{user.name ? `, ${user.name.split(" ")[0]}` : ""} · <span className="glassy-brand-text">your engine room</span>
             </h1>
             <p className="mt-2 text-sm text-neutral-500">{user.email}</p>
 
@@ -80,14 +80,14 @@ export default function Account() {
                   <Clock className="h-3.5 w-3.5" /> Hours remaining
                 </p>
                 <p className="mt-2 font-display text-4xl font-bold tracking-tight text-black" data-testid="account-hours-remaining">
-                  {data ? remaining : "—"}
+                  {data ? remaining : " · "}
                 </p>
                 <p className="text-xs text-neutral-500">of {data?.hours_total ?? 0} hours purchased</p>
               </div>
               <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
                 <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-brand-orange">Hours used</p>
                 <p className="mt-2 font-display text-4xl font-bold tracking-tight text-black" data-testid="account-hours-used">
-                  {data ? data.hours_used : "—"}
+                  {data ? data.hours_used : " · "}
                 </p>
                 <p className="text-xs text-neutral-500">logged by your High On AI team</p>
               </div>
@@ -96,7 +96,7 @@ export default function Account() {
                   <IndianRupee className="h-3.5 w-3.5" /> Total invested
                 </p>
                 <p className="mt-2 font-display text-4xl font-bold tracking-tight text-black" data-testid="account-spend">
-                  ₹{data ? (data.spend_total / 100).toLocaleString("en-IN") : "—"}
+                  ₹{data ? (data.spend_total / 100).toLocaleString("en-IN") : " · "}
                 </p>
                 <p className="text-xs text-neutral-500">{data?.payments?.length ?? 0} payment{data?.payments?.length === 1 ? "" : "s"}</p>
               </div>
@@ -111,7 +111,7 @@ export default function Account() {
               </div>
               {!data || data.payments.length === 0 ? (
                 <p className="mt-4 rounded-3xl border border-dashed border-black/10 bg-neutral-50/60 p-8 text-center text-sm text-neutral-400" data-testid="account-empty">
-                  No packs yet — grab an hourly success pack and your balance shows up here.
+                  No packs yet · grab an hourly success pack and your balance shows up here.
                 </p>
               ) : (
                 <ul className="mt-6 space-y-4" data-testid="account-payments">
@@ -145,7 +145,7 @@ export default function Account() {
                 </ul>
               )}
               <p className="mt-4 text-xs text-neutral-400">
-                Hours are logged by your High On AI team as work is delivered — this page updates automatically.
+                Hours are logged by your High On AI team as work is delivered · this page updates automatically.
               </p>
             </div>
 

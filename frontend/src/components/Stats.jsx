@@ -1,6 +1,6 @@
 const STATS = [
   { value: "94%", label: "of B2B buyers use LLMs to research vendors", color: "#2B39D1" },
-  { value: "3–4", label: "brands cited per AI answer — the only seats that matter", color: "#E200C4" },
+  { value: "3–4", label: "brands cited per AI answer · the only seats that matter", color: "#E200C4" },
   { value: "2–4 wks", label: "to first AI citations, videos, and booked meetings", color: "#1FA84A" },
   { value: "10–20 hrs", label: "per week of C-level growth ownership, fractional", color: "#F7941E" },
 ];
@@ -15,7 +15,7 @@ export default function Stats() {
             The shortlist moved into the answer box
           </h2>
           <p className="mt-4 text-base text-neutral-500 md:text-lg">
-            Buyers no longer scroll ten links — they ask an AI, get 3–4 names, and shortlist from there. If you're
+            Buyers no longer scroll ten links · they ask an AI, get 3–4 names, and shortlist from there. If you're
             not in the answer, you're not in the deal.
           </p>
         </div>

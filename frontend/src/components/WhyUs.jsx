@@ -9,8 +9,8 @@ const COMPARISON = [
 ];
 
 const STACK = [
-  ["AI/LLM visibility tracking", "Profound, AthenaHQ, Peec AI, Otterly.AI", "Built-in GEO/AEO pillar — tracking and the fix"],
-  ["AI/UGC video creation", "HeyGen, Synthesia, Arcads", "Built-in video pillar — scripted, generated, repurposed"],
+  ["AI/LLM visibility tracking", "Profound, AthenaHQ, Peec AI, Otterly.AI", "Built-in GEO/AEO pillar · tracking and the fix"],
+  ["AI/UGC video creation", "HeyGen, Synthesia, Arcads", "Built-in video pillar · scripted, generated, repurposed"],
   ["Affiliate & partner programs", "impact.com, PartnerStack", "Included in the Get Chosen pillar"],
   ["Influencer/creator management", "GRIN, CreatorIQ, Aspire", "Included in the Get Chosen pillar"],
   ["Outbound / AI SDR", "Apollo, Clay, Outreach, Smartlead", "Agentic outbound with human review, built in"],
@@ -22,7 +22,7 @@ export default function WhyUs() {
     <section id="why-us" className="scroll-mt-20 border-t border-black/5 bg-neutral-50/60 py-24 md:py-32" data-testid="why-us-section">
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">05 · The honest comparison</p>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">04 · The honest comparison</p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="why-us-heading">
             Why High On AI <span className="text-neutral-400">(vs. hiring 5 vendors)</span>
           </h2>
@@ -63,7 +63,7 @@ export default function WhyUs() {
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-neutral-500 md:text-base">
             Everything below is a real, separately-sold category in 2026. Most growing companies end up buying 5–8
-            of these — different logins, different invoices, no shared context. High On AI's engine covers the
+            of these · different logins, different invoices, no shared context. High On AI's engine covers the
             outcome each one sells, in a single plan.
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function WhyUs() {
           </table>
         </div>
         <p className="mt-4 text-xs italic text-neutral-400">
-          This table works hardest paired with our pilot offer — it turns "trust us" into "here's the exact stack we're replacing."
+          This table works hardest paired with our pilot offer · it turns "trust us" into "here's the exact stack we're replacing."
         </p>
       </div>
     </section>

@@ -16,7 +16,7 @@ export default function Pilot() {
             Proof over promises
           </p>
           <h2 className="mx-auto mt-5 max-w-3xl font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="pilot-heading">
-            We're not asking you to trust a pitch — we're asking you to trust a{" "}
+            We're not asking you to trust a pitch · we're asking you to trust a{" "}
             <span className="glassy-brand-text">pilot.</span>
           </h2>
           <ul className="mx-auto mt-10 grid max-w-3xl gap-4 text-left sm:grid-cols-3">

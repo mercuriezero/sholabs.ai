@@ -8,7 +8,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const CAL = "https://cal.com/sunnyrai/30min";
 
 function timeAgo(iso) {
-  if (!iso) return "—";
+  if (!iso) return " · ";
   const diff = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
   if (diff < 60) return "just now";
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
@@ -58,7 +58,7 @@ export default function CommandCenter() {
     })),
   ].sort((a, b) => new Date(b.time) - new Date(a.time));
 
-  const latest = feed[0] ? timeAgo(feed[0].time) : "—";
+  const latest = feed[0] ? timeAgo(feed[0].time) : " · ";
   const revenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0) / 100;
 
   return (
@@ -84,7 +84,7 @@ export default function CommandCenter() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-4xl font-semibold tracking-tight text-black md:text-5xl">
-              High On AI — <span className="glassy-brand-text">command center</span>
+              High On AI · <span className="glassy-brand-text">command center</span>
             </h1>
             <p className="mt-2 text-sm text-neutral-500">Every pillar, one live view. Refreshes automatically.</p>
           </div>
@@ -129,7 +129,7 @@ export default function CommandCenter() {
           <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">Live signal feed</p>
           {feed.length === 0 ? (
             <p className="mt-4 text-sm text-neutral-400" data-testid="dash-feed-empty">
-              No signals yet — submit a brief on the homepage to see it land here in real time.
+              No signals yet · submit a brief on the homepage to see it land here in real time.
             </p>
           ) : (
             <ul className="mt-4 space-y-2.5" data-testid="dash-feed">
@@ -147,7 +147,7 @@ export default function CommandCenter() {
                       <strong className="font-semibold text-black">
                         {f.type === "plan" ? "Plan generated" : f.type === "payment" ? "Payment received" : "New brief"}
                       </strong>
-                      {" — "}
+                      {" · "}
                       {f.text}
                     </span>
                   </span>

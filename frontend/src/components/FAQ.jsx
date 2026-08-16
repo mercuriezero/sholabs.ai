@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: "How fast can we see pipeline impact?",
-    a: "Quick wins — AI search citations, video output, and voice-agent meetings — typically appear within 2–4 weeks. Compounding GEO authority that consistently places you in AI answers usually builds over 60–90 days.",
+    a: "Quick wins · AI search citations, video output, and voice-agent meetings · typically appear within 2–4 weeks. Compounding GEO authority that consistently places you in AI answers usually builds over 60–90 days.",
   },
   {
     q: "Will AI replace our marketing team?",
@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: "How is High On AI different from a traditional agency?",
-    a: "Traditional agencies sell hours and headcount. High On AI deploys a full-stack H.I.A.I. engine — human intelligence plus AI — covering GEO, AI video, Voice AI, and fractional leadership in one operating system, so strategy and execution ship together every week.",
+    a: "Traditional agencies sell hours and headcount. High On AI deploys a full-stack H.I.A.I. engine · human intelligence plus AI · covering GEO, AI video, Voice AI, and fractional leadership in one operating system, so strategy and execution ship together every week.",
   },
 ];
 
@@ -36,7 +36,7 @@ export default function FAQ() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
           <div>
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">06 · FAQ</p>
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">05 · FAQ</p>
             <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="faq-heading">
               Asked by founders. Answered straight.
             </h2>

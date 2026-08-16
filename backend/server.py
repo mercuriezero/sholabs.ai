@@ -244,7 +244,7 @@ async def send_email(*, to: str, subject: str, html: str) -> str | None:
 
 async def notify_owner(lead: Lead):
     try:
-        subject = "New growth brief — High On AI"
+        subject = "New growth brief · High On AI"
         html = (
             '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#111">'
             '<h2 style="margin:0 0 12px">New growth brief received</h2>'
@@ -265,7 +265,7 @@ async def notify_owner_payment(*, name: str, email: str, amount_paise: int, pack
         return
     try:
         amount = f"₹{amount_paise / 100:,.0f}"
-        subject = f"Payment received — {amount} · {name or email}"
+        subject = f"Payment received · {amount} · {name or email}"
         html = (
             '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#111">'
             '<h2 style="margin:0 0 12px">Payment received</h2>'
@@ -284,13 +284,13 @@ async def notify_owner_payment(*, name: str, email: str, amount_paise: int, pack
 
 async def send_low_balance(*, to: str, name: str, package_name: str, remaining: float):
     try:
-        subject = f"Running low — {remaining:g} hours left in your pack"
+        subject = f"Running low · {remaining:g} hours left in your pack"
         greeting = f"Hi {escape(name)}," if name else "Hi,"
         html = (
             '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#111">'
             f'<h2 style="margin:0 0 12px">{remaining:g} hours left in your pack</h2>'
             f'<p style="margin:0 0 8px">{greeting} your <strong>{escape(package_name)}</strong> is almost used up.</p>'
-            '<p style="margin:0 0 20px;color:#555">Top up in one click to keep momentum — same flat rate, hours roll over 90 days.</p>'
+            '<p style="margin:0 0 20px;color:#555">Top up in one click to keep momentum · same flat rate, hours roll over 90 days.</p>'
             f'<p style="margin:0"><a href="{escape(SITE_URL)}/fractional-cxo">Top up your pack</a></p>'
             f'<p style="font-size:12px;color:#888;margin-top:24px">Sent by {escape(EMAIL_FROM_NAME)} · account balance alert</p>'
             '</td></tr></table>'
@@ -303,7 +303,7 @@ async def send_low_balance(*, to: str, name: str, package_name: str, remaining: 
 async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: str, payment_id: str):
     try:
         amount = f"₹{amount_paise / 100:,.0f}"
-        subject = f"Payment received — {amount} · High On AI"
+        subject = f"Payment received · {amount} · High On AI"
         stripe = "".join(
             f'<td style="background:{c};height:6px;font-size:0">&nbsp;</td>'
             for c in ["#FFD900", "#2BBCC4", "#1FA84A", "#E200C4", "#ED1C24", "#2B39D1", "#F7941E", "#91268F"]
@@ -315,7 +315,7 @@ async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: s
             f'<tr>{stripe}</tr>'
             '<tr><td style="padding:32px 24px;font-family:Arial,sans-serif;color:#111">'
             '<h2 style="margin:0 0 4px">Payment received</h2>'
-            f'<p style="margin:0 0 20px;color:#555">{greeting} thank you — your payment is confirmed.</p>'
+            f'<p style="margin:0 0 20px;color:#555">{greeting} thank you · your payment is confirmed.</p>'
             f'<p style="margin:0 0 8px;font-size:28px"><strong>{escape(amount)}</strong> <span style="color:#555;font-size:14px">INR</span></p>'
             f'{pkg}'
             f'<p style="margin:0 0 8px"><strong>Payment ID:</strong> {escape(payment_id)}</p>'
@@ -333,11 +333,11 @@ async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: s
 # ---------- Instant plan agent ----------
 URL_RE = re.compile(r"(https?://[^\s]+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s]*)?)", re.I)
 
-SYSTEM_PROMPT = """You are the High On AI strategy engine — a senior growth strategist for an AI-powered marketing agency.
+SYSTEM_PROMPT = """You are the High On AI strategy engine · a senior growth strategist for an AI-powered marketing agency.
 Given a visitor's website and/or growth goal, produce an instant, concise growth plan.
 Rules:
 - Plain text with markdown formatting only: '## ' section headings and '- ' bullets. No tables, no code blocks, no links.
-- Structure: one short opening line naming the single biggest opportunity. Then '## Get Cited (GEO)', '## Get Watched (AI Video)', '## Get Chosen (Outbound & Voice)' — each with 3 sharp, specific bullet actions. Then '## First 2 Weeks' with 2-3 bullets.
+- Structure: one short opening line naming the single biggest opportunity. Then '## Get Cited (GEO)', '## Get Watched (AI Video)', '## Get Chosen (Outbound & Voice)' · each with 3 sharp, specific bullet actions. Then '## First 2 Weeks' with 2-3 bullets.
 - Tailor everything to the website content and goal provided. If no website content is available, infer from the brief and stay concrete.
 - Total under 300 words. Confident, direct, benefit-driven. No filler, no disclaimers, no questions."""
 
@@ -641,7 +641,7 @@ async def razorpay_webhook(request: Request):
     payment_id = entity.get("id", "")
     if not order_id or not payment_id:
         return {"status": "ignored"}
-    # Cross-check with Razorpay API — defense in depth when no webhook secret is configured
+    # Cross-check with Razorpay API · defense in depth when no webhook secret is configured
     try:
         fetched = await asyncio.to_thread(rzp_client.payment.fetch, payment_id)
     except Exception:

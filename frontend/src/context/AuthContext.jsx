@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // CRITICAL: if returning from the OAuth callback, AuthCallback exchanges the
-    // session_id first — skip the /me check to avoid a race.
+    // session_id first · skip the /me check to avoid a race.
     if (window.location.hash?.includes("session_id=")) return;
     fetch(`${API}/auth/me`, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : null))

@@ -1,5 +1,6 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import PromptBox from "@/components/PromptBox";
+import KeywordField from "@/components/KeywordField";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -26,19 +27,19 @@ export default function Hero() {
 
   return (
     <section id="top" className="relative overflow-hidden" data-testid="hero-section" onMouseMove={onMouseMove}>
-      <div className="hero-grid-bg pointer-events-none absolute inset-0" aria-hidden="true" />
       <motion.div style={{ x: orbX, y: orbY }} className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-brand-magenta/10 blur-3xl" aria-hidden="true" />
       <motion.div style={{ x: orb2X, y: orb2Y }} className="pointer-events-none absolute -right-24 top-56 h-80 w-80 rounded-full bg-brand-blue/10 blur-3xl" aria-hidden="true" />
+      <KeywordField mx={mx} my={my} />
       <div className="relative mx-auto max-w-4xl px-6 pb-24 pt-20 text-center md:pt-28">
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0} className="flex items-center justify-center gap-3">
-          <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
+        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0} className="flex items-center justify-center gap-4">
+          <span className="stripe-gradient h-1 w-10 rounded-full" aria-hidden="true" />
           <span
             data-testid="hero-eyebrow"
-            className="font-mono text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500"
+            className="font-mono text-sm font-medium uppercase tracking-[0.3em] text-neutral-600 md:text-base"
           >
             Full-Stack H.I.A.I. Engine
           </span>
-          <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
+          <span className="stripe-gradient h-1 w-10 rounded-full" aria-hidden="true" />
         </motion.div>
 
         <h1
@@ -75,7 +76,7 @@ export default function Hero() {
           data-testid="hero-subheadline"
           className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-neutral-500 md:text-lg"
         >
-          New revenue from LLMs. Video that converts —{" "}
+          New revenue from LLMs. Video that converts.{" "}
           <strong className="font-semibold text-black">89% of buyers</strong> say it seals the deal.
         </motion.p>
 

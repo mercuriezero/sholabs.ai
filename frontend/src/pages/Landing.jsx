@@ -2,8 +2,6 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
-import EditorialMarquee from "@/components/EditorialMarquee";
-import UseCases from "@/components/UseCases";
 import Portal from "@/components/Portal";
 import Dashboard from "@/components/Dashboard";
 import Process from "@/components/Process";
@@ -45,11 +43,9 @@ export default function Landing() {
       <Nav />
       <main>
         <Hero />
-        <EditorialMarquee />
-        <Reveal><UseCases /></Reveal>
+        <Reveal><Process /></Reveal>
         <Portal />
         <Reveal><Dashboard /></Reveal>
-        <Reveal><Process /></Reveal>
         <Reveal><WhyUs /></Reveal>
         <Reveal><Pilot /></Reveal>
         <FAQ />

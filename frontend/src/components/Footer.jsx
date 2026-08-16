@@ -8,7 +8,7 @@ export default function Footer() {
           <div>
             <img src="/logo.webp" alt="High On AI logo" className="h-14 w-auto rounded-lg" />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-neutral-500">
-              The full-stack H.I.A.I. engine — human intelligence plus AI for marketing, sales, and growth.
+              The full-stack H.I.A.I. engine · human intelligence plus AI for marketing, sales, and growth.
             </p>
             <p className="mt-6 text-xs text-neutral-400" data-testid="footer-powered-by">
               High On AI is powered by <span className="font-semibold text-neutral-600">QuantumAI OS Pvt Ltd</span>
@@ -18,7 +18,7 @@ export default function Footer() {
             <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Services</p>
             <ul className="mt-5 space-y-3 text-sm">
               {[
-                ["GEO Leads", "services"],
+                ["LLM Revenue", "services"],
                 ["AI Videos", "services"],
                 ["Voice AI", "services"],
                 ["Dashboard", "dashboard"],

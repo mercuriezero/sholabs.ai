@@ -10,9 +10,9 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const PRESETS = [4999, 9999, 24999];
 
 const PILOT_PACKAGES = [
-  { name: "Pilot Sprint", price: 24999, desc: "One pillar, two weeks, real output — not a slide deck" },
+  { name: "Pilot Sprint", price: 24999, desc: "One pillar, two weeks, real output · not a slide deck" },
   { name: "Growth Pilot", price: 49999, desc: "Two pillars, 30 days, live dashboard from day one" },
-  { name: "Full Engine Pilot", price: 99999, desc: "All three pillars — Get Cited, Get Watched, Get Chosen" },
+  { name: "Full Engine Pilot", price: 99999, desc: "All three pillars · Get Cited, Get Watched, Get Chosen" },
 ];
 
 const CXO_PACKS = [
@@ -90,7 +90,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(resp),
           });
-          if (v.ok) toast.success("Payment received — receipt sent to your email. Our team will reach out within 24 hours.");
+          if (v.ok) toast.success("Payment received · receipt sent to your email. Our team will reach out within 24 hours.");
           else toast.error("Verification failed. Any amount debited is auto-refunded.");
           setAmountOpen(false);
           setSelected(null);
