@@ -1,26 +1,22 @@
 import { motion, useReducedMotion, useTransform } from "framer-motion";
-import { AudioLines, Bot, Clapperboard, Megaphone, Send, Target, Users } from "lucide-react";
+import { AudioLines, Play } from "lucide-react";
 
-const TOKENS = [
-  { t: "ChatGPT", x: "6%", y: "16%", d: 1.8 },
-  { t: "Gemini", x: "84%", y: "12%", d: 1.8 },
-  { t: "Perplexity", x: "12%", y: "66%", d: 1.8 },
-  { t: "Claude", x: "88%", y: "58%", d: 1 },
-  { t: "GEO", x: "24%", y: "7%", d: 0.6 },
-  { t: "AEO", x: "70%", y: "26%", d: 0.6 },
-  { t: "AI Overviews", x: "62%", y: "82%", d: 1 },
-  { t: "AI Video", icon: Clapperboard, x: "38%", y: "90%", d: 1.8 },
-  { t: "Voice AI", icon: AudioLines, x: "91%", y: "34%", d: 1.8 },
-  { t: "AI SDR", icon: Bot, x: "2%", y: "84%", d: 1 },
-  { t: "Social Media", icon: Megaphone, x: "52%", y: "4%", d: 1 },
-  { t: "Outbound", icon: Send, x: "28%", y: "86%", d: 0.6 },
-  { t: "UGC Ads", icon: Users, x: "78%", y: "72%", d: 0.6 },
-  { t: "Share of Voice", x: "83%", y: "90%", d: 1 },
-  { t: "Booked Meetings", icon: Target, x: "44%", y: "7%", d: 1.8 },
-  { t: "Answer Engine", x: "3%", y: "40%", d: 0.6 },
+const CARDS = [
+  { t: "Founder UGC ad", views: "12.4k", dur: "0:32", x: "3%", y: "12%", d: 1.8, color: "#E200C4" },
+  { t: "Product demo", views: "8.1k", dur: "0:45", x: "81%", y: "9%", d: 1, color: "#2B39D1" },
+  { t: "Customer story", views: "21k", dur: "1:04", x: "2%", y: "60%", d: 1, color: "#1FA84A", live: true },
+  { t: "Ad creative · V3", views: "4.2k", dur: "0:18", x: "83%", y: "64%", d: 1.8, color: "#F7941E" },
+  { t: "Launch teaser", views: "16.9k", dur: "0:27", x: "30%", y: "88%", d: 0.6, color: "#91268F" },
+  { t: "AI avatar ad", views: "9.8k", dur: "0:38", x: "58%", y: "87%", d: 1, color: "#2BBCC4" },
 ];
 
-const COLORS = ["#2B39D1", "#E200C4", "#1FA84A", "#F7941E", "#2BBCC4", "#91268F", "#ED1C24", "#FFD900"];
+const CHIPS = [
+  { t: "ChatGPT", x: "26%", y: "5%", d: 0.6 },
+  { t: "Gemini", x: "68%", y: "28%", d: 0.6 },
+  { t: "Perplexity", x: "9%", y: "84%", d: 0.6 },
+  { t: "GEO", x: "50%", y: "4%", d: 1 },
+  { t: "Voice AI", icon: AudioLines, x: "90%", y: "40%", d: 1.8 },
+];
 
 const DEPTH = {
   0.6: "opacity-40 blur-[1.5px] scale-90",
@@ -28,7 +24,7 @@ const DEPTH = {
   1.8: "opacity-90",
 };
 
-function Token({ t, icon: Icon, x, y, d, i, mx, my, reduce }) {
+function Chip({ t, icon: Icon, x, y, d, i, mx, my, reduce }) {
   const tx = useTransform(mx, (v) => v * 1.4 * d);
   const ty = useTransform(my, (v) => v * d);
   return (
@@ -39,12 +35,66 @@ function Token({ t, icon: Icon, x, y, d, i, mx, my, reduce }) {
         className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-black/5 bg-white/70 px-3 py-1.5 font-mono text-[11px] font-medium text-neutral-500 shadow-sm backdrop-blur-sm"
       >
         {Icon ? (
-          <Icon className="h-3.5 w-3.5" style={{ color: COLORS[i % COLORS.length] }} />
+          <Icon className="h-3.5 w-3.5 text-brand-green" />
         ) : (
-          <span className="h-1.5 w-1.5 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-blue" />
         )}
         {t}
       </motion.span>
+    </motion.span>
+  );
+}
+
+function VideoCard({ t, views, dur, live, color, x, y, d, i, mx, my, reduce }) {
+  const tx = useTransform(mx, (v) => v * 1.6 * d);
+  const ty = useTransform(my, (v) => v * 1.1 * d);
+  return (
+    <motion.span style={{ left: x, top: y, x: tx, y: ty }} className={`absolute ${DEPTH[d]}`}>
+      <motion.div
+        animate={reduce ? undefined : { y: [0, -14, 0] }}
+        transition={{ repeat: Infinity, duration: 7 + (i % 4), ease: "easeInOut", delay: i * 0.6 }}
+        className="w-36 overflow-hidden rounded-2xl border border-black/5 bg-white shadow-md md:w-44"
+      >
+        <div className="relative h-20 md:h-24" style={{ background: `linear-gradient(135deg, ${color}26, ${color}59)` }}>
+          {!reduce && (
+            <motion.span
+              className="absolute inset-y-0 w-1/2 bg-white/25 blur-md"
+              animate={{ x: ["-120%", "260%"] }}
+              transition={{ repeat: Infinity, duration: 2.8 + i * 0.5, ease: "easeInOut", repeatDelay: 1.2 }}
+              aria-hidden="true"
+            />
+          )}
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-md">
+              <Play className="ml-0.5 h-4 w-4 fill-black text-black" />
+            </span>
+          </span>
+          {live && (
+            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-brand-red px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-white">
+              <span className="h-1 w-1 animate-pulse rounded-full bg-white" /> Live
+            </span>
+          )}
+          <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 font-mono text-[9px] text-white">
+            {dur}
+          </span>
+        </div>
+        <div className="p-2.5">
+          <p className="text-[11px] font-semibold leading-tight text-black">{t}</p>
+          <p className="mt-0.5 font-mono text-[9px] text-neutral-400">{views} views</p>
+          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-neutral-100">
+            {reduce ? (
+              <span className="block h-full w-2/3 rounded-full" style={{ background: color }} />
+            ) : (
+              <motion.span
+                className="block h-full rounded-full"
+                style={{ background: color }}
+                animate={{ width: ["4%", "96%"] }}
+                transition={{ repeat: Infinity, duration: 5 + i, ease: "linear", repeatDelay: 0.6 }}
+              />
+            )}
+          </div>
+        </div>
+      </motion.div>
     </motion.span>
   );
 }
@@ -60,8 +110,11 @@ export default function KeywordField({ mx, my }) {
       aria-hidden="true"
       data-testid="keyword-field"
     >
-      {TOKENS.map((token, i) => (
-        <Token key={token.t} {...token} i={i} mx={mx} my={my} reduce={reduce} />
+      {CARDS.map((c, i) => (
+        <VideoCard key={c.t} {...c} i={i} mx={mx} my={my} reduce={reduce} />
+      ))}
+      {CHIPS.map((c, i) => (
+        <Chip key={c.t} {...c} i={i} mx={mx} my={my} reduce={reduce} />
       ))}
     </motion.div>
   );

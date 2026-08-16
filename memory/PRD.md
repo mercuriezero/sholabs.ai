@@ -89,6 +89,9 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Concierge lead capture: bot now asks for name + work email on buying intent (system prompt); backend detects emails in visitor messages, saves a lead (source=concierge_chat, email field, dedupe), fires owner alert, and emits a captured SSE event → visitor sees a confirmation toast. Verified e2e (lead saved, owner alerted, dedupe), test data cleaned.
 - Lead model now carries optional email field.
 
+## Rev 12 (2026-08-16) — Hero video wall
+- KeywordField reworked from LLM chips to floating UGC/ad video cards (Founder UGC ad, Product demo, Customer story with LIVE badge, Ad creative V3, Launch teaser, AI avatar ad): play buttons, duration badges, view counts, simulated playback via animated progress bars + light-sweep flash, per-card brand tint. Only 5 LLM/GEO chips remain for flavor. Depth layers + mouse parallax retained; static frames under reduced motion.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
