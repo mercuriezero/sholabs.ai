@@ -9,14 +9,13 @@ const PHRASES = [
   "Generate 50 marketing-qualified leads with GEO this quarter…",
   "Launch an AI video engine for my category…",
   "Deploy a Voice AI SDR that books meetings while I sleep…",
-  "Hire a fractional AI CXO to run growth end-to-end…",
+  "Turn one focused pilot into a full growth engine…",
 ];
 
 const CHIPS = [
   { label: "GEO Leads", prompt: PHRASES[0] },
   { label: "AI Videos", prompt: PHRASES[2] },
   { label: "Voice AI", prompt: PHRASES[3] },
-  { label: "Fractional CXO", prompt: PHRASES[4] },
 ];
 
 function useTypewriter(active) {

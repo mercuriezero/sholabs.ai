@@ -13,23 +13,30 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Signature elements: subtle masked grid hero background; Clay-style prompt CTA with typewriter ghost text + chips + black circular arrow submit; glassy stripe brand wall (40vh) at page bottom.
 - Motion: framer-motion staggered hero reveal, AnimatePresence portal crossfade (3s cycle), accordion animations; prefers-reduced-motion respected.
 
-## Implemented (2026-08-15)
-- Sticky glass nav with logo, anchor links, "Book a growth call" CTA, mobile menu.
-- Hero: eyebrow, H1 with stripe-gradient text, subheadline "New revenue from LLMs. Video that converts — 89% of buyers say it seals the deal.", prompt-box CTA (typewriter phrases ~4s cycle, 4 quick-action chips, POST /api/leads + sonner toast), reassurance line "No pitch deck. A 20-minute working session and a written 90-day plan." (2026-08-15 revision replaced the 94% stat callout per user request).
-- Services portal: 4 pill tabs auto-cycling every 3s (GEO Leads blue, AI Videos magenta, Voice AI green, Fractional CXO orange), each with mock product UI panel and per-service CTA.
-- "Why now" stats strip (94%, 3–4, 2–4 wks, 10–20 hrs).
+## Implemented (2026-08-15, rev 2)
+- Sticky glass nav with logo, anchor links, "Book a growth call" CTA wired to https://cal.com/sunnyrai/30min, mobile menu.
+- Hero: redesigned minimal eyebrow (stripe-gradient dashes + letterspaced mono, pill removed), H1 with stripe-gradient text, subheadline "New revenue from LLMs. Video that converts — 89% of buyers say it seals the deal.", prompt-box CTA (typewriter phrases ~4s cycle, 3 chips: GEO Leads / AI Videos / Voice AI, POST /api/leads + sonner toast), reassurance line "No pitch deck. A 20-minute working session and a written 90-day plan."
+- Use Cases section ("Be the answer AI gives."): visual mock of buyer query → AI answer citing the brand across ChatGPT/Gemini/Perplexity/AI Overviews/Claude + 5 term cards (GEO, AEO, LLM SEO, AI Visibility, LLM Brand Visibility).
+- Services portal: 3 pillars (GEO Leads blue, AI Videos magenta, Voice AI green) auto-cycling every 3s with mock product UI panels. Fractional CXO removed from portal and hero per user request.
+- Dashboard section ("One dashboard. Every signal. Live."): 3 pillar cards (Get Cited/Watched/Chosen), mock command-center window with LIVE badge, KPI tiles, auto-rotating live signal feed, "See the Dashboard →" CTA to cal.com.
+- Process section: 4 steps (URL + goal → instant plan → pilot → scale with add-ons), CTA to prompt box.
+- Why High On AI section: 5-row comparison table (vs 5 vendors) + "The stack you'd otherwise need" replacement table (Profound/HeyGen/impact.com/GRIN/Apollo/Clari categories).
+- Pilot trust section: "Trust a pilot, not a pitch" + 3 points + "Scope your pilot" CTA to cal.com.
 - FAQ: 6 genuine GEO/LLM Q&As, animated accordion, matching FAQPage JSON-LD in head.
-- Footer: link columns, "Powered by QuantumAI OS Pvt Ltd", copyright, stripe bar, glassy 40vh "high on ai" brand wall.
+- Footer: link columns incl. "Fractional AI CXO" page link, "Powered by QuantumAI OS Pvt Ltd", copyright, stripe bar, glassy 40vh "high on ai" brand wall.
+- Dedicated page /fractional-cxo (React Router): hero, "Is this you?" audiences, scope of ownership (6 items), fractional vs full-time table, first-90-days phases, mini FAQ, Cal.com CTAs, shared footer.
 - Backend: POST/GET /api/leads (MongoDB persistence, validated).
 - Accessibility: focus-visible rings, aria labels, keyboard-operable accordion/tabs, reduced-motion handling.
 
 ## Verified
 - POST /api/leads + GET /api/leads via external URL (lead persisted).
 - UI e2e via screenshots: hero render, portal auto-cycle (AI Videos → Voice AI), FAQ open, footer/brand wall, prompt submit with success toast, lead visible in DB.
+- Rev 2: new eyebrow, use-cases visual, dashboard mock (feed rotates), process, comparison + stack tables, pilot block all render; portal shows exactly 3 tabs; nav CTAs point to cal.com/sunnyrai/30min; footer links to /fractional-cxo; CXO page renders all sections and back-link returns home.
 
 ## Backlog
-- P0: Real contact email/calendar link for "Book a growth call" (currently anchors to prompt box).
+- P0: (done) Cal.com booking link wired.
 - P1: Admin view for captured leads; email notification on new lead (Resend).
 - P1: Case studies / testimonials / client logos section (real proof points from user).
-- P2: Blog/insights hub for GEO content moat; per-service detail pages; llms.txt file; sitemap.xml/robots.txt.
+- P1: Wire the hero prompt box to a real AI plan-generation agent ("Get your plan, instantly" promise).
+- P2: Blog/insights hub for GEO content moat; llms.txt; sitemap.xml/robots.txt.
 - P2: OG share image (designed 1200x630) instead of logo.

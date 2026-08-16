@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, Clapperboard, AudioLines, Briefcase, Check, TrendingUp } from "lucide-react";
+import { Sparkles, Clapperboard, AudioLines, Check, TrendingUp } from "lucide-react";
 
 const SERVICES = [
   {
@@ -32,16 +32,6 @@ const SERVICES = [
     icon: AudioLines,
     heading: "Voice AI agents that book real meetings",
     body: "Human-grade voice agents qualify inbound, revive cold lists, and follow up in seconds — every call transcribed, scored, and synced to your CRM.",
-  },
-  {
-    id: "cxo",
-    tab: "Fractional CXO",
-    color: "#F7941E",
-    soft: "rgba(247,148,30,0.06)",
-    border: "rgba(247,148,30,0.18)",
-    icon: Briefcase,
-    heading: "Hire a Fractional AI Marketing CXO",
-    body: "C-level ownership of your growth number — positioning, demand, GEO, and the AI stack — in 10–20 hours a week, for a fraction of a full-time hire.",
   },
 ];
 
@@ -125,33 +115,7 @@ function VoicePanel({ color }) {
   );
 }
 
-function CxoPanel({ color }) {
-  return (
-    <div className="flex h-full flex-col gap-4 p-6 md:p-8">
-      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-neutral-500">
-        <Briefcase className="h-3.5 w-3.5" style={{ color }} /> Growth cockpit · weekly review
-      </div>
-      <div className="grid flex-1 grid-cols-2 gap-3">
-        {[
-          { k: "CAC", v: "-38%" },
-          { k: "MQLs", v: "+3.1x" },
-          { k: "AI citations", v: "47" },
-          { k: "Pipeline", v: "+64%" },
-        ].map((m) => (
-          <div key={m.k} className="flex flex-col justify-center rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">{m.k}</p>
-            <p className="mt-1 font-display text-2xl font-bold text-black md:text-3xl">{m.v}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
-        <TrendingUp className="h-4 w-4" /> Strategy shipped every single week
-      </div>
-    </div>
-  );
-}
-
-const PANELS = { geo: GeoPanel, video: VideoPanel, voice: VoicePanel, cxo: CxoPanel };
+const PANELS = { geo: GeoPanel, video: VideoPanel, voice: VoicePanel };
 
 export default function Portal() {
   const [active, setActive] = useState(0);
@@ -172,7 +136,7 @@ export default function Portal() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400" data-testid="services-eyebrow">
-            One engine. Four growth motions.
+            One engine. Three growth pillars.
           </p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="services-heading">
             Growth teams build on <span className="glassy-brand-text">High On AI</span>

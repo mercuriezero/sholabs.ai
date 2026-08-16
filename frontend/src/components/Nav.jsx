@@ -3,7 +3,8 @@ import { Menu, X, ArrowUpRight } from "lucide-react";
 
 const links = [
   { label: "Services", href: "#services" },
-  { label: "Why Now", href: "#why-now" },
+  { label: "Dashboard", href: "#dashboard" },
+  { label: "Process", href: "#process" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -29,7 +30,9 @@ export default function Nav() {
         </div>
         <div className="hidden md:block">
           <a
-            href="#hero-cta"
+            href="https://cal.com/sunnyrai/30min"
+            target="_blank"
+            rel="noopener noreferrer"
             data-testid="nav-cta-button"
             className="group inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >
@@ -62,7 +65,9 @@ export default function Nav() {
               </a>
             ))}
             <a
-              href="#hero-cta"
+              href="https://cal.com/sunnyrai/30min"
+              target="_blank"
+              rel="noopener noreferrer"
               data-testid="nav-mobile-cta-button"
               className="inline-flex w-fit items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white"
               onClick={() => setOpen(false)}

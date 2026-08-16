@@ -15,18 +15,15 @@ export default function Hero() {
     <section id="top" className="relative overflow-hidden" data-testid="hero-section">
       <div className="hero-grid-bg pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="relative mx-auto max-w-4xl px-6 pb-24 pt-20 text-center md:pt-28">
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0}>
+        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0} className="flex items-center justify-center gap-3">
+          <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
           <span
             data-testid="hero-eyebrow"
-            className="inline-flex items-center gap-2.5 rounded-full border border-black/10 bg-white px-4 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-600 shadow-sm"
+            className="font-mono text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500"
           >
-            <span className="flex gap-1" aria-hidden="true">
-              <span className="h-2 w-2 rounded-full bg-brand-magenta" />
-              <span className="h-2 w-2 rounded-full bg-brand-cyan" />
-              <span className="h-2 w-2 rounded-full bg-brand-orange" />
-            </span>
             Full-Stack H.I.A.I. Engine
           </span>
+          <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
         </motion.div>
 
         <motion.h1

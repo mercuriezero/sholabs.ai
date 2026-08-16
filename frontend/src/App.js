@@ -1,23 +1,20 @@
 import "@/App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
-import Nav from "@/components/Nav";
-import Hero from "@/components/Hero";
-import Portal from "@/components/Portal";
-import Stats from "@/components/Stats";
-import FAQ from "@/components/FAQ";
-import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
+import Landing from "@/pages/Landing";
+import FractionalCxO from "@/pages/FractionalCxO";
 
 function App() {
   return (
     <div className="App">
-      <Nav />
-      <main>
-        <Hero />
-        <Portal />
-        <Stats />
-        <FAQ />
-      </main>
-      <Footer />
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/fractional-cxo" element={<FractionalCxO />} />
+        </Routes>
+      </BrowserRouter>
       <Toaster position="bottom-right" richColors />
     </div>
   );

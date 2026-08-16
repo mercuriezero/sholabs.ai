@@ -18,25 +18,31 @@ export default function Footer() {
             <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Services</p>
             <ul className="mt-5 space-y-3 text-sm">
               {[
-                ["GEO Leads", "#services"],
-                ["AI Videos", "#services"],
-                ["Voice AI", "#services"],
-                ["Fractional CXO", "#services"],
-              ].map(([label, href]) => (
+                ["GEO Leads", "services"],
+                ["AI Videos", "services"],
+                ["Voice AI", "services"],
+                ["Dashboard", "dashboard"],
+              ].map(([label, id]) => (
                 <li key={label}>
-                  <a href={href} data-testid={`footer-service-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-neutral-600 transition-colors hover:text-black">
+                  <a href={window.location.pathname === "/" ? `#${id}` : `/#${id}`} data-testid={`footer-service-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-neutral-600 transition-colors hover:text-black">
                     {label}
                   </a>
                 </li>
               ))}
+              <li>
+                <a href="/fractional-cxo" data-testid="footer-service-fractional-ai-cxo" className="text-neutral-600 transition-colors hover:text-black">
+                  Fractional AI CXO
+                </a>
+              </li>
             </ul>
           </nav>
           <nav aria-label="Company">
             <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Company</p>
             <ul className="mt-5 space-y-3 text-sm">
-              <li><a href="#why-now" data-testid="footer-link-why-now" className="text-neutral-600 transition-colors hover:text-black">Why now</a></li>
-              <li><a href="#faq" data-testid="footer-link-faq" className="text-neutral-600 transition-colors hover:text-black">FAQ</a></li>
-              <li><a href="#hero-cta" data-testid="footer-link-contact" className="text-neutral-600 transition-colors hover:text-black">Start a brief</a></li>
+              <li><a href={window.location.pathname === "/" ? "#process" : "/#process"} data-testid="footer-link-process" className="text-neutral-600 transition-colors hover:text-black">Process</a></li>
+              <li><a href={window.location.pathname === "/" ? "#why-us" : "/#why-us"} data-testid="footer-link-why-us" className="text-neutral-600 transition-colors hover:text-black">Why us</a></li>
+              <li><a href={window.location.pathname === "/" ? "#faq" : "/#faq"} data-testid="footer-link-faq" className="text-neutral-600 transition-colors hover:text-black">FAQ</a></li>
+              <li><a href={window.location.pathname === "/" ? "#hero-cta" : "/#hero-cta"} data-testid="footer-link-contact" className="text-neutral-600 transition-colors hover:text-black">Start a brief</a></li>
             </ul>
           </nav>
         </div>
