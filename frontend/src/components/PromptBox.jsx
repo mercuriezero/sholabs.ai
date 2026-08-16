@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import PayButton from "@/components/PayButton";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -271,6 +272,7 @@ export default function PromptBox() {
                 >
                   Build this with us <ArrowUpRight className="h-4 w-4" />
                 </a>
+                <PayButton label="Upgrade — pay now" testid="plan-pay-button" />
                 <p className="text-xs text-neutral-400">Brief saved — our team has it too.</p>
               </motion.div>
             )}

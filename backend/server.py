@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -9,15 +9,18 @@ import json
 import asyncio
 import logging
 import ipaddress
+import uuid
 import httpx
+import bcrypt
+import jwt
+import razorpay
 from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
-import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
 
 
@@ -39,7 +42,13 @@ EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "High On AI")
 OWNER_EMAIL = os.environ.get("OWNER_EMAIL") or None
 SITE_URL = os.environ.get("SITE_URL", "")
 
+JWT_SECRET = os.environ["JWT_SECRET"]
+JWT_ALGORITHM = "HS256"
 
+rzp_client = razorpay.Client(auth=(os.environ.get("RAZORPAY_KEY_ID", ""), os.environ.get("RAZORPAY_KEY_SECRET", "")))
+
+
+# ---------- Models ----------
 class Lead(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -63,7 +72,89 @@ class Plan(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-# --- Email guardrail gate (G2/G3 structural checks) ---
+class RegisterInput(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class LoginInput(BaseModel):
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class OrderInput(BaseModel):
+    amount_rupees: float = Field(gt=0, le=500000)
+
+
+class VerifyInput(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+# ---------- Auth helpers ----------
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+
+
+def create_access_token(user_id: str, email: str) -> str:
+    payload = {"sub": user_id, "email": email, "type": "access",
+               "exp": datetime.now(timezone.utc) + timedelta(minutes=15)}
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def create_refresh_token(user_id: str) -> str:
+    payload = {"sub": user_id, "type": "refresh",
+               "exp": datetime.now(timezone.utc) + timedelta(days=7)}
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def set_auth_cookies(response: Response, user_id: str, email: str):
+    response.set_cookie("access_token", create_access_token(user_id, email),
+                        httponly=True, secure=True, samesite="none", max_age=900, path="/")
+    response.set_cookie("refresh_token", create_refresh_token(user_id),
+                        httponly=True, secure=True, samesite="none", max_age=604800, path="/")
+
+
+async def get_current_user(request: Request) -> dict:
+    token = request.cookies.get("session_token")
+    if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+    if token:
+        session = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
+        if session:
+            expires_at = session["expires_at"]
+            if isinstance(expires_at, str):
+                expires_at = datetime.fromisoformat(expires_at)
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if expires_at > datetime.now(timezone.utc):
+                user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
+                if user:
+                    user.pop("password_hash", None)
+                    return user
+    access = request.cookies.get("access_token")
+    if access:
+        try:
+            payload = jwt.decode(access, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            if payload.get("type") == "access":
+                user = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
+                if user:
+                    user.pop("password_hash", None)
+                    return user
+        except jwt.InvalidTokenError:
+            pass
+    raise HTTPException(status_code=401, detail="Not authenticated")
+
+
+# ---------- Email guardrail gate (G2/G3 structural checks) ---
 _SHORTENERS = ("bit.ly", "tinyurl.com", "t.co", "is.gd", "cutt.ly", "goo.gl", "rebrand.ly")
 _CRED_ASK = ("reply with your password", "reply with the code", "send your password", "cvv",
              "send us your password", "enter your password below", "confirm your card number",
@@ -168,7 +259,7 @@ async def notify_owner(lead: Lead):
         logger.exception("Owner notification failed")
 
 
-# --- Instant plan agent ---
+# ---------- Instant plan agent ----------
 URL_RE = re.compile(r"(https?://[^\s]+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s]*)?)", re.I)
 
 SYSTEM_PROMPT = """You are the High On AI strategy engine — a senior growth strategist for an AI-powered marketing agency.
@@ -277,12 +368,183 @@ async def get_plans():
     return plans
 
 
+# ---------- Auth endpoints ----------
+@api_router.post("/auth/register")
+async def register(input: RegisterInput, response: Response):
+    email = input.email.strip().lower()
+    if await db.users.find_one({"email": email}):
+        raise HTTPException(status_code=400, detail="An account with this email already exists")
+    user = {
+        "user_id": f"user_{uuid.uuid4().hex[:12]}",
+        "email": email,
+        "name": input.name.strip(),
+        "picture": "",
+        "password_hash": hash_password(input.password),
+        "auth_provider": "email",
+        "role": "user",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.insert_one(user)
+    set_auth_cookies(response, user["user_id"], email)
+    return {k: v for k, v in user.items() if k not in ("password_hash", "_id")}
+
+
+@api_router.post("/auth/login")
+async def login(input: LoginInput, request: Request, response: Response):
+    email = input.email.strip().lower()
+    identifier = f"{request.client.host}:{email}"
+    since = (datetime.now(timezone.utc) - timedelta(minutes=15)).isoformat()
+    fails = await db.login_attempts.count_documents({"identifier": identifier, "created_at": {"$gte": since}})
+    if fails >= 5:
+        raise HTTPException(status_code=429, detail="Too many failed attempts. Try again in 15 minutes.")
+    user = await db.users.find_one({"email": email})
+    if not user or not user.get("password_hash") or not verify_password(input.password, user["password_hash"]):
+        await db.login_attempts.insert_one({"identifier": identifier, "created_at": datetime.now(timezone.utc).isoformat()})
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    await db.login_attempts.delete_many({"identifier": identifier})
+    set_auth_cookies(response, user["user_id"], email)
+    user.pop("password_hash", None)
+    user.pop("_id", None)
+    return user
+
+
+@api_router.post("/auth/logout")
+async def logout(request: Request, response: Response):
+    token = request.cookies.get("session_token")
+    if token:
+        await db.user_sessions.delete_many({"session_token": token})
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("refresh_token", path="/")
+    response.delete_cookie("session_token", path="/")
+    return {"status": "logged_out"}
+
+
+@api_router.get("/auth/me")
+async def auth_me(request: Request):
+    return await get_current_user(request)
+
+
+@api_router.post("/auth/refresh")
+async def refresh(request: Request, response: Response):
+    token = request.cookies.get("refresh_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="No refresh token")
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    response.set_cookie("access_token", create_access_token(user["user_id"], user["email"]),
+                        httponly=True, secure=True, samesite="none", max_age=900, path="/")
+    return {"status": "refreshed"}
+
+
+@api_router.post("/auth/google/session")
+async def google_session(request: Request, response: Response):
+    session_id = request.headers.get("X-Session-ID")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Missing session id")
+    async with httpx.AsyncClient(timeout=15) as http:
+        r = await http.get(
+            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+            headers={"X-Session-ID": session_id},
+        )
+    if r.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid session")
+    data = r.json()
+    email = data["email"].lower()
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        user = {
+            "user_id": f"user_{uuid.uuid4().hex[:12]}",
+            "email": email,
+            "name": data.get("name", ""),
+            "picture": data.get("picture", ""),
+            "auth_provider": "google",
+            "role": "user",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        await db.users.insert_one(user)
+    token = data["session_token"]
+    await db.user_sessions.insert_one({
+        "user_id": user["user_id"],
+        "session_token": token,
+        "expires_at": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    response.set_cookie("session_token", token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
+    return {k: v for k, v in user.items() if k not in ("password_hash", "_id")}
+
+
+# ---------- Payments (auth required) ----------
+@api_router.post("/payments/create-order")
+async def create_order(input: OrderInput, request: Request):
+    user = await get_current_user(request)
+    amount_paise = int(round(input.amount_rupees * 100))
+    try:
+        order = await asyncio.to_thread(
+            rzp_client.order.create,
+            {"amount": amount_paise, "currency": "INR", "payment_capture": 1, "receipt": f"rcpt_{uuid.uuid4().hex[:12]}"},
+        )
+    except Exception:
+        logger.exception("Razorpay order creation failed")
+        raise HTTPException(status_code=502, detail="Payment gateway error. Please try again.")
+    doc = {
+        "id": str(uuid.uuid4()),
+        "order_id": order["id"],
+        "payment_id": "",
+        "user_id": user["user_id"],
+        "name": user.get("name", ""),
+        "email": user.get("email", ""),
+        "amount": amount_paise,
+        "currency": "INR",
+        "status": "created",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.payments.insert_one(doc)
+    return {"order_id": order["id"], "amount": amount_paise, "currency": "INR", "key_id": os.environ.get("RAZORPAY_KEY_ID")}
+
+
+@api_router.post("/payments/verify")
+async def verify_payment(input: VerifyInput, request: Request):
+    user = await get_current_user(request)
+    try:
+        await asyncio.to_thread(
+            rzp_client.utility.verify_payment_signature,
+            {
+                "razorpay_order_id": input.razorpay_order_id,
+                "razorpay_payment_id": input.razorpay_payment_id,
+                "razorpay_signature": input.razorpay_signature,
+            },
+        )
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid payment signature")
+    await db.payments.update_one(
+        {"order_id": input.razorpay_order_id, "user_id": user["user_id"]},
+        {"$set": {"status": "paid", "payment_id": input.razorpay_payment_id, "paid_at": datetime.now(timezone.utc).isoformat()}},
+    )
+    return {"status": "paid"}
+
+
+@api_router.get("/payments")
+async def get_payments():
+    payments = await db.payments.find({"status": "paid"}, {"_id": 0}).to_list(1000)
+    for p in payments:
+        e = p.get("email") or ""
+        p["email"] = (e[:2] + "***") if e else ""
+    return payments
+
+
 app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=[SITE_URL] if SITE_URL else os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -293,7 +555,12 @@ logging.basicConfig(
 )
 
 
+@app.on_event("startup")
+async def create_indexes():
+    await db.users.create_index("email", unique=True)
+    await db.login_attempts.create_index("identifier")
+
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
-

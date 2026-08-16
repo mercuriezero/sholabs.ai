@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X, ArrowUpRight, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import AuthModal from "@/components/AuthModal";
 
 const links = [
   { label: "Services", href: "#services" },
@@ -10,6 +12,9 @@ const links = [
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const { user, logout } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4" aria-label="Main navigation">
@@ -28,7 +33,30 @@ export default function Nav() {
             </a>
           ))}
         </div>
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-4 md:flex">
+          {user === null && (
+            <button
+              onClick={() => setAuthOpen(true)}
+              data-testid="nav-login-button"
+              className="text-sm font-medium text-neutral-600 transition-colors hover:text-black"
+            >
+              Log in
+            </button>
+          )}
+          {user && (
+            <div className="flex items-center gap-2.5" data-testid="nav-user-menu">
+              {user.picture ? (
+                <img src={user.picture} alt="" className="h-8 w-8 rounded-full" referrerPolicy="no-referrer" />
+              ) : (
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black font-display text-xs font-bold text-white">
+                  {(user.name || user.email || "U")[0].toUpperCase()}
+                </span>
+              )}
+              <button onClick={logout} data-testid="nav-logout-button" aria-label="Log out" className="text-neutral-400 transition-colors hover:text-black">
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          )}
           <a
             href="https://cal.com/sunnyrai/30min"
             target="_blank"
@@ -64,6 +92,30 @@ export default function Nav() {
                 {l.label}
               </a>
             ))}
+            {user === null && (
+              <button
+                data-testid="nav-mobile-login-button"
+                className="w-fit text-sm font-medium text-neutral-700"
+                onClick={() => {
+                  setOpen(false);
+                  setAuthOpen(true);
+                }}
+              >
+                Log in
+              </button>
+            )}
+            {user && (
+              <button
+                data-testid="nav-mobile-logout-button"
+                className="w-fit text-sm font-medium text-neutral-700"
+                onClick={() => {
+                  setOpen(false);
+                  logout();
+                }}
+              >
+                Log out ({user.name || user.email})
+              </button>
+            )}
             <a
               href="https://cal.com/sunnyrai/30min"
               target="_blank"
@@ -77,6 +129,7 @@ export default function Nav() {
           </div>
         </div>
       )}
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </header>
   );
 }

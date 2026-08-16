@@ -33,13 +33,21 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - UI e2e via screenshots: hero render, portal auto-cycle (AI Videos → Voice AI), FAQ open, footer/brand wall, prompt submit with success toast, lead visible in DB.
 - Rev 2: new eyebrow, use-cases visual, dashboard mock (feed rotates), process, comparison + stack tables, pilot block all render; portal shows exactly 3 tabs; nav CTAs point to cal.com/sunnyrai/30min; footer links to /fractional-cxo; CXO page renders all sections and back-link returns home.
 
+## Rev 4 (2026-08-16) — Auth + Razorpay live payments
+- Unified auth: JWT email/password (bcrypt, 15-min access + 7-day refresh httpOnly cookies, 5-attempt/15-min lockout) + Emergent-managed Google OAuth (AuthCallback exchanges session_id → session_token cookie). Custom user_id UUIDs, _id never exposed.
+- Login UI: AuthModal (Google + email/password tabs) from nav "Log in" and automatically before any payment. Nav shows avatar + logout when signed in.
+- Razorpay (LIVE keys in backend/.env): POST /api/payments/create-order (auth-gated, flexible ₹ amount) → Checkout.js modal → POST /api/payments/verify (HMAC signature) → db.payments marked paid.
+- Pay surfaces: "Upgrade — pay now" unlocks on the generated plan card (info-first gating per user requirement), "Make a payment" on /dashboard. Amount modal with presets ₹4,999/₹9,999/₹24,999 + custom.
+- /dashboard: Revenue collected KPI + payment signals in live feed; GET /api/payments public with masked emails.
+- Verified: register/login/me curl chain, live Razorpay order created (order_TQMzBC4J1khkbp), 401 on unauthenticated order, UI signup → login → amount → Razorpay live checkout modal opened with prefill. Real charge NOT completed (live keys).
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: OWNER_EMAIL in backend/.env is EMPTY — lead email alerts are verified working (test send id returned) but paused until the user shares their real notification email address.
-- P1: Auth-protect /dashboard (currently public demo data).
+- P1: Auth-protect /dashboard (currently public demo data); Razorpay webhook for payment.captured events; payment success email receipt to customer.
 - P1: Case studies / testimonials / client logos section (real proof points from user).
 - P1: Connect pillar KPIs on /dashboard to real data sources (currently labeled sample).
-- P2: Blog/insights hub for GEO content moat; llms.txt; sitemap.xml/robots.txt.
+- P2: Forgot/reset password flow; blog/insights hub for GEO; llms.txt; sitemap.xml/robots.txt.
 - P2: OG share image (designed 1200x630) instead of logo.
 
 ## Rev 3 (2026-08-15) — Instant Plan Agent + alerts + live dashboard + motion upgrade

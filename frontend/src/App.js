@@ -1,21 +1,36 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/context/AuthContext";
 import ScrollToTop from "@/components/ScrollToTop";
+import AuthCallback from "@/components/AuthCallback";
 import Landing from "@/pages/Landing";
 import FractionalCxO from "@/pages/FractionalCxO";
 import CommandCenter from "@/pages/CommandCenter";
+
+function AppRouter() {
+  const location = useLocation();
+  // Google OAuth returns with #session_id=... — process it before any route renders
+  if (location.hash?.includes("session_id=")) {
+    return <AuthCallback />;
+  }
+  return (
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/fractional-cxo" element={<FractionalCxO />} />
+      <Route path="/dashboard" element={<CommandCenter />} />
+    </Routes>
+  );
+}
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/fractional-cxo" element={<FractionalCxO />} />
-          <Route path="/dashboard" element={<CommandCenter />} />
-        </Routes>
+        <AuthProvider>
+          <ScrollToTop />
+          <AppRouter />
+        </AuthProvider>
       </BrowserRouter>
       <Toaster position="bottom-right" richColors />
     </div>

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, FileText, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, FileText, IndianRupee, Sparkles } from "lucide-react";
 import Footer from "@/components/Footer";
+import PayButton from "@/components/PayButton";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const CAL = "https://cal.com/sunnyrai/30min";
@@ -24,15 +25,18 @@ const SAMPLE_KPIS = [
 export default function CommandCenter() {
   const [leads, setLeads] = useState([]);
   const [plans, setPlans] = useState([]);
+  const [payments, setPayments] = useState([]);
 
   const load = useCallback(async () => {
     try {
-      const [l, p] = await Promise.all([
+      const [l, p, pay] = await Promise.all([
         fetch(`${API}/leads`).then((r) => r.json()),
         fetch(`${API}/plans`).then((r) => r.json()),
+        fetch(`${API}/payments`).then((r) => r.json()),
       ]);
       setLeads(l);
       setPlans(p);
+      setPayments(pay);
     } catch {
       /* keep last data */
     }
@@ -47,9 +51,15 @@ export default function CommandCenter() {
   const feed = [
     ...leads.map((l) => ({ type: "brief", text: l.prompt, time: l.created_at })),
     ...plans.map((p) => ({ type: "plan", text: p.prompt, time: p.created_at })),
+    ...payments.map((p) => ({
+      type: "payment",
+      text: `₹${(p.amount / 100).toLocaleString("en-IN")} from ${p.name || p.email || "a client"}`,
+      time: p.paid_at || p.created_at,
+    })),
   ].sort((a, b) => new Date(b.time) - new Date(a.time));
 
   const latest = feed[0] ? timeAgo(feed[0].time) : "—";
+  const revenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0) / 100;
 
   return (
     <>
@@ -62,7 +72,8 @@ export default function CommandCenter() {
             <Link to="/" data-testid="dash-back-link" className="hidden items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-black sm:inline-flex">
               <ArrowLeft className="h-4 w-4" /> Back to site
             </Link>
-            <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="dash-nav-cta" className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg">
+            <PayButton label="Make a payment" testid="dash-pay-button" />
+            <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="dash-nav-cta" className="hidden items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg md:inline-flex">
               Book a working session <ArrowUpRight className="h-4 w-4" />
             </a>
           </div>
@@ -86,11 +97,12 @@ export default function CommandCenter() {
           </span>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-3" data-testid="dash-real-kpis">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="dash-real-kpis">
           {[
             { label: "Briefs received", value: leads.length, sub: "via the hero prompt box" },
             { label: "Plans generated", value: plans.length, sub: "instant AI strategies delivered" },
-            { label: "Latest signal", value: latest, sub: "most recent brief or plan" },
+            { label: "Revenue collected", value: `₹${revenue.toLocaleString("en-IN")}`, sub: `${payments.length} payment${payments.length === 1 ? "" : "s"} via Razorpay` },
+            { label: "Latest signal", value: latest, sub: "most recent activity" },
           ].map((k) => (
             <div key={k.label} className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">{k.label}</p>
@@ -126,11 +138,15 @@ export default function CommandCenter() {
                   <span className="flex min-w-0 items-center gap-2.5 text-sm text-neutral-700">
                     {f.type === "plan" ? (
                       <Sparkles className="h-4 w-4 shrink-0 text-brand-magenta" />
+                    ) : f.type === "payment" ? (
+                      <IndianRupee className="h-4 w-4 shrink-0 text-brand-green" />
                     ) : (
                       <FileText className="h-4 w-4 shrink-0 text-brand-blue" />
                     )}
                     <span className="truncate">
-                      <strong className="font-semibold text-black">{f.type === "plan" ? "Plan generated" : "New brief"}</strong>
+                      <strong className="font-semibold text-black">
+                        {f.type === "plan" ? "Plan generated" : f.type === "payment" ? "Payment received" : "New brief"}
+                      </strong>
                       {" — "}
                       {f.text}
                     </span>
