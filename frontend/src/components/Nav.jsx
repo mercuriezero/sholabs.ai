@@ -5,9 +5,9 @@ import AuthModal from "@/components/AuthModal";
 
 const links = [
   { label: "Services", href: "#services" },
-  { label: "Dashboard", href: "#dashboard" },
-  { label: "Process", href: "#process" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Pricing", href: "/fractional-cxo#cxo-packs" },
+  { label: "Command Center", href: "#dashboard" },
+  { label: "Help", href: "#faq" },
 ];
 
 export default function Nav() {

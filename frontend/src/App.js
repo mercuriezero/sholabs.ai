@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import ScrollToTop from "@/components/ScrollToTop";
 import AuthCallback from "@/components/AuthCallback";
+import ChatBot from "@/components/ChatBot";
 import Landing from "@/pages/Landing";
 import FractionalCxO from "@/pages/FractionalCxO";
 import CommandCenter from "@/pages/CommandCenter";
@@ -32,6 +33,7 @@ function App() {
         <AuthProvider>
           <ScrollToTop />
           <AppRouter />
+          <ChatBot />
         </AuthProvider>
       </BrowserRouter>
       <Toaster position="bottom-right" richColors />

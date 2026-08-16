@@ -745,6 +745,116 @@ async def get_payments():
     return payments
 
 
+# ---------- AI concierge ----------
+BOT_BASE_PROMPT = """You are the High On AI concierge: part salesperson, part senior growth consultant. You answer questions about High On AI and guide visitors to the right next step.
+
+ABOUT HIGH ON AI (ground truth):
+- Creative AI-powered marketing agency, powered by QuantumAI OS Pvt Ltd.
+- Promise: human intelligence + AI for marketing, sales and growth, delivered as one full-stack H.I.A.I. engine.
+- Three pillars. Get Cited (GEO: getting brands cited by ChatGPT, Gemini, Perplexity, Claude and Google AI Overviews; 94% of B2B buyers now research with LLMs and AI cites only 3-4 brands per answer). Get Watched (AI video engine: videos scripted, generated and repurposed weekly; 89% of buyers say video seals the deal). Get Chosen (agentic outbound plus Voice AI agents that qualify leads, follow up in seconds and book meetings).
+- One live command center dashboard across every pillar: AI citation rate, share of voice vs competitors, views, watch-through, pipeline, reply rates. Real-time, not monthly PDFs.
+- Fractional AI CXO: C-level growth ownership at a flat $30/hour. Success packs: Starter 25 hours ₹65,000, Momentum 50 hours ₹1,30,000, Scale 100 hours ₹2,60,000, Embedded 200 hours ₹5,20,000. Unused hours roll over 90 days. A project estimator on the Fractional CXO page scopes hours and recommends a pack.
+- Pilots: Pilot Sprint ₹24,999 (one pillar, 2 weeks), Growth Pilot ₹49,999 (two pillars, 30 days), Full Engine Pilot ₹99,999 (all three pillars). No long-term contract. No sales call needed to get a plan.
+- Free instant plan: visitors paste their website plus goal in the homepage prompt box and get an AI-generated growth plan in seconds.
+- Next step for serious prospects: a free 20-minute working session with a written 90-day plan (no pitch deck) at https://cal.com/sunnyrai/30min
+- Positioning vs alternatives: one accountable engine instead of 5+ disconnected vendors; clients typically save 50-75% versus the equivalent tool stack and agencies.
+- Payments are online via Razorpay and require a free account. Logged-in clients see hours used vs remaining at /account.
+
+HOW TO BEHAVE:
+- Sound like a sharp senior consultant, not a support bot. Concise: 2-4 sentences per answer unless detail is requested.
+- Plain text only: no markdown headings, no bullet spam, no em dashes. Short lines are fine.
+- Diagnose before prescribing: if the visitor's goal is unclear, ask one smart question, then recommend.
+- Always end with a concrete next step when relevant: the free instant plan on the homepage, the project estimator on /fractional-cxo, a success pack, or the working session link.
+- Never invent pricing, discounts, results or capabilities beyond what is listed. If something is not listed, say the team confirms scope in the working session.
+- On competitor questions: stay factual and brief, then pivot to outcomes and the pilot."""
+
+
+class ChatInput(BaseModel):
+    session_id: str = Field(min_length=1, max_length=64)
+    message: str = Field(min_length=1, max_length=2000)
+
+
+class TeachInput(BaseModel):
+    fact: str = Field(min_length=3, max_length=500)
+
+
+@api_router.post("/chat/stream")
+async def chat_stream(input: ChatInput):
+    facts = await db.bot_knowledge.find({}, {"_id": 0, "fact": 1}).to_list(200)
+    system = BOT_BASE_PROMPT
+    if facts:
+        system += "\n\nAdditional context taught by the founder (treat as ground truth):\n" + "\n".join(
+            f"- {f['fact']}" for f in facts
+        )
+    history = await db.chats.find({"session_id": input.session_id}, {"_id": 0}).sort("created_at", -1).to_list(8)
+    history.reverse()
+    transcript = "\n".join(
+        f"{'Visitor' if m['role'] == 'user' else 'Concierge'}: {m['text']}" for m in history
+    )
+
+    async def gen():
+        collected = []
+        try:
+            chat = LlmChat(
+                api_key=os.environ["EMERGENT_LLM_KEY"],
+                session_id=f"concierge-{input.session_id}-{uuid.uuid4().hex[:6]}",
+                system_message=system,
+            ).with_model("openai", "gpt-5.4")
+            user_text = input.message
+            if transcript:
+                user_text = f"Conversation so far:\n{transcript}\n\nVisitor: {input.message}\n\nReply as the concierge."
+            async for ev in chat.stream_message(UserMessage(text=user_text)):
+                if isinstance(ev, TextDelta):
+                    collected.append(ev.content)
+                    yield f"data: {json.dumps({'token': ev.content})}\n\n"
+                elif isinstance(ev, StreamDone):
+                    break
+            reply = "".join(collected)
+            now = datetime.now(timezone.utc).isoformat()
+            await db.chats.insert_many([
+                {"id": str(uuid.uuid4()), "session_id": input.session_id, "role": "user", "text": input.message, "created_at": now},
+                {"id": str(uuid.uuid4()), "session_id": input.session_id, "role": "assistant", "text": reply, "created_at": now},
+            ])
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception:
+            logger.exception("Chat failed")
+            yield f"data: {json.dumps({'error': 'Something glitched. Please try again.'})}\n\n"
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+async def _owner_only(request: Request) -> dict:
+    user = await get_current_user(request)
+    if not OWNER_EMAIL or user.get("email") != OWNER_EMAIL:
+        raise HTTPException(status_code=403, detail="Owner only")
+    return user
+
+
+@api_router.get("/chat/teach")
+async def list_facts(request: Request):
+    await _owner_only(request)
+    return await db.bot_knowledge.find({}, {"_id": 0}).to_list(200)
+
+
+@api_router.post("/chat/teach")
+async def teach_fact(input: TeachInput, request: Request):
+    await _owner_only(request)
+    doc = {"id": str(uuid.uuid4()), "fact": input.fact.strip(), "created_at": datetime.now(timezone.utc).isoformat()}
+    await db.bot_knowledge.insert_one(doc)
+    return {"id": doc["id"], "fact": doc["fact"], "created_at": doc["created_at"]}
+
+
+@api_router.delete("/chat/teach/{fact_id}")
+async def delete_fact(fact_id: str, request: Request):
+    await _owner_only(request)
+    await db.bot_knowledge.delete_one({"id": fact_id})
+    return {"status": "deleted"}
+
+
 app.include_router(api_router)
 
 app.add_middleware(

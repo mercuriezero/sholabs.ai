@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Brain, Loader2, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -8,11 +8,18 @@ export default function OwnerTools({ onLogged }) {
   const [payments, setPayments] = useState(null);
   const [hours, setHours] = useState({});
   const [busy, setBusy] = useState("");
+  const [facts, setFacts] = useState(null);
+  const [newFact, setNewFact] = useState("");
+  const [factBusy, setFactBusy] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch(`${API}/account/all-payments`, { credentials: "include" });
+      const [r, f] = await Promise.all([
+        fetch(`${API}/account/all-payments`, { credentials: "include" }),
+        fetch(`${API}/chat/teach`, { credentials: "include" }),
+      ]);
       if (r.ok) setPayments(await r.json());
+      if (f.ok) setFacts(await f.json());
     } catch {
       /* keep last data */
     }
@@ -45,6 +52,37 @@ export default function OwnerTools({ onLogged }) {
       toast.error("Couldn't log hours. Try again.");
     } finally {
       setBusy("");
+    }
+  };
+
+  const addFact = async () => {
+    const fact = newFact.trim();
+    if (fact.length < 3) return;
+    setFactBusy(true);
+    try {
+      const r = await fetch(`${API}/chat/teach`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fact }),
+      });
+      if (!r.ok) throw new Error();
+      toast.success("The concierge just learned that.");
+      setNewFact("");
+      load();
+    } catch {
+      toast.error("Couldn't save that. Try again.");
+    } finally {
+      setFactBusy(false);
+    }
+  };
+
+  const removeFact = async (id) => {
+    try {
+      await fetch(`${API}/chat/teach/${id}`, { method: "DELETE", credentials: "include" });
+      load();
+    } catch {
+      toast.error("Couldn't remove that.");
     }
   };
 
@@ -104,6 +142,47 @@ export default function OwnerTools({ onLogged }) {
           })}
         </ul>
       )}
+
+      <div className="mt-10 border-t border-brand-orange/20 pt-8">
+        <p className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-brand-purple">
+          <Brain className="h-4 w-4" /> Train the AI concierge
+        </p>
+        <p className="mt-2 text-sm text-neutral-500">
+          Teach the website chatbot your business context: new offers, case results, positioning, processes. Every
+          line becomes ground truth in its answers.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <input
+            value={newFact}
+            onChange={(e) => setNewFact(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addFact()}
+            data-testid="teach-input"
+            placeholder='e.g. "We guarantee 3 AI citations in the first 30 days or the pilot is free"'
+            className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-black/40"
+          />
+          <button
+            onClick={addFact}
+            disabled={factBusy}
+            data-testid="teach-add-button"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-purple px-5 py-2.5 text-xs font-semibold text-white transition-all hover:-translate-y-0.5 disabled:opacity-60"
+          >
+            {factBusy && <Loader2 className="h-3 w-3 animate-spin" />}
+            Teach
+          </button>
+        </div>
+        {facts && facts.length > 0 && (
+          <ul className="mt-4 space-y-2" data-testid="teach-list">
+            {facts.map((f) => (
+              <li key={f.id} className="flex items-center gap-3 rounded-xl border border-black/5 bg-white px-4 py-2.5" data-testid={`teach-fact-${f.id}`}>
+                <span className="flex-1 text-sm text-neutral-700">{f.fact}</span>
+                <button onClick={() => removeFact(f.id)} data-testid={`teach-delete-${f.id}`} aria-label="Remove fact" className="text-neutral-300 transition-colors hover:text-brand-red">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }

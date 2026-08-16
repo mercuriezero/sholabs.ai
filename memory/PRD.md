@@ -78,6 +78,12 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - StackCalculator repriced from published 2026 competitor pricing: Profound $399 / Peec €205 / AthenaHQ $295 / Otterly $189 / HeyGen $69 per seat / Synthesia $89 / Arcads $110 / Apollo $59 per seat / Clay $149 / Smartlead $94 / Outreach ~$115 per seat / impact.com $500 / PartnerStack ~$1k / GRIN $1.5k / CreatorIQ $3k+ / Aspire $2k / Clari ~$75 per seat (INR at ~₹87/USD). Right panel reframed: monthly stack total vs High On AI engine ₹1,30,000/mo (50 hrs flat $30/hr) with yearly savings + % (52% at defaults).
 - Estimator: each need now carries a researched market benchmark for equivalent agency+tools scope (GEO ₹2.2L, video ₹1.6L, outbound/voice ₹1.3L, fractional CXO ₹2.6L, RevOps ₹1L) — result panel shows "Agencies + tools ≈ ₹X" and "You save ~N%" (verified 65-75% band across selections).
 
+## Rev 10 (2026-08-16) — AI concierge + Odoo-style nav
+- ChatBot.jsx: floating concierge on every page (black launcher with live dot, streaming SSE replies via POST /api/chat/stream, session persisted in localStorage, suggestion chips, clickable links, consultative tone).
+- Backend: BOT_BASE_PROMPT holds full business ground truth (pillars, packs, pilots, pricing, process, positioning, booking link, behavior rules); conversation transcript (last 8) included per turn; chats stored in db.chats.
+- Owner teaching: POST/GET/DELETE /api/chat/teach (owner-only) stored in db.bot_knowledge and injected into the system prompt as ground truth. UI in OwnerTools ("Train the AI concierge") on /account. Verified: taught fact was used by the bot in its next answer; test data cleaned up.
+- Nav reworked to Odoo-style: Services / Pricing (/fractional-cxo#cxo-packs, hash scroll fixed in ScrollToTop) / Command Center / Help.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
