@@ -282,6 +282,24 @@ async def notify_owner_payment(*, name: str, email: str, amount_paise: int, pack
         logger.exception("Owner payment alert failed")
 
 
+async def send_low_balance(*, to: str, name: str, package_name: str, remaining: float):
+    try:
+        subject = f"Running low — {remaining:g} hours left in your pack"
+        greeting = f"Hi {escape(name)}," if name else "Hi,"
+        html = (
+            '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#111">'
+            f'<h2 style="margin:0 0 12px">{remaining:g} hours left in your pack</h2>'
+            f'<p style="margin:0 0 8px">{greeting} your <strong>{escape(package_name)}</strong> is almost used up.</p>'
+            '<p style="margin:0 0 20px;color:#555">Top up in one click to keep momentum — same flat rate, hours roll over 90 days.</p>'
+            f'<p style="margin:0"><a href="{escape(SITE_URL)}/fractional-cxo">Top up your pack</a></p>'
+            f'<p style="font-size:12px;color:#888;margin-top:24px">Sent by {escape(EMAIL_FROM_NAME)} · account balance alert</p>'
+            '</td></tr></table>'
+        )
+        await send_email(to=to, subject=subject, html=html)
+    except Exception:
+        logger.exception("Low-balance email failed")
+
+
 async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: str, payment_id: str):
     try:
         amount = f"₹{amount_paise / 100:,.0f}"
@@ -662,21 +680,38 @@ class LogHoursInput(BaseModel):
     hours: float = Field(gt=0, le=100)
 
 
+def _pack_hours(package_name: str) -> int:
+    m = re.search(r"(\d+)\s*hours?", package_name or "")
+    return int(m.group(1)) if m else 0
+
+
 @api_router.get("/account/summary")
 async def account_summary(request: Request):
     user = await get_current_user(request)
     payments = await db.payments.find({"user_id": user["user_id"], "status": "paid"}, {"_id": 0}).to_list(100)
     for p in payments:
-        m = re.search(r"(\d+)\s*hours?", p.get("package_name", ""))
-        p["hours_total"] = int(m.group(1)) if m else 0
+        p["hours_total"] = _pack_hours(p.get("package_name", ""))
         p["hours_used"] = p.get("hours_used", 0)
     return {
         "user": {"name": user.get("name", ""), "email": user.get("email", "")},
+        "is_owner": bool(OWNER_EMAIL) and user.get("email") == OWNER_EMAIL,
         "payments": payments,
         "hours_total": sum(p["hours_total"] for p in payments),
         "hours_used": sum(p["hours_used"] for p in payments),
         "spend_total": sum(p.get("amount", 0) for p in payments),
     }
+
+
+@api_router.get("/account/all-payments")
+async def all_payments(request: Request):
+    user = await get_current_user(request)
+    if not OWNER_EMAIL or user.get("email") != OWNER_EMAIL:
+        raise HTTPException(status_code=403, detail="Owner only")
+    payments = await db.payments.find({"status": "paid"}, {"_id": 0}).to_list(500)
+    for p in payments:
+        p["hours_total"] = _pack_hours(p.get("package_name", ""))
+        p["hours_used"] = p.get("hours_used", 0)
+    return payments
 
 
 @api_router.post("/account/log-hours")
@@ -687,7 +722,18 @@ async def log_hours(input: LogHoursInput, request: Request):
     result = await db.payments.update_one({"id": input.payment_id}, {"$inc": {"hours_used": input.hours}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Payment not found")
-    return {"status": "logged"}
+    payment = await db.payments.find_one({"id": input.payment_id}, {"_id": 0})
+    total = _pack_hours(payment.get("package_name", ""))
+    remaining = total - payment.get("hours_used", 0)
+    if total and remaining < 5 and not payment.get("low_balance_notified") and payment.get("email") and EMAIL_KEY:
+        await db.payments.update_one({"id": input.payment_id}, {"$set": {"low_balance_notified": True}})
+        asyncio.create_task(send_low_balance(
+            to=payment["email"],
+            name=payment.get("name", ""),
+            package_name=payment.get("package_name", ""),
+            remaining=max(remaining, 0),
+        ))
+    return {"status": "logged", "hours_used": payment.get("hours_used", 0)}
 
 
 @api_router.get("/payments")

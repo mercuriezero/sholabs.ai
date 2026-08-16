@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, Clock, IndianRupee, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
+import OwnerTools from "@/components/OwnerTools";
 import Footer from "@/components/Footer";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -13,13 +14,17 @@ export default function Account() {
   const [authOpen, setAuthOpen] = useState(false);
   const [data, setData] = useState(null);
 
-  useEffect(() => {
+  const loadSummary = useCallback(() => {
     if (!user) return;
     fetch(`${API}/account/summary`, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : null))
       .then(setData)
       .catch(() => setData(null));
   }, [user]);
+
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary]);
 
   const remaining = data ? data.hours_total - data.hours_used : 0;
 
@@ -143,6 +148,8 @@ export default function Account() {
                 Hours are logged by your High On AI team as work is delivered — this page updates automatically.
               </p>
             </div>
+
+            {data?.is_owner && <OwnerTools onLogged={loadSummary} />}
           </>
         )}
       </main>

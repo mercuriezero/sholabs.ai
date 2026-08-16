@@ -53,6 +53,13 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - OWNER_EMAIL=ssup@sohighon.ai active: instant email alerts on every new brief AND every payment received (notify_owner_payment on verify + webhook).
 - Hours Balance Tracker: /account page (login-gated) — hours remaining/used/invested KPIs, per-pack progress bars. Owner logs consumed hours via POST /api/account/log-hours (restricted to OWNER_EMAIL). Nav avatar links to /account.
 
+## Rev 6b (2026-08-16) — Low-balance alerts + owner hours UI
+- Low-balance alerts: logging hours that drops a pack below 5 remaining auto-emails the client a top-up email (links to /fractional-cxo), once per pack (low_balance_notified flag).
+- Owner hours UI: /account shows an "Owner tools" section (only when logged in as OWNER_EMAIL) — lists all paid packs with remaining-hours badges (red under 5) and per-pack log inputs. Backed by GET /api/account/all-payments (owner-only).
+- Pilot pricing confirmed as-is by user (₹24,999/₹49,999/₹99,999).
+- Note: email proxy blocks undeliverable recipients (fake domains like demo@highonai.dev get 422 — correct guard; real customer emails deliver).
+- Verified: owner flow e2e (registered temp owner, logged 21h → 4 remaining → alert triggered + flag set; UI log 0.5h → 3.5; temp owner user deleted after test).
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
