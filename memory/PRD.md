@@ -59,6 +59,7 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Pilot pricing confirmed as-is by user (₹24,999/₹49,999/₹99,999).
 - Note: email proxy blocks undeliverable recipients (fake domains like demo@highonai.dev get 422 — correct guard; real customer emails deliver).
 - Verified: owner flow e2e (registered temp owner, logged 21h → 4 remaining → alert triggered + flag set; UI log 0.5h → 3.5; temp owner user deleted after test).
+- Google sign-in (Emergent-managed OAuth) verified live: "Continue with Google" → auth.emergentagent.com → real Google accounts sign-in page; backend session exchange rejects missing/invalid session IDs correctly. Post-Google-account callback untested (needs a real Google account).
 
 ## Backlog
 - P0: (done) Cal.com booking link wired.
