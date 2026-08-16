@@ -120,6 +120,15 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 ## Rev 20 (2026-08-16) — ChatGPT models confirmation
 - OpenAI ChatGPT models confirmed integrated: plan agent (server.py:408) and concierge (server.py:805) both run openai/gpt-5.4 (playbook-recommended) via EMERGENT_LLM_KEY, streaming SSE, chats persisted in db.chats. Live-verified. Newer models available if wanted: gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna / gpt-5.5 (one-line model swap each).
 
+
+## Rev 21 (2026-08-16) — Next.js migration verified + SEO polish
+- Visual regression pass on Next.js port: /fractional-cxo (hero, 4-tier success packs table, Book buttons, Is-this-you), /dashboard (KPIs, pillar targets, live signal feed, footer brand wall), /account (login gate) all render pixel-perfect. Zero hydration/console errors.
+- SEO fix: every route was canonicalizing to the root URL and sharing one og:title. Each page now exports its own alternates.canonical (/fractional-cxo, /dashboard, /account) plus per-page openGraph/twitter title + description. Verified in SSR HTML.
+- Backend smoke post-migration: cookie login, /auth/me, GET /payments, GET /leads (9), POST /payments/create-order (live Razorpay order created, not charged), POST /chat/stream (SSE streaming) all green.
+- CRA cleanup: zero react-router-dom references remain; internal route links in Nav (account avatar) and Footer (Fractional AI CXO) converted to next/link for client-side navigation.
+- Lint: excluded .next build output via .gitignore (root + frontend) — oxlint now 0 errors / 0 warnings across 117 files.
+- Note: /api/auth/me CORS error only appears when browsing via localhost:3000 (cross-origin); on the real preview domain it is same-origin and works.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
