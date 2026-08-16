@@ -101,6 +101,10 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Packs now: Trial 4h ₹10,400 (red) · Starter 25h ₹65,000 (orange) · Momentum 50h ₹1,30,000 (cyan) · Scale 100h ₹2,60,000 (green). 200h Embedded removed everywhere (table, PayButton packages, feature matrix re-flagged to 4 columns).
 - Hero background reduced to exactly two video cards (Founder UGC ad, Ad creative V3); small chips retained.
 
+## Rev 15 (2026-08-16) — Trial Pack promotion + hero visibility fixes
+- Pilot section now features "Lowest-friction start: Trial Pack · 4 hours · ₹10,400" with a working green PayButton (preselected in payment modal).
+- Hero field rebalanced: ChatGPT/GEO/AI SDR moved to sharp near layer (were blurred at depth 0.6); GEO relocated out from behind the sticky nav; lower-left empty space filled with Perplexity + AI SDR chips; UGC Ads added mid-left. Two video cards retained.
+
 ## Backlog
 - P0: (done) Cal.com booking link wired.
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.

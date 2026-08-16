@@ -1,4 +1,5 @@
 import { Check, ArrowUpRight } from "lucide-react";
+import PayButton from "@/components/PayButton";
 
 const POINTS = [
   "No long-term contract to get your plan",
@@ -29,6 +30,17 @@ export default function Pilot() {
               </li>
             ))}
           </ul>
+          <div className="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-4 rounded-2xl border border-black/5 bg-neutral-50/80 px-6 py-4">
+            <p className="text-sm text-neutral-500">
+              Lowest-friction start: <strong className="font-semibold text-black">Trial Pack · 4 hours · ₹10,400</strong>
+            </p>
+            <PayButton
+              label="Start with the Trial Pack"
+              testid="pilot-trial-pay"
+              context="cxo"
+              initialPackage={{ name: "Trial Pack · 4 hours", price: 10400 }}
+            />
+          </div>
           <a
             href="https://cal.com/sunnyrai/30min"
             target="_blank"

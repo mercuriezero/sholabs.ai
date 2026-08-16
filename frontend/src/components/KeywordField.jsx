@@ -1,5 +1,5 @@
 import { motion, useReducedMotion, useTransform } from "framer-motion";
-import { AudioLines, Play } from "lucide-react";
+import { AudioLines, Bot, Play, Users } from "lucide-react";
 
 const CARDS = [
   { t: "Founder UGC ad", views: "12.4k", dur: "0:32", x: "3%", y: "12%", d: 1.8, color: "#E200C4" },
@@ -7,11 +7,13 @@ const CARDS = [
 ];
 
 const CHIPS = [
-  { t: "ChatGPT", x: "26%", y: "5%", d: 0.6 },
-  { t: "Gemini", x: "68%", y: "28%", d: 0.6 },
-  { t: "Perplexity", x: "9%", y: "84%", d: 0.6 },
-  { t: "GEO", x: "50%", y: "4%", d: 1 },
-  { t: "Voice AI", icon: AudioLines, x: "90%", y: "40%", d: 1.8 },
+  { t: "ChatGPT", x: "22%", y: "10%", d: 1.8 },
+  { t: "Gemini", x: "72%", y: "16%", d: 1 },
+  { t: "UGC Ads", icon: Users, x: "10%", y: "42%", d: 1 },
+  { t: "Perplexity", x: "8%", y: "78%", d: 1 },
+  { t: "AI SDR", icon: Bot, x: "24%", y: "89%", d: 1.8 },
+  { t: "GEO", x: "56%", y: "88%", d: 1.8 },
+  { t: "Voice AI", icon: AudioLines, x: "90%", y: "38%", d: 1.8 },
 ];
 
 const DEPTH = {
