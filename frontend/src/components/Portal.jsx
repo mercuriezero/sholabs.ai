@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, Clapperboard, AudioLines, Check, TrendingUp } from "lucide-react";
+import { Sparkles, Clapperboard, AudioLines, Send, Megaphone, Users, Handshake, Check, TrendingUp } from "lucide-react";
 
 const SERVICES = [
   {
@@ -32,6 +32,46 @@ const SERVICES = [
     icon: AudioLines,
     heading: "Voice AI agents that book real meetings",
     body: "Human-grade voice agents qualify inbound, revive cold lists, and follow up in seconds · every call transcribed, scored, and synced to your CRM.",
+  },
+  {
+    id: "sdr",
+    tab: "AI SDR",
+    color: "#ED1C24",
+    soft: "rgba(237,28,36,0.06)",
+    border: "rgba(237,28,36,0.18)",
+    icon: Send,
+    heading: "Outbound that replies before competitors",
+    body: "Agentic outbound with human review: researched sequences, smart follow-ups, and every reply routed straight into pipeline.",
+  },
+  {
+    id: "social",
+    tab: "Social Media",
+    color: "#2BBCC4",
+    soft: "rgba(43,188,196,0.06)",
+    border: "rgba(43,188,196,0.18)",
+    icon: Megaphone,
+    heading: "Social media that compounds daily",
+    body: "Founder-led content, category takes, and community plays shipped on a weekly cadence across LinkedIn, X, and Instagram.",
+  },
+  {
+    id: "ugc",
+    tab: "UGC Ads",
+    color: "#91268F",
+    soft: "rgba(145,38,143,0.06)",
+    border: "rgba(145,38,143,0.18)",
+    icon: Users,
+    heading: "UGC ad creatives tested weekly",
+    body: "AI-generated creator-style ads in volume: hooks, angles, and variants tested until a winner carries your spend.",
+  },
+  {
+    id: "partners",
+    tab: "Affiliate & Partners",
+    color: "#F7941E",
+    soft: "rgba(247,148,30,0.06)",
+    border: "rgba(247,148,30,0.18)",
+    icon: Handshake,
+    heading: "Partner programs that share your upside",
+    body: "Affiliate, referral, and creator partnerships recruited and managed for you, turning other people's audiences into your pipeline.",
   },
 ];
 
@@ -115,7 +155,115 @@ function VoicePanel({ color }) {
   );
 }
 
-const PANELS = { geo: GeoPanel, video: VideoPanel, voice: VoicePanel };
+function SdrPanel({ color }) {
+  return (
+    <div className="flex h-full flex-col gap-4 p-6 md:p-8">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
+        <Send className="h-3.5 w-3.5" style={{ color }} /> Outbound sequence · live
+      </div>
+      <div className="flex-1 space-y-2.5 rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
+        {[
+          ["Day 1 · Intro email", "Opened 2h ago"],
+          ["Day 3 · Value bump", "Replied"],
+          ["Day 5 · Case study", "Meeting booked"],
+        ].map(([step, status]) => (
+          <div key={step} className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
+            <span className="text-sm text-neutral-600">{step}</span>
+            <span className="text-xs font-semibold" style={{ color }}>{status}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
+        <TrendingUp className="h-4 w-4" /> 12.4% reply rate this week
+      </div>
+    </div>
+  );
+}
+
+function SocialPanel({ color }) {
+  return (
+    <div className="flex h-full flex-col gap-4 p-6 md:p-8">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
+        <Megaphone className="h-3.5 w-3.5" style={{ color }} /> This week's content
+      </div>
+      <div className="grid flex-1 grid-cols-3 gap-3">
+        {[
+          ["Founder take", "2.1k likes"],
+          ["Category teardown", "184 comments"],
+          ["Client win story", "96 shares"],
+        ].map(([t, stat]) => (
+          <div key={t} className="flex flex-col justify-between rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
+            <div className="h-14 rounded-xl md:h-20" style={{ background: `linear-gradient(135deg, ${color}22, ${color}55)` }} />
+            <div className="mt-3">
+              <p className="text-xs font-semibold text-black">{t}</p>
+              <p className="mt-1 text-[10px] uppercase tracking-wider" style={{ color }}>{stat}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
+        <TrendingUp className="h-4 w-4" /> 4.8x engagement vs last month
+      </div>
+    </div>
+  );
+}
+
+function UgcPanel({ color }) {
+  return (
+    <div className="flex h-full flex-col gap-4 p-6 md:p-8">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
+        <Users className="h-3.5 w-3.5" style={{ color }} /> Creative testing · round 6
+      </div>
+      <div className="grid flex-1 grid-cols-3 gap-3">
+        {[
+          ["Hook A", "1.8% CTR", false],
+          ["Hook B", "3.4% CTR", true],
+          ["Hook C", "1.2% CTR", false],
+        ].map(([t, ctr, winner]) => (
+          <div key={t} className={`flex flex-col justify-between rounded-2xl border bg-white p-4 shadow-sm ${winner ? "" : "border-black/5"}`} style={winner ? { borderColor: color } : undefined}>
+            <div className="h-14 rounded-xl md:h-20" style={{ background: `linear-gradient(135deg, ${color}${winner ? "44" : "18"}, ${color}${winner ? "77" : "33"})` }} />
+            <div className="mt-3">
+              <p className="text-xs font-semibold text-black">{t}</p>
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: winner ? color : "#a3a3a3" }}>
+                {ctr}{winner ? " · winner" : ""}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
+        <TrendingUp className="h-4 w-4" /> Winning creative found in 6 days
+      </div>
+    </div>
+  );
+}
+
+function PartnerPanel({ color }) {
+  return (
+    <div className="flex h-full flex-col gap-4 p-6 md:p-8">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
+        <Handshake className="h-3.5 w-3.5" style={{ color }} /> Partner pipeline · live
+      </div>
+      <div className="flex-1 space-y-2.5 rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
+        {[
+          ["New partner signed", "SaaS newsletter · 40k subs"],
+          ["Referral deal closed", "₹1.2L partner-sourced"],
+          ["Creator collab shipped", "3 videos this month"],
+        ].map(([t, sub]) => (
+          <div key={t} className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
+            <span className="text-sm font-medium text-black">{t}</span>
+            <span className="text-xs text-neutral-500">{sub}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
+        <TrendingUp className="h-4 w-4" /> 22% of revenue from partners
+      </div>
+    </div>
+  );
+}
+
+const PANELS = { geo: GeoPanel, video: VideoPanel, voice: VoicePanel, sdr: SdrPanel, social: SocialPanel, ugc: UgcPanel, partners: PartnerPanel };
 
 export default function Portal() {
   const [active, setActive] = useState(0);
@@ -136,7 +284,7 @@ export default function Portal() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400" data-testid="services-eyebrow">
-            02 · One engine. Three growth pillars.
+            02 · One engine. Every growth motion.
           </p>
           <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-black md:text-5xl" data-testid="services-heading">
             Growth teams build on <span className="glassy-brand-text">High On AI</span>
