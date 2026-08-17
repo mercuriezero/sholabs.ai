@@ -146,6 +146,11 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Result panel: itemized ledger, Service products subtotal, separate CXO hours subtotal (marked billed hourly only), total indicative investment, per-line market benchmark comparison (agencies+tools rates: video ₹18k, pages ₹1.4L/block, UGC ₹20k, voice ₹2.5L, SDR ₹3L, social ₹1L/mo, CXO ₹6.5k/hr, affiliate ×1.8) with savings %. Verified: pipeline/12w ₹5,78,000 save 51%; revenue/4w ₹17,72,800 save 68%; stepper adjustments recompute live.
 - "Lock this scope" CTA prefills the total into the Razorpay payment modal (auth-gated). Usage-based footnote shown when Voice/SDR selected.
 
+## Rev 24 (2026-08-17) — Logo nav + card-based estimator UX
+- Removed "Back to site" buttons from FractionalCxO, CommandCenter and Account headers (unused ArrowLeft imports removed too). Logo click (already next/link to /) is the way home, verified client-side navigation works.
+- Estimator scope section rebuilt as clickable expandable service cards: 7 service product cards + 1 Fractional CXO card (under its own "billed hourly only" divider). Card header shows colored monogram, name, unit price, in-scope qty pill (e.g. × 6) and a "Suggested" badge for auto-recommended services. Expanding a card reveals blurb, 3 "what's included" bullets and the quantity stepper (affiliate card shows tier pills). Goal + timeline still auto-suggest; steppers inside cards adjust live; ledger/subtotals/savings unchanged and verified (videos 6 to 7 moved total ₹5,78,000 to ₹5,85,000).
+
+
 
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
 - P1: Confirm pilot tier pricing (₹24,999/₹49,999/₹99,999 assumed). Auth-protect /dashboard (currently public demo data).

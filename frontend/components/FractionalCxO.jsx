@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Compass, Eye, Megaphone, Users, CalendarClock, BarChart3, Check } from "lucide-react";
+import { ArrowUpRight, Compass, Eye, Megaphone, Users, CalendarClock, BarChart3, Check } from "lucide-react";
 import Footer from "@/components/Footer";
 import SuccessPacks from "@/components/SuccessPacks";
 
@@ -68,9 +68,6 @@ export default function FractionalCxO() {
             <img src="/logo.webp" alt="High On AI logo" className="h-10 w-auto rounded-md" />
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/" data-testid="cxo-back-link" className="hidden items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-black sm:inline-flex">
-              <ArrowLeft className="h-4 w-4" /> Back to site
-            </Link>
             <a
               href={CAL}
               target="_blank"

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Clock, IndianRupee, Loader2 } from "lucide-react";
+import { ArrowUpRight, Clock, IndianRupee, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import OwnerTools from "@/components/OwnerTools";
@@ -38,9 +38,6 @@ export default function Account() {
             <img src="/logo.webp" alt="High On AI logo" className="h-10 w-auto rounded-md" />
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/" data-testid="account-back-link" className="hidden items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-black sm:inline-flex">
-              <ArrowLeft className="h-4 w-4" /> Back to site
-            </Link>
             <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="account-nav-cta" className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg">
               Book a working session <ArrowUpRight className="h-4 w-4" />
             </a>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Minus, Plus, Target, Timer, X } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, Minus, Plus, Sparkles, Target, Timer, X } from "lucide-react";
 import PayButton from "@/components/PayButton";
 
 const CAL = "https://cal.com/sunnyrai/30min";
@@ -50,13 +50,41 @@ const GOALS = [
 // What agencies + tools typically charge for the same scope (market rates researched Aug 2026).
 const MARKET = { video: 18000, pageBlock: 140000, ugc: 20000, voice: 250000, sdr: 300000, social: 100000, cxoHour: 6500, affMult: 1.8 };
 
+const SERVICES = [
+  { id: "videos", name: "AI Videos", price: "₹7,000 / video", color: "#F7941E",
+    blurb: "A weekly video engine: scripted, generated and repurposed for every channel.",
+    includes: ["Hook-first scripts written for your category", "AI presenters, voiceover, captions and edits", "Repurposed into Shorts, Reels and LinkedIn cuts"] },
+  { id: "pages", name: "GEO / LLM citation pages", price: "₹80,000 / 20 pages", color: "#2B39D1",
+    blurb: "Pages engineered so ChatGPT, Gemini and Perplexity cite you.",
+    includes: ["Question-led research mapped to buyer prompts", "Structured answers, schema and citations LLMs trust", "Internal linking and refresh cadence built in"] },
+  { id: "ugc", name: "UGC ad creatives", price: "from ₹10,000 / creative", color: "#ED1C24",
+    blurb: "Creator-style ads that convert, without creator logistics.",
+    includes: ["Scroll-stopping hooks and script variations", "AI presenters matched to your audience", "Volume tiers: ₹7,000 at 500+, ₹6,000 at 5000+"] },
+  { id: "voice", name: "Voice AI agents", price: "₹1,00,000 setup / agent", color: "#2BBCC4",
+    blurb: "Agents that answer, qualify and book meetings on live calls.",
+    includes: ["Custom call flows tuned to your pitch", "Qualification, routing and calendar booking", "₹10/minute usage billed on actuals"] },
+  { id: "sdr", name: "AI SDR outbound", price: "₹2,00,000 / motion", color: "#1FA84A",
+    blurb: "An outbound motion that finds, enriches and follows up for you.",
+    includes: ["ICP list building and enrichment", "Multi-touch sequences across email and LinkedIn", "₹10/minute usage billed on actuals"] },
+  { id: "social", name: "Social media", price: "₹60,000 / month", color: "#E200C4",
+    blurb: "A content engine that keeps your brand loud every week.",
+    includes: ["Monthly content calendar and production", "Founder and brand channel management", "Community replies and trend-jacking"] },
+  { id: "aff", name: "Affiliate & Partners", price: "from ₹15,000 / month", color: "#91268F",
+    blurb: "A partner program with tracking, payouts and recruitment done for you.",
+    includes: ["Starter: up to 25 partners · 2% commission", "Growth: up to 100 partners · 1.5% commission", "Pro: unlimited, fully managed · 1% commission"] },
+];
+
+const CXO_CARD = { id: "cxo", name: "Fractional CXO", price: "₹2,600 / hour", color: "#0A0A0A",
+  blurb: "C-level growth leadership, billed hourly only. No retainer lock-in.",
+  includes: ["Growth strategy, GEO direction and demand engine design", "Team and agency leadership with weekly reviews", "Board-ready reporting on pipeline and spend"] };
+
 const inr = (n) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 
 function Stepper({ value, onChange, min = 0, max = 999, step = 1, testid }) {
   return (
     <div className="flex items-center gap-1.5">
       <button
-        onClick={() => onChange(Math.max(min, value - step))}
+        onClick={(e) => { e.stopPropagation(); onChange(Math.max(min, value - step)); }}
         data-testid={`${testid}-minus`}
         aria-label="Decrease"
         className="flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-200 transition-colors hover:border-black/40"
@@ -65,7 +93,7 @@ function Stepper({ value, onChange, min = 0, max = 999, step = 1, testid }) {
       </button>
       <span className="w-10 text-center text-sm font-semibold text-black" data-testid={`${testid}-value`}>{value}</span>
       <button
-        onClick={() => onChange(Math.min(max, value + step))}
+        onClick={(e) => { e.stopPropagation(); onChange(Math.min(max, value + step)); }}
         data-testid={`${testid}-plus`}
         aria-label="Increase"
         className="flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-200 transition-colors hover:border-black/40"
@@ -87,6 +115,8 @@ export default function Estimator({ open, onClose }) {
   const [socialMonths, setSocialMonths] = useState(0);
   const [aff, setAff] = useState("none");
   const [cxoHours, setCxOHours] = useState(60);
+  const [suggested, setSuggested] = useState(new Set());
+  const [openCard, setOpenCard] = useState(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -96,20 +126,30 @@ export default function Estimator({ open, onClose }) {
     const t = TIMELINES.find((x) => x.id === timeline);
     if (!g || !t) return;
     const scale = (n) => (n > 0 ? Math.max(1, Math.round(n * t.mult)) : 0);
-    setVideos(scale(g.mix.videos));
-    setPages(scale(g.mix.pages));
-    setUgc(scale(g.mix.ugc));
-    setVoice(g.mix.voice);
-    setSdr(g.mix.sdr);
-    setSocialMonths(g.mix.social ? t.months : 0);
-    setAff(g.mix.aff);
-    setCxOHours(Math.round(g.cxo * t.mult));
+    const mix = {
+      videos: scale(g.mix.videos),
+      pages: scale(g.mix.pages),
+      ugc: scale(g.mix.ugc),
+      voice: g.mix.voice,
+      sdr: g.mix.sdr,
+      social: g.mix.social ? t.months : 0,
+      aff: g.mix.aff,
+      cxo: Math.round(g.cxo * t.mult),
+    };
+    setVideos(mix.videos);
+    setPages(mix.pages);
+    setUgc(mix.ugc);
+    setVoice(mix.voice);
+    setSdr(mix.sdr);
+    setSocialMonths(mix.social);
+    setAff(mix.aff);
+    setCxOHours(mix.cxo);
+    setSuggested(new Set(Object.entries(mix).filter(([k, v]) => (k === "aff" ? v !== "none" : v > 0)).map(([k]) => k)));
   }, [goal, timeline]);
 
   const estimate = useMemo(() => {
-    const g = GOALS.find((x) => x.id === goal);
     const t = TIMELINES.find((x) => x.id === timeline);
-    if (!g || !t) return null;
+    if (!t) return null;
     const lines = [];
     if (videos > 0) lines.push({ label: `AI Videos · ${videos} × ${inr(PRICE.video)}`, cost: videos * PRICE.video });
     if (pages > 0) lines.push({ label: `GEO pages · ${pages * 20} pages (${pages} × ${inr(PRICE.pageBlock)})`, cost: pages * PRICE.pageBlock });
@@ -127,9 +167,112 @@ export default function Estimator({ open, onClose }) {
     market = Math.round(market * (t.mult > 1 ? 1 + (t.mult - 1) * 0.5 : 1));
     const savingsPct = total > 0 ? Math.min(75, Math.max(0, Math.round((1 - total / market) * 100))) : 0;
     return { lines, services, cxoCost, total, market, savingsPct, usage: voice > 0 || sdr > 0, weekly: Math.max(1, Math.round(cxoHours / t.weeks)) };
-  }, [goal, timeline, videos, pages, ugc, voice, sdr, socialMonths, aff, cxoHours]);
+  }, [timeline, videos, pages, ugc, voice, sdr, socialMonths, aff, cxoHours]);
 
   if (!mounted) return null;
+
+  const qtyOf = { videos, pages, ugc, voice, sdr, social: socialMonths, cxo: cxoHours };
+
+  const cardControl = (id) => {
+    switch (id) {
+      case "videos": return <Stepper value={videos} onChange={setVideos} max={500} testid="estimator-videos" />;
+      case "pages": return <Stepper value={pages} onChange={setPages} max={10} testid="estimator-pages" />;
+      case "ugc": return <Stepper value={ugc} onChange={setUgc} max={5000} step={5} testid="estimator-ugc" />;
+      case "voice": return <Stepper value={voice} onChange={setVoice} max={3} testid="estimator-voice" />;
+      case "sdr": return <Stepper value={sdr} onChange={setSdr} max={2} testid="estimator-sdr" />;
+      case "social": return <Stepper value={socialMonths} onChange={setSocialMonths} max={12} testid="estimator-social" />;
+      case "cxo": return <Stepper value={cxoHours} onChange={setCxOHours} min={0} max={400} step={5} testid="estimator-cxo" />;
+      case "aff": return (
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Affiliate tier">
+          {AFF_TIERS.map((tier) => (
+            <button
+              key={tier.id}
+              onClick={(e) => { e.stopPropagation(); setAff(tier.id); }}
+              data-testid={`estimator-aff-${tier.id}`}
+              aria-pressed={aff === tier.id}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                aff === tier.id ? "border-black bg-black text-white" : "border-neutral-200 text-neutral-600 hover:border-black/40"
+              }`}
+            >
+              {tier.label}
+            </button>
+          ))}
+        </div>
+      );
+      default: return null;
+    }
+  };
+
+  const unitLabel = { videos: "videos", pages: "blocks of 20", ugc: "creatives", voice: "agents", sdr: "motions", social: "months", cxo: "hours" };
+
+  const renderCard = (s, inScope, isAff) => {
+    const expanded = openCard === s.id;
+    const qty = isAff ? (aff !== "none" ? AFF_TIERS.find((x) => x.id === aff)?.label : null) : qtyOf[s.id];
+    return (
+      <div
+        key={s.id}
+        className={`rounded-2xl border transition-all ${
+          inScope ? "border-black bg-white shadow-sm" : "border-neutral-200 bg-white hover:border-black/30"
+        }`}
+      >
+        <button
+          onClick={() => setOpenCard(expanded ? null : s.id)}
+          data-testid={`estimator-service-${s.id}`}
+          aria-expanded={expanded}
+          className="flex w-full items-center gap-3 p-3.5 text-left"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-display text-xs font-bold text-white" style={{ background: s.color }}>
+            {s.name.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase()}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-black">
+              {s.name}
+              {suggested.has(s.id) && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand-yellow/40 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-black">
+                  <Sparkles className="h-2.5 w-2.5" /> Suggested
+                </span>
+              )}
+            </span>
+            <span className="block truncate text-xs text-neutral-400">{s.price}</span>
+          </span>
+          {inScope && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-black px-2.5 py-1 text-[10px] font-semibold text-white" data-testid={`estimator-inscope-${s.id}`}>
+              <Check className="h-3 w-3" /> {isAff ? qty : `× ${qty}`}
+            </span>
+          )}
+          <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        </button>
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-neutral-100 px-4 pb-4 pt-3">
+                <p className="text-xs leading-relaxed text-neutral-500">{s.blurb}</p>
+                <ul className="mt-2 space-y-1">
+                  {s.includes.map((inc) => (
+                    <li key={inc} className="flex items-start gap-1.5 text-xs text-neutral-600">
+                      <Check className="mt-0.5 h-3 w-3 shrink-0 text-brand-green" /> {inc}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium text-neutral-500">
+                    {isAff ? "Tier (billed for your timeline months)" : `Quantity · ${unitLabel[s.id]}`}
+                  </span>
+                  {cardControl(s.id)}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
 
   return createPortal(
     <AnimatePresence>
@@ -158,8 +301,8 @@ export default function Estimator({ open, onClose }) {
 
             <h2 className="font-display text-2xl font-semibold tracking-tight text-black">Project Estimator</h2>
             <p className="mt-2 text-sm leading-relaxed text-neutral-500">
-              Pick your goal and timeline. We suggest the scope; you adjust the quantities. Service products are
-              priced per unit, CXO leadership is billed separately by the hour.
+              Pick your goal and timeline. We suggest a scope; tap any service to see what is inside and adjust
+              quantities. CXO leadership is billed separately, by the hour.
             </p>
 
             <p className="mt-5 flex items-center gap-2 text-sm font-medium text-neutral-700">
@@ -207,56 +350,17 @@ export default function Estimator({ open, onClose }) {
               })}
             </div>
 
-            <p className="mt-6 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Service products · per-unit pricing</p>
-            <div className="mt-2 divide-y divide-neutral-100 rounded-2xl border border-neutral-200" data-testid="estimator-scope">
-              <div className="flex items-center justify-between gap-3 p-3.5">
-                <div><p className="text-sm font-medium text-black">AI Videos</p><p className="text-xs text-neutral-400">{inr(PRICE.video)} per video</p></div>
-                <Stepper value={videos} onChange={setVideos} max={500} testid="estimator-videos" />
-              </div>
-              <div className="flex items-center justify-between gap-3 p-3.5">
-                <div><p className="text-sm font-medium text-black">GEO / LLM citation pages</p><p className="text-xs text-neutral-400">{inr(PRICE.pageBlock)} per 20 pages</p></div>
-                <Stepper value={pages} onChange={setPages} max={10} testid="estimator-pages" />
-              </div>
-              <div className="flex items-center justify-between gap-3 p-3.5">
-                <div><p className="text-sm font-medium text-black">UGC ad creatives</p><p className="text-xs text-neutral-400">{inr(ugcUnit(ugc))} per creative · volume tiers at 500+</p></div>
-                <Stepper value={ugc} onChange={setUgc} max={5000} step={5} testid="estimator-ugc" />
-              </div>
-              <div className="flex items-center justify-between gap-3 p-3.5">
-                <div><p className="text-sm font-medium text-black">Voice AI agents</p><p className="text-xs text-neutral-400">{inr(PRICE.voiceSetup)} setup per agent + usage</p></div>
-                <Stepper value={voice} onChange={setVoice} max={3} testid="estimator-voice" />
-              </div>
-              <div className="flex items-center justify-between gap-3 p-3.5">
-                <div><p className="text-sm font-medium text-black">AI SDR outbound</p><p className="text-xs text-neutral-400">{inr(PRICE.sdr)} per motion + usage</p></div>
-                <Stepper value={sdr} onChange={setSdr} max={2} testid="estimator-sdr" />
-              </div>
-              <div className="flex items-center justify-between gap-3 p-3.5">
-                <div><p className="text-sm font-medium text-black">Social media</p><p className="text-xs text-neutral-400">{inr(PRICE.social)} per month</p></div>
-                <Stepper value={socialMonths} onChange={setSocialMonths} max={12} testid="estimator-social" />
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 p-3.5">
-                <div><p className="text-sm font-medium text-black">Affiliate &amp; Partners</p><p className="text-xs text-neutral-400">₹15,000 to ₹1,25,000+ per month by tier</p></div>
-                <div className="flex gap-1.5" role="group" aria-label="Affiliate tier">
-                  {AFF_TIERS.map((tier) => (
-                    <button
-                      key={tier.id}
-                      onClick={() => setAff(tier.id)}
-                      data-testid={`estimator-aff-${tier.id}`}
-                      aria-pressed={aff === tier.id}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-                        aff === tier.id ? "border-black bg-black text-white" : "border-neutral-200 text-neutral-600 hover:border-black/40"
-                      }`}
-                    >
-                      {tier.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <p className="mt-6 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Service products · tap a card to explore</p>
+            <div className="mt-2 space-y-2" data-testid="estimator-scope">
+              {SERVICES.map((s) => {
+                const inScope = s.id === "aff" ? aff !== "none" : qtyOf[s.id] > 0;
+                return renderCard(s, inScope, s.id === "aff");
+              })}
             </div>
 
             <p className="mt-5 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Fractional CXO · billed hourly only</p>
-            <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-neutral-200 p-3.5">
-              <div><p className="text-sm font-medium text-black">CXO leadership hours</p><p className="text-xs text-neutral-400">{inr(CXO_RATE)} per hour · ~{estimate.weekly} hrs/week over your timeline</p></div>
-              <Stepper value={cxoHours} onChange={setCxOHours} min={0} max={400} step={5} testid="estimator-cxo" />
+            <div className="mt-2">
+              {renderCard(CXO_CARD, cxoHours > 0, false)}
             </div>
 
             <div className="mt-6 rounded-2xl border border-black/5 bg-neutral-50/70 p-6" data-testid="estimator-result">
@@ -276,7 +380,7 @@ export default function Estimator({ open, onClose }) {
                 </div>
               )}
               <div className="mt-1.5 flex items-baseline justify-between text-sm">
-                <span className="text-neutral-500">CXO hours · {cxoHours} × {inr(CXO_RATE)}</span>
+                <span className="text-neutral-500">CXO hours · {cxoHours} × {inr(CXO_RATE)} · ~{estimate.weekly} hrs/week</span>
                 <span className="font-semibold text-black" data-testid="estimator-cxo-subtotal">{inr(estimate.cxoCost)}</span>
               </div>
               <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-black/10 pt-4">
@@ -284,7 +388,7 @@ export default function Estimator({ open, onClose }) {
                   <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">Total indicative investment</p>
                   <p className="mt-1 font-display text-3xl font-bold tracking-tight text-black" data-testid="estimator-cost">{inr(estimate.total)}</p>
                   <p className="mt-1 text-xs text-neutral-400">
-                    Agencies + tools for this goal: ≈ {inr(estimate.market)} · <span className="font-semibold text-brand-green" data-testid="estimator-savings">you save ~{estimate.savingsPct}%</span>
+                    Agencies + tools for this scope: ≈ {inr(estimate.market)} · <span className="font-semibold text-brand-green" data-testid="estimator-savings">you save ~{estimate.savingsPct}%</span>
                   </p>
                   {estimate.usage && (
                     <p className="mt-2 text-xs text-neutral-400">* Voice AI and AI SDR usage billed on actuals at ₹10/minute.</p>

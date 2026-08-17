@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, FileText, IndianRupee, Sparkles } from "lucide-react";
+import { ArrowUpRight, FileText, IndianRupee, Sparkles } from "lucide-react";
 import Footer from "@/components/Footer";
 import PayButton from "@/components/PayButton";
 
@@ -71,9 +71,6 @@ export default function CommandCenter() {
             <img src="/logo.webp" alt="High On AI logo" className="h-10 w-auto rounded-md" />
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/" data-testid="dash-back-link" className="hidden items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-black sm:inline-flex">
-              <ArrowLeft className="h-4 w-4" /> Back to site
-            </Link>
             <PayButton label="Make a payment" testid="dash-pay-button" />
             <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="dash-nav-cta" className="hidden items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg md:inline-flex">
               Book a working session <ArrowUpRight className="h-4 w-4" />
