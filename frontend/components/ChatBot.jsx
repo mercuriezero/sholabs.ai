@@ -52,6 +52,17 @@ export default function ChatBot() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
+  // Lets anywhere in the app open the concierge, optionally with a prefilled message.
+  useEffect(() => {
+    const handler = (e) => {
+      setOpen(true);
+      const prefill = e.detail?.prefill;
+      if (prefill) setInput(prefill);
+    };
+    window.addEventListener("hia:open-chat", handler);
+    return () => window.removeEventListener("hia:open-chat", handler);
+  }, []);
+
   const send = async (text) => {
     const msg = (text ?? input).trim();
     if (!msg || busy || !sessionRef.current) return;

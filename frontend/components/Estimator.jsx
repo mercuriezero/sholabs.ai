@@ -44,6 +44,8 @@ const GOALS = [
     mix: { pages: 0, videos: 20, ugc: 15, voice: 0, sdr: 0, social: true, aff: "none" } },
   { id: "launch", label: "Launch a new product", sub: "Positioning, GTM and demand in one sprint", cxo: 90,
     mix: { pages: 1, videos: 10, ugc: 8, voice: 0, sdr: 1, social: true, aff: "none" } },
+  { id: "other", label: "Other · custom goal", sub: "Tell us what you are chasing and we will scope it together", cxo: 0,
+    mix: { pages: 0, videos: 0, ugc: 0, voice: 0, sdr: 0, social: false, aff: "none" } },
 ];
 
 // What agencies + tools typically charge for the same scope (market rates researched Aug 2026).
@@ -116,6 +118,7 @@ export default function Estimator() {
   const [cxoHours, setCxOHours] = useState(60);
   const [suggested, setSuggested] = useState(new Set());
   const [openCard, setOpenCard] = useState(null);
+  const [customGoal, setCustomGoal] = useState("");
 
   // Auto-suggest quantities from goal + timeline; the visitor can adjust anything afterwards.
   useEffect(() => {
@@ -327,6 +330,32 @@ export default function Estimator() {
           </div>
         </div>
 
+        <AnimatePresence initial={false}>
+          {goal === "other" && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <textarea
+                value={customGoal}
+                onChange={(e) => setCustomGoal(e.target.value)}
+                rows={3}
+                data-testid="estimator-custom-goal-input"
+                placeholder="Describe your goal in your own words · e.g. expand into the US market, double demo bookings, launch a partner channel…"
+                aria-label="Describe your custom goal"
+                className="mt-3 w-full resize-none rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-black outline-none transition-colors placeholder:text-neutral-400 focus:border-black/50"
+              />
+              <p className="mt-2 text-xs text-neutral-400">
+                Custom scopes start with a conversation · book a working session below or ask our AI concierge, and
+                we will shape the numbers together. You can still build an indicative scope with the cards.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Service products · tap a card to explore</p>
@@ -376,15 +405,48 @@ export default function Estimator() {
                   )}
                 </div>
                 <div className="mt-5 flex flex-col items-stretch gap-3">
-                  <PayButton
-                    key={estimate.total}
-                    label="Lock this scope"
-                    testid="estimator-book-button"
-                    initialPackage={{ name: `Estimated scope · ${GOALS.find((g) => g.id === goal)?.label || "growth engine"}`, price: estimate.total }}
-                  />
-                  <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="estimator-call-link" className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-brand-blue hover:underline">
-                    Or talk it through first <ArrowUpRight className="h-3.5 w-3.5" />
-                  </a>
+                  {goal === "other" ? (
+                    <>
+                      <a
+                        href={CAL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="estimator-book-call-button"
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                      >
+                        Book a working session <ArrowUpRight className="h-4 w-4" />
+                      </a>
+                      <button
+                        onClick={() =>
+                          window.dispatchEvent(
+                            new CustomEvent("hia:open-chat", {
+                              detail: {
+                                prefill: customGoal.trim()
+                                  ? `I have a custom growth goal: ${customGoal.trim()}`
+                                  : "I have a custom growth goal that does not fit the standard options. Can you help me scope it?",
+                              },
+                            })
+                          )
+                        }
+                        data-testid="estimator-chat-button"
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:-translate-y-0.5 hover:border-black/40 hover:shadow-md"
+                      >
+                        <Sparkles className="h-4 w-4 text-brand-magenta" /> Ask our AI concierge
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <PayButton
+                        key={estimate.total}
+                        label="Lock this scope"
+                        testid="estimator-book-button"
+                        initialPackage={{ name: `Estimated scope · ${GOALS.find((g) => g.id === goal)?.label || "growth engine"}`, price: estimate.total }}
+                      />
+                      <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="estimator-call-link" className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-brand-blue hover:underline">
+                        Or talk it through first <ArrowUpRight className="h-3.5 w-3.5" />
+                      </a>
+                    </>
+                  )}
                 </div>
               </div>
             )}

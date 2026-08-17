@@ -157,6 +157,13 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Hero content (Fractional AI CXO eyebrow, "C-level growth leadership, without the C-level hire." headline, 10-20 hrs/week subcopy, working-session CTA) moved into SuccessPacks above the packs table. Testids cxo-hero/cxo-eyebrow/cxo-headline/cxo-hero-cta kept on the moved elements.
 - SuccessPacks "Project Estimator" button is now an anchor link to #estimator (modal removed, Estimator import dropped). FAQ "What does it cost?" rewritten to reference published per-unit pricing.
 - Page metadata updated to pricing focus: title "Pricing · AI Videos, GEO Pages, Voice AI & Fractional CXO at $30/hour".
+
+## Rev 26 (2026-08-17) — "Other · custom goal" path in pricing estimator
+- Added a 6th goal card "Other · custom goal" (testid estimator-goal-other): selecting it reveals a free-text textarea (estimator-custom-goal-input), zeroes all auto-suggested quantities, clears Suggested badges, and swaps the summary CTAs from "Lock this scope" (payment) to "Book a working session" (Cal.com, testid estimator-book-call-button) + "Ask our AI concierge" (testid estimator-chat-button).
+- ChatBot now listens for a global window event "hia:open-chat" (optional detail.prefill) so any surface can open the concierge with a prefilled message; the estimator prefills "I have a custom growth goal: <their text>".
+- Visitors can still build an indicative manual scope with the service cards while on the custom path.
+- Verified on preview: textarea flow, zeroed scope, CTA swap, concierge opens with the custom goal prefilled, manual steppers still price correctly (3 videos = ₹21,000).
+
 - Verified: goal+timeline changes update sticky summary live (revenue/4w = ₹17,72,800), card expansion works, anchor scrolls to top, mobile stacks cleanly, lint clean.
 
 
