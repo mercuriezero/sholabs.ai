@@ -139,6 +139,14 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - StackCalculator: users stepper removed. Per-seat competitor tools priced at a fixed 5 seats with note "High On AI never charges per user". Verified totals recompute (default stack ₹1,82,500/mo vs engine ₹1,30,000).
 - Hero background: top-left "Engine showreel" video card removed; only the "Ad creative · V3" card remains. Mobile hero re-verified, no collisions.
 
+## Rev 23 (2026-08-17) — Dual-model pricing in estimator (user-specified rates)
+- Pricing model clarified by user: service products are priced per unit; Fractional CXO is a separate engagement billed hourly only.
+- Rates now in Estimator.jsx and RESEARCH_PROMPT: AI Videos ₹7,000/video · GEO/LLM citation pages ₹80,000 per 20 · UGC creatives ₹10,000 (tiers: ₹7,000 at 500+, ₹6,000 at 5000+) · Social ₹60,000/mo · Voice AI ₹1,00,000 setup/agent + ₹10/min usage · AI SDR ₹2,00,000/motion + ₹10/min usage · Affiliate & Partners Starter ₹15-25k/mo (2% comm) / Growth ₹40-75k/mo (1.5%) / Pro ₹1.25L+/mo (1%) · CXO ₹2,600/hr separate.
+- Estimator UX: goal + timeline auto-suggest quantities (unit items scale with timeline compression, monthly items scale with duration, CXO hours scale with intensity); every quantity user-adjustable via steppers; affiliate tier pills.
+- Result panel: itemized ledger, Service products subtotal, separate CXO hours subtotal (marked billed hourly only), total indicative investment, per-line market benchmark comparison (agencies+tools rates: video ₹18k, pages ₹1.4L/block, UGC ₹20k, voice ₹2.5L, SDR ₹3L, social ₹1L/mo, CXO ₹6.5k/hr, affiliate ×1.8) with savings %. Verified: pipeline/12w ₹5,78,000 save 51%; revenue/4w ₹17,72,800 save 68%; stepper adjustments recompute live.
+- "Lock this scope" CTA prefills the total into the Razorpay payment modal (auth-gated). Usage-based footnote shown when Voice/SDR selected.
+
+
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
 - P1: Confirm pilot tier pricing (₹24,999/₹49,999/₹99,999 assumed). Auth-protect /dashboard (currently public demo data).
 - P1: Owner UI for logging hours (currently API-only, owner-gated).
