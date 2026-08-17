@@ -1,0 +1,124 @@
+{
+  "theme": "White theme only (No dark theme)",
+  "colors": {
+    "background": "#FFFFFF",
+    "surface": "#F9FAFB",
+    "surface_soft": "#F3F4F6",
+    "text_primary": "#0A0A0A",
+    "text_secondary": "#525252",
+    "border": "#E5E7EB",
+    "cta_background": "#0A0A0A",
+    "cta_text": "#FFFFFF",
+    "brand_stripes": {
+      "yellow": "#FFD900",
+      "cyan": "#2BBCC4",
+      "green": "#1FA84A",
+      "magenta": "#E200C4",
+      "red": "#ED1C24",
+      "royal_blue": "#2B39D1",
+      "orange": "#F7941E",
+      "purple": "#91268F"
+    }
+  },
+  "typography": {
+    "heading_font": "Outfit",
+    "body_font": "Inter",
+    "mono_font": "JetBrains Mono",
+    "scale": {
+      "h1": "text-5xl md:text-6xl lg:text-[72px] font-bold tracking-tighter leading-[1.1] text-[#0A0A0A]",
+      "h2": "text-4xl md:text-5xl font-semibold tracking-tight text-[#0A0A0A]",
+      "h3": "text-2xl md:text-3xl font-medium tracking-tight text-[#0A0A0A]",
+      "body": "text-lg leading-relaxed text-[#525252]",
+      "small": "text-sm font-medium tracking-wide uppercase text-[#525252]"
+    },
+    "pairing_justification": "Outfit delivers a striking, geometric display aesthetic for high-end agency branding, while Inter provides sterile, high-legibility contrast for UI components like the prompt CTA and dashboard panels."
+  },
+  "grids": {
+    "hero": "Single-column centered layout (max-w-4xl) to ensure tight typography and focus on the CTA.",
+    "portal": "Vertical stack with top-aligned tabs and a large 16:9 or 21:9 UI panel below. Center the tabs horizontally.",
+    "footer": "Standard multi-column grid for links, followed by a massive full-width container for the brand visual at the very bottom."
+  },
+  "layouts": {
+    "spacing_scale": "Use 2-3x standard spacing. Apply py-24 or py-32 for section pacing. gap-8 and gap-12 for flex components.",
+    "hero_section": "Generous vertical rhythm. Eyebrow -> H1 -> Subtitle -> Stat -> Prompt Box CTA.",
+    "portal_section": "Max-w-6xl container. Ensure enough padding so the active tinted panel feels like a premium embedded product window.",
+    "glassy_brand_footer": "Relative positioning with overflow-hidden on the footer container. The very bottom should feature the 8 brand stripes vertically, overlaid with a giant glassy text mask reading 'high on ai'."
+  },
+  "components": {
+    "nav": {
+      "description": "Sticky top navigation, backdrop-blur-xl bg-white/70, 1px bottom border border-black/5.",
+      "elements": "Logo (left), Navigation Links (center), Primary CTA (right)."
+    },
+    "hero": {
+      "description": "Gushwork-style centered hero. Bold, minimal, grid-backed.",
+      "elements": "Eyebrow ('Full-Stack H.I.A.I. Engine'), Headline, Subtitle, Stat Callout."
+    },
+    "prompt_box_cta": {
+      "description": "Clay.com style giant prompt input box.",
+      "elements": "White/Soft background box with heavy shadow-2xl, rounded-2xl. Rotating typewriter placeholder text. Quick-action chips (rounded-full). Submit button is a solid black circle with a white arrow."
+    },
+    "services_portal": {
+      "description": "Auto-cycling interactive tabbed showcase.",
+      "elements": "Pill-shaped tab bar. Cycles between 4 services: GEO leads, AI videos, Voice AI, Hire fractional CXO. Cycles every 3s. The active tab and display panel are tinted utilizing different brand colors for each state."
+    },
+    "faq": {
+      "description": "Accordion-style genuine GEO/LLM-focused FAQ.",
+      "elements": "Clean lines, 1px borders, bold question text."
+    }
+  },
+  "visual_enhancers": {
+    "grid_background": "Implement a subtle grid background in the hero: background-image with repeating linear gradients (black/5), masked with a radial-gradient to fade at the edges.",
+    "color_infusion": "Use the 8 vibrant brand colors strategically as accents (active chips, portal panel tints) against the stark white theme. Avoid muddy gradients.",
+    "glassmorphism": "For the bottom footer brand treatment, use backdrop-blur and partial opacity (bg-white/30) over the vibrant color stripes to create a premium glass effect."
+  },
+  "motion": {
+    "typewriter": "Use an interval or typing animation library for the prompt box placeholder text.",
+    "portal_cycling": "Use Framer Motion AnimatePresence to smoothly crossfade the active portal panel and slide the active tab indicator every 3 seconds.",
+    "interactions": "Micro-animations on hover: buttons elevate (-translate-y-1) and shadows intensify."
+  },
+  "seo_schema": {
+    "organization": "JSON-LD targeting QuantumAI OS Pvt Ltd and High On AI.",
+    "faq": "JSON-LD FAQPage schema wrapping the semantic accordion."
+  },
+  "media": {
+    "logo": "https://customer-assets-4nw71qhi.emergentagent.net/job_df4d2516-00a7-4efb-a317-c500996e2312/artifacts/f0m7l0j4_logo.webp",
+    "favicon": "https://customer-assets-4nw71qhi.emergentagent.net/job_df4d2516-00a7-4efb-a317-c500996e2312/artifacts/9bqbpgwr_fevicon.webp",
+    "portal_images": [
+      {
+        "category": "Futuristic UI Mock",
+        "url": "https://images.unsplash.com/photo-1720962158937-7ea890052166?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwYWklMjBpbnRlcmZhY2UlMjBkYXNoYm9hcmR8ZW58MHx8fHwxNzg2Nzc4MjkzfDA&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "AI Video Generation",
+        "url": "https://images.unsplash.com/photo-1677442135751-15e514d909f3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwyfHxhaSUyMHZpZGVvJTIwZ2VuZXJhdGlvbiUyMGFic3RyYWN0fGVufDB8fHx8MTc4Njc3ODI5M3ww&ixlib=rb-4.1.0&q=85"
+      }
+    ]
+  },
+  "accessibility": {
+    "contrast": "Maintain WCAG AA compliance. Dark text on light backgrounds. For CTA chips using brand colors, ensure text is readable (white on dark colors, black on light colors).",
+    "motion": "Respect prefers-reduced-motion for the automatic 3s cycling."
+  },
+  "3d_libraries": {
+    "framer_motion": "Required for layout transitions in the portal tabs and prompt box animations.",
+    "lucide_react": "Required for scalable UI iconography."
+  },
+  "instructions_to_main_agent": [
+    "Install 'framer-motion' and 'lucide-react'.",
+    "Ensure 'Outfit' and 'Inter' fonts are loaded via Google Fonts or standard imports.",
+    "Set up Tailwind configuration to include the 8 custom brand colors under a 'brand' object.",
+    "Construct the Hero section using a Gushwork-inspired centered aesthetic with a subtle technical grid background.",
+    "Build the Prompt Box CTA mirroring Clay.com's aesthetic: large rounded input, quick-action chips underneath, and a black arrow submit button. Incorporate a typing effect for the placeholder.",
+    "Develop the Services Portal component. Create an automated cycle (0 to 3) running every 3 seconds to switch active tabs. Sync this state to display corresponding content in the main glass-tinted UI panel below. Animate state changes smoothly.",
+    "Integrate the 8 brand stripes directly into the bottom-most footer section, overlaid by a giant, partially transparent 'high on ai' text or SVG.",
+    "Implement structured JSON-LD schemas (FAQPage and Organization) in the document head.",
+    "Ensure the final aesthetic feels premium, high-end, and starkly distinct from generic dark-mode AI templates."
+  ],
+  "universal_guidelines_for_main_agent": [
+    "Strictly adhere to a White/Light theme; dark mode is strictly forbidden.",
+    "Include 'data-testid' attributes on all interactive elements (buttons, links, inputs).",
+    "Apply 2-3x standard spacing to create a luxurious, premium layout.",
+    "Use proper semantic HTML elements (section, nav, main, footer).",
+    "Left-align standard body text for readability, reserving centered alignment for hero headings or specific focal points.",
+    "Do not use generic placeholder image services; utilize the provided Unsplash URLs or generic CSS gradients/abstract shapes tinted with brand colors."
+  ]
+}
