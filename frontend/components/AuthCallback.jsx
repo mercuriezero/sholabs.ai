@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 
-const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
 
 export default function AuthCallback() {
   const router = useRouter();

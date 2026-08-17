@@ -8,7 +8,7 @@ import PayButton from "@/components/PayButton";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/context/AuthContext";
 
-const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
 const PENDING_KEY = "hia_pending_research";
 
 const PHRASES = [

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Brain, Loader2, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
 
 export default function OwnerTools({ onLogged }) {
   const [payments, setPayments] = useState(null);

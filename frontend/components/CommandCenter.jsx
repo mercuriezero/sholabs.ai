@@ -6,7 +6,7 @@ import { ArrowUpRight, FileText, IndianRupee, Sparkles } from "lucide-react";
 import Footer from "@/components/Footer";
 import PayButton from "@/components/PayButton";
 
-const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
 const CAL = "https://cal.com/sunnyrai/30min";
 
 function timeAgo(iso) {

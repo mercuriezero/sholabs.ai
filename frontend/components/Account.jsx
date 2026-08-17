@@ -8,7 +8,7 @@ import AuthModal from "@/components/AuthModal";
 import OwnerTools from "@/components/OwnerTools";
 import Footer from "@/components/Footer";
 
-const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
 const CAL = "https://cal.com/sunnyrai/30min";
 
 export default function Account() {

@@ -6,7 +6,7 @@ import Providers from "./providers";
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-display" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-const SITE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://purples-3.preview.emergentagent.com";
+const SITE_URL = "https://sholabs-ai.emergent.host";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

@@ -111,10 +111,10 @@ user_problem_statement: >
   Emergent's deploy expects a static build/ or dist/ folder.
 
 frontend:
-  - task: "Backend URL wiring (NEXT_PUBLIC_BACKEND_URL mapping)"
+  - task: "Backend URL wiring (runtime resolution via window.location.origin)"
     implemented: true
     working: true
-    file: "frontend/next.config.mjs"
+    file: "frontend/components/ChatBot.jsx, frontend/components/PromptBox.jsx, frontend/context/AuthContext.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
@@ -125,11 +125,17 @@ frontend:
         -working: true
         -agent: "testing"
         -comment: "VERIFIED: Backend URL mapping is working correctly. All API requests go to https://sholabs-ai.preview.emergentagent.com/api/... NO 'undefined/api' URLs detected. Tested: /api/auth/me, /api/chat/stream endpoints. The NEXT_PUBLIC_BACKEND_URL fix is successful."
+        -working: true
+        -agent: "main"
+        -comment: "PRODUCTION BLANK-PAGE FIX: Root cause was non-deterministic chunk hashes. The backend URL was baked into the client bundle at build time via next.config env, so Emergent's two frontend build steps produced different chunk hashes; the served HTML referenced chunks the asset server didn't have, returning HTML for .js requests (MIME error) -> no hydration -> blank pages. Fix: removed all build-time process.env usage; API base is now resolved at runtime via window.location.origin + '/api' in ChatBot.jsx, PromptBox.jsx, and AuthContext.jsx. Verified two local builds now produce IDENTICAL chunk hashes. Needs re-verification on preview."
+        -working: true
+        -agent: "testing"
+        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: The runtime resolution fix is working perfectly! All API requests correctly go to https://sholabs-ai.preview.emergentagent.com/api/... with NO 'undefined/api' URLs detected. Tested 4 API requests: POST /api/chat/stream, GET /api/auth/me (3x). NO MIME type errors detected. NO 'Refused to execute script' errors. JS chunks loading correctly. The fix successfully resolves the blank page issue."
 
   - task: "Homepage / landing renders correctly"
     implemented: true
     working: true
-    file: "frontend/app/page.js"
+    file: "frontend/app/page.js, frontend/components/Landing.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
@@ -140,6 +146,9 @@ frontend:
         -working: true
         -agent: "testing"
         -comment: "VERIFIED: Homepage loads and renders correctly. Hero headline 'Human intelligence + AI for marketing, sales & growth.' is visible. Navigation links (Services, Pricing, Command Center, Help, 'Book a growth call') all render correctly. No fatal console errors blocking interaction."
+        -working: true
+        -agent: "testing"
+        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: Homepage loads and renders correctly. Hero headline 'Human intelligence + AI for marketing, sales & growth.' is VISIBLE (confirmed via screenshots). All navigation links render correctly: Services, Pricing, Command Center, Help, 'Book a growth call'. No fatal console errors. No MIME type errors. Page is fully functional and not blank."
 
   - task: "AI concierge chat + hero prompt submission (LLM via EMERGENT_LLM_KEY)"
     implemented: true
@@ -155,6 +164,9 @@ frontend:
         -working: true
         -agent: "testing"
         -comment: "VERIFIED: AI Concierge chat works perfectly. Chat opens, accepts messages, calls https://sholabs-ai.preview.emergentagent.com/api/chat/stream, and returns AI-generated responses. Hero prompt box correctly shows auth modal for non-authenticated users (expected behavior). Both components use correct backend URL."
+        -working: true
+        -agent: "testing"
+        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: AI Concierge chat works perfectly. Chat launcher opens, accepts message 'What does High On AI do?', sends POST request to https://sholabs-ai.preview.emergentagent.com/api/chat/stream (SAME ORIGIN), and receives AI-generated streaming response (688 chars). The runtime resolution (window.location.origin + '/api') is working correctly. No 'undefined/api' errors."
 
   - task: "Fractional CXO pricing estimator page"
     implemented: true
@@ -170,6 +182,21 @@ frontend:
         -working: true
         -agent: "testing"
         -comment: "VERIFIED: Fractional CXO page loads correctly. Pricing estimator works perfectly - goal selection updates scope, service card expansion works, quantity steppers (+/-) update totals in real-time. Tested: changed goal from '₹10L revenue pipeline' (₹5,78,000) to 'Get cited by AI' (₹4,80,000), increased video quantity, final estimate updated to ₹4,94,000. Savings percentage displays correctly (~51%)."
+        -working: true
+        -agent: "testing"
+        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: Fractional CXO page loads correctly at /fractional-cxo. Page heading 'Build your growth engine, priced like a product.' is visible. Found 27 pricing elements (₹ symbols), 16 goal-related elements. Goal cards visible: 'Get cited by AI', '₹10L revenue pipeline', '₹1Cr revenue run-rate', etc. Timeline selector works (4 weeks, 8 weeks, 12 weeks, 6 months). Service products display with pricing: AI Videos (₹7,000/video), GEO/LLM citation pages (₹80,000/20 pages), UGC ad creatives. Live estimate showing ₹42,200 total with breakdown. Page renders and functions correctly."
+
+  - task: "Command Center navigation"
+    implemented: true
+    working: true
+    file: "frontend/app/dashboard/page.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "VERIFIED AFTER RUNTIME RESOLUTION FIX: Command Center navigation works correctly. Clicking 'Command Center' link navigates successfully. Page loads with heading 'One dashboard. Every signal. Live.' and displays dashboard content with three pillars: Get Cited (38% AI citation rate), Get Watched (64.2k views this week), Get Chosen ($184k pipeline generated). Live signal feed shows recent activity. Navigation and page rendering work correctly."
 
 backend:
   - task: "Health check endpoint for Kubernetes probe (GET /health)"
@@ -202,14 +229,12 @@ backend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Backend URL wiring (NEXT_PUBLIC_BACKEND_URL mapping)"
-    - "Homepage / landing renders correctly"
-    - "AI concierge chat + hero prompt submission (LLM via EMERGENT_LLM_KEY)"
+    - "Runtime resolution verification complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -217,13 +242,19 @@ test_plan:
 agent_communication:
     -agent: "main"
     -message: >
-      Fixed two issues after restoring the app from GitHub: mapped the backend URL
-      to NEXT_PUBLIC_BACKEND_URL (was undefined) and switched the build to static
-      export into build/. Please verify the PREVIEW frontend: homepage renders, nav
-      works, and API-driven flows connect to the backend (hero prompt submit, AI
-      concierge chat, and the fractional-cxo pricing estimator). Note: Razorpay
-      payment completion and email alerts require the owner's live keys and are
-      out of scope for this verification.
+      PRODUCTION BLANK-PAGE FIX: Root cause was non-deterministic chunk hashes.
+      The backend URL was baked into the client bundle at build time via
+      next.config env, so Emergent's two frontend build steps produced different
+      chunk hashes; the served HTML referenced chunks the asset server didn't have,
+      returning HTML for .js requests (MIME error) -> no hydration -> blank pages
+      (homepage hero starts at opacity:0 and needs JS to appear).
+      Fix: removed all build-time process.env usage; API base is now resolved at
+      runtime via window.location.origin + '/api' (works on preview and production
+      since /api routes to the backend on the same domain). Verified two local
+      builds now produce IDENTICAL chunk hashes and all HTML-referenced chunks exist.
+      Please re-verify the PREVIEW frontend: homepage renders with visible hero,
+      nav works, AI concierge chat returns responses, and the fractional-cxo
+      estimator updates totals. Confirm API calls hit the correct same-origin /api.
     -agent: "testing"
     -message: >
       TESTING COMPLETE - ALL FLOWS VERIFIED WORKING. The NEXT_PUBLIC_BACKEND_URL mapping fix is successful. 
@@ -239,3 +270,22 @@ agent_communication:
       WORKING: /api/health (200 OK), /api/ (200 OK), localhost:8001/health (200 OK internal test).
       NOT WORKING: https://sholabs-ai.preview.emergentagent.com/health (404 from Next.js frontend).
       SOLUTION: Either (1) update Kubernetes ingress to route /health to backend, OR (2) configure health probe to use /api/health instead.
+    -agent: "testing"
+    -message: >
+      RUNTIME RESOLUTION FIX VERIFICATION COMPLETE - ALL TESTS PASSED! The runtime resolution fix (window.location.origin + '/api') is working perfectly on the preview site (https://sholabs-ai.preview.emergentagent.com).
+      
+      VERIFIED WORKING:
+      1. ✅ Homepage loads with VISIBLE hero headline "Human intelligence + AI for marketing, sales & growth." (confirmed via screenshots)
+      2. ✅ All navigation links render correctly: Services, Pricing, Command Center, Help, Book a growth call
+      3. ✅ AI Concierge chat opens, sends messages, and receives AI-generated streaming responses
+      4. ✅ Pricing page (/fractional-cxo) loads with full estimator, goal cards, timeline selector, service products, and live pricing
+      5. ✅ Command Center navigation works, displays dashboard with "One dashboard. Every signal. Live."
+      
+      CRITICAL SUCCESS - API REQUESTS:
+      ✅ ALL 4 API requests go to SAME ORIGIN: https://sholabs-ai.preview.emergentagent.com/api/...
+      ✅ NO "undefined/api" requests detected
+      ✅ NO MIME type errors (no "Refused to execute script" errors)
+      ✅ JS chunks loading correctly
+      ✅ No fatal console errors blocking functionality
+      
+      The blank page issue is RESOLVED. The runtime resolution fix successfully prevents non-deterministic chunk hashes and ensures API calls always go to the correct same-origin endpoint. The preview site is fully functional.

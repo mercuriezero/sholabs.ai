@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 
-const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
 
 const SUGGESTIONS = [
   "What exactly does High On AI do?",
