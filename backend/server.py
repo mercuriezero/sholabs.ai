@@ -373,6 +373,16 @@ async def root():
     return {"message": "High On AI API"}
 
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
+@api_router.get("/health")
+async def api_health():
+    return {"status": "ok"}
+
+
 @api_router.post("/leads", response_model=Lead)
 async def create_lead(input: LeadCreate):
     lead = Lead(prompt=input.prompt.strip(), source=input.source)

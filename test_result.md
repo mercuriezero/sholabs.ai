@@ -172,6 +172,21 @@ frontend:
         -comment: "VERIFIED: Fractional CXO page loads correctly. Pricing estimator works perfectly - goal selection updates scope, service card expansion works, quantity steppers (+/-) update totals in real-time. Tested: changed goal from '₹10L revenue pipeline' (₹5,78,000) to 'Get cited by AI' (₹4,80,000), increased video quantity, final estimate updated to ₹4,94,000. Savings percentage displays correctly (~51%)."
 
 backend:
+  - task: "Health check endpoint for Kubernetes probe (GET /health)"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Production deploy health probe was hitting GET /health and getting 404 (all routes were under /api). Added app-level @app.get('/health') and @api_router.get('/health') returning {status: ok} with no DB dependency. Verify GET /health returns 200 and does not require /api prefix, and that /api/health also returns 200."
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL ISSUE: The @app.get('/health') endpoint exists in FastAPI and works correctly when tested directly (localhost:8001/health returns 200 with {status: ok}), BUT it is unreachable from the external URL (https://sholabs-ai.preview.emergentagent.com/health returns 404). Root cause: Kubernetes ingress routes /health to the Next.js frontend instead of the backend. The ingress only routes /api/* to the backend. VERIFIED WORKING: (1) GET /api/health returns 200 with {status: ok}, (2) GET /api/ returns 200 with {message: High On AI API}, (3) Internal GET localhost:8001/health returns 200 with {status: ok}. SOLUTION NEEDED: Update Kubernetes ingress configuration to route /health to the backend service, OR configure the health probe to use /api/health instead of /health."
+
   - task: "Backend boots with restored env (JWT_SECRET, EMERGENT_LLM_KEY)"
     implemented: true
     working: true
@@ -217,3 +232,10 @@ agent_communication:
       and receives AI responses via /api/chat/stream, (3) Hero prompt box correctly shows auth modal for non-authenticated users, 
       (4) Fractional CXO page loads, (5) Pricing estimator updates totals correctly when goals/quantities change. 
       The 401 errors on /api/auth/me are expected for non-authenticated users. All core functionality is working as designed.
+    -agent: "testing"
+    -message: >
+      HEALTH CHECK ENDPOINT TESTING COMPLETE. CRITICAL FINDING: The root-level /health endpoint is NOT accessible externally due to Kubernetes ingress routing. 
+      The FastAPI code is correct (@app.get('/health') exists and works on localhost:8001/health), but the ingress routes /health to the frontend instead of the backend.
+      WORKING: /api/health (200 OK), /api/ (200 OK), localhost:8001/health (200 OK internal test).
+      NOT WORKING: https://sholabs-ai.preview.emergentagent.com/health (404 from Next.js frontend).
+      SOLUTION: Either (1) update Kubernetes ingress to route /health to backend, OR (2) configure health probe to use /api/health instead.
