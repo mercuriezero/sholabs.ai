@@ -131,6 +131,14 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 
 ## Backlog
 - P0: (done) Cal.com booking link wired.
+
+## Rev 22 (2026-08-17) — Gated 360 research agent + goal/timeline pricing
+- Hero prompt rework: submitting the hero prompt box no longer streams a public instant plan. Visitors must log in or sign up first (AuthModal opens, brief stashed in sessionStorage and auto-resumed after login, including the Google OAuth redirect roundtrip). Then the new 360 research agent runs.
+- New agent: POST /api/research/stream (auth-gated via get_current_user, replaces /api/plan/stream which is deleted). RESEARCH_PROMPT ground truth includes all 7 service motions + pack/pilot pricing. Output structure: opening opportunity line, '## 360 Snapshot' (market, audience, competitive frame, biggest gap), '## Your Aggressive 90-Day Plan' ('### Days 1-15/16-45/46-90', 3 quick actionables each naming the High On AI service), '## Recommended Engine' (best-fit pack/pilot + add-on). Saves lead (with user email) and plan (with user_id) so dashboard feed keeps working. Verified e2e: 401 logged out; full tailored stream after UI login on the preview URL.
+- Estimator reworked: company-size/employees input removed. New inputs: goal (5 cards: Get cited by AI / ₹10L pipeline / ₹1Cr run-rate / 1M+ reach / product launch, each with base hours + market benchmark at 12-week pace) and timeline (4w 1.9x / 8w 1.4x / 12w 1x / 6m 0.8x). Faster timeline = more investment. Output adds weekly intensity. Verified: ₹1Cr goal = ₹5,92,800 at 4 weeks vs ₹2,49,600 at 6 months.
+- StackCalculator: users stepper removed. Per-seat competitor tools priced at a fixed 5 seats with note "High On AI never charges per user". Verified totals recompute (default stack ₹1,82,500/mo vs engine ₹1,30,000).
+- Hero background: top-left "Engine showreel" video card removed; only the "Ad creative · V3" card remains. Mobile hero re-verified, no collisions.
+
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
 - P1: Confirm pilot tier pricing (₹24,999/₹49,999/₹99,999 assumed). Auth-protect /dashboard (currently public demo data).
 - P1: Owner UI for logging hours (currently API-only, owner-gated).

@@ -2,11 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Loader2, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import PayButton from "@/components/PayButton";
+import AuthModal from "@/components/AuthModal";
+import { useAuth } from "@/context/AuthContext";
 
 const API = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+const PENDING_KEY = "hia_pending_research";
 
 const PHRASES = [
   "Get my brand cited by ChatGPT, Gemini & Perplexity…",
@@ -89,7 +92,14 @@ function PlanBody({ text }) {
   };
   text.split("\n").forEach((raw) => {
     const line = raw.trim();
-    if (line.startsWith("#")) {
+    if (line.startsWith("###")) {
+      flush();
+      blocks.push(
+        <h5 key={`h-${blocks.length}`} className="pt-2 font-display text-sm font-semibold tracking-tight text-brand-blue">
+          {renderInline(line.replace(/^#+\s*/, ""))}
+        </h5>
+      );
+    } else if (line.startsWith("#")) {
       flush();
       blocks.push(
         <h4 key={`h-${blocks.length}`} className="pt-3 font-display text-base font-semibold tracking-tight text-black">
@@ -114,26 +124,33 @@ function PlanBody({ text }) {
 }
 
 export default function PromptBox() {
+  const { user } = useAuth();
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [phase, setPhase] = useState("idle"); // idle | loading | streaming | done
   const [plan, setPlan] = useState("");
+  const [authOpen, setAuthOpen] = useState(false);
   const inputRef = useRef(null);
   const busy = phase === "loading" || phase === "streaming";
   const showGhost = value === "" && !focused && phase === "idle";
   const ghost = useTypewriter(showGhost);
 
-  const submit = async (promptText) => {
-    const prompt = (promptText ?? value).trim() || ghost.trim() || PHRASES[0];
-    if (busy) return;
+  const run = async (prompt) => {
     setPhase("loading");
     setPlan("");
     try {
-      const res = await fetch(`${API}/plan/stream`, {
+      const res = await fetch(`${API}/research/stream`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, source: "hero_prompt" }),
       });
+      if (res.status === 401) {
+        sessionStorage.setItem(PENDING_KEY, prompt);
+        setPhase("idle");
+        setAuthOpen(true);
+        return;
+      }
       if (!res.ok || !res.body) throw new Error("request failed");
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -156,9 +173,31 @@ export default function PromptBox() {
       setPhase("done");
     } catch {
       setPhase("idle");
-      toast.error("Couldn't generate your plan. Please try again.");
+      toast.error("Couldn't run your research. Please try again.");
     }
   };
+
+  const submit = (promptText) => {
+    const prompt = (promptText ?? value).trim() || ghost.trim() || PHRASES[0];
+    if (busy) return;
+    if (!user) {
+      sessionStorage.setItem(PENDING_KEY, prompt);
+      setAuthOpen(true);
+      return;
+    }
+    run(prompt);
+  };
+
+  // Resume a stashed brief after login, including the Google OAuth redirect roundtrip.
+  useEffect(() => {
+    if (!user) return;
+    const pending = sessionStorage.getItem(PENDING_KEY);
+    if (pending) {
+      sessionStorage.removeItem(PENDING_KEY);
+      run(pending);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return (
     <div id="hero-cta" data-testid="prompt-box" className="w-full scroll-mt-28">
@@ -210,7 +249,7 @@ export default function PromptBox() {
               onClick={() => submit()}
               disabled={busy}
               data-testid="prompt-submit-button"
-              aria-label="Generate my instant plan"
+              aria-label="Generate my 360 research snapshot"
               className="ml-auto flex h-11 w-11 items-center justify-center rounded-full bg-black text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60"
             >
               {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
@@ -218,9 +257,22 @@ export default function PromptBox() {
           </div>
         </div>
       </div>
-      <p className="mt-4 text-xs font-medium text-neutral-500 md:text-sm" data-testid="prompt-hint">
-        No pitch deck. A 20-minute working session and a written 90-day plan.
+      <p className="mt-4 flex items-center justify-center gap-1.5 text-xs font-medium text-neutral-500 md:text-sm" data-testid="prompt-hint">
+        <Lock className="h-3.5 w-3.5" />
+        Free 360° research snapshot with an aggressive 90-day plan · sign in to generate yours.
       </p>
+
+      <AuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        onSuccess={() => {
+          const pending = sessionStorage.getItem(PENDING_KEY);
+          if (pending) {
+            sessionStorage.removeItem(PENDING_KEY);
+            run(pending);
+          }
+        }}
+      />
 
       <AnimatePresence>
         {phase !== "idle" && (
@@ -235,7 +287,7 @@ export default function PromptBox() {
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
                 <Sparkles className="h-4 w-4 text-brand-magenta" />
-                Your instant plan
+                Your 360° growth snapshot
               </div>
               {phase === "done" ? (
                 <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-medium uppercase tracking-widest text-brand-green">
@@ -243,14 +295,14 @@ export default function PromptBox() {
                 </span>
               ) : (
                 <span className="rounded-full bg-brand-blue/10 px-3 py-1 text-[10px] font-medium uppercase tracking-widest text-brand-blue">
-                  Generating
+                  Researching
                 </span>
               )}
             </div>
             <div className="mt-5" data-testid="plan-text">
               {phase === "loading" ? (
                 <p className="flex items-center gap-2 text-sm text-neutral-500">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Auditing your brand across AI, search &amp; video…
+                  <Loader2 className="h-4 w-4 animate-spin" /> Running a 360° read on your market, audience and channels…
                 </p>
               ) : (
                 <div className={busy ? "type-caret" : ""}>
@@ -275,7 +327,7 @@ export default function PromptBox() {
                   Build this with us <ArrowUpRight className="h-4 w-4" />
                 </a>
                 <PayButton label="Choose your pilot" testid="plan-pay-button" context="pilot" />
-                <p className="text-xs text-neutral-400">Brief saved · our team has it too.</p>
+                <p className="text-xs text-neutral-400">Saved to your account · our team has it too.</p>
               </motion.div>
             )}
           </motion.div>

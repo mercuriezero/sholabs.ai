@@ -67,6 +67,7 @@ class Plan(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     lead_id: str = ""
+    user_id: str = ""
     prompt: str
     url: str = ""
     plan: str
@@ -331,17 +332,31 @@ async def send_receipt(*, to: str, name: str, amount_paise: int, package_name: s
         logger.exception("Receipt email failed")
 
 
-# ---------- Instant plan agent ----------
+# ---------- 360 research agent ----------
 URL_RE = re.compile(r"(https?://[^\s]+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s]*)?)", re.I)
 EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 
-SYSTEM_PROMPT = """You are the High On AI strategy engine · a senior growth strategist for an AI-powered marketing agency.
-Given a visitor's website and/or growth goal, produce an instant, concise growth plan.
-Rules:
-- Plain text with markdown formatting only: '## ' section headings and '- ' bullets. No tables, no code blocks, no links.
-- Structure: one short opening line naming the single biggest opportunity. Then '## Get Cited (GEO)', '## Get Watched (AI Video)', '## Get Chosen (Outbound & Voice)' · each with 3 sharp, specific bullet actions. Then '## First 2 Weeks' with 2-3 bullets.
+RESEARCH_PROMPT = """You are the High On AI 360 research agent · a senior growth strategist at an AI-powered marketing agency.
+A logged-in client gives you their website and/or growth goal. Do an end-to-end marketing read and deliver a one-page snapshot plus an aggressive 90-day plan.
+
+High On AI services and pricing (weave the right ones into the plan by name):
+- LLM Revenue (GEO): get the brand cited by ChatGPT, Gemini and Perplexity.
+- AI Videos: a weekly AI-produced video engine, scripted, generated and repurposed.
+- Voice AI + AI SDR: agents that qualify leads and book meetings.
+- Social Media, UGC Ads, Affiliate and Partners motions.
+- Fractional AI CXO leadership at flat $30/hour (about ₹2,600/hour).
+- Success packs: Trial 4h ₹10,400 · Starter 25h ₹65,000 · Momentum 50h ₹1,30,000 · Scale 100h ₹2,60,000.
+- Pilot tiers: Pilot Sprint ₹24,999 · Growth Pilot ₹49,999 · Full Engine Pilot ₹99,999.
+
+Output rules:
+- Plain text with markdown formatting only: '## ' section headings, '### ' phase headings and '- ' bullets. No tables, no code blocks, no links.
+- Structure exactly:
+  1. One short opening line naming the single biggest opportunity you found.
+  2. '## 360 Snapshot' with 4 bullets: market and category read, audience, competitive frame, biggest gap.
+  3. '## Your Aggressive 90-Day Plan' with three phases: '### Days 1-15', '### Days 16-45', '### Days 46-90' · each with 3 quick actionables that name the High On AI service doing the work.
+  4. '## Recommended Engine' with 2 bullets: the single best-fit pack or pilot (name and price) and why it fits, plus one add-on service.
 - Tailor everything to the website content and goal provided. If no website content is available, infer from the brief and stay concrete.
-- Total under 300 words. Confident, direct, benefit-driven. No filler, no disclaimers, no questions."""
+- Total under 420 words. Confident, direct, aggressive but credible. No filler, no disclaimers, no questions."""
 
 
 async def fetch_site_text(url: str) -> str:
@@ -382,10 +397,11 @@ async def get_leads():
     return leads
 
 
-@api_router.post("/plan/stream")
-async def plan_stream(input: LeadCreate):
+@api_router.post("/research/stream")
+async def research_stream(input: LeadCreate, request: Request):
+    user = await get_current_user(request)
     prompt = input.prompt.strip()
-    lead = Lead(prompt=prompt, source=input.source)
+    lead = Lead(prompt=prompt, email=user.get("email", ""), source=input.source)
     doc = lead.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.leads.insert_one(doc)
@@ -403,27 +419,27 @@ async def plan_stream(input: LeadCreate):
         try:
             chat = LlmChat(
                 api_key=os.environ["EMERGENT_LLM_KEY"],
-                session_id=f"plan-{lead.id}",
-                system_message=SYSTEM_PROMPT,
+                session_id=f"research-{lead.id}",
+                system_message=RESEARCH_PROMPT,
             ).with_model("openai", "gpt-5.4")
-            user_text = f"Growth brief: {prompt}\n"
+            user_text = f"Growth brief from {user.get('name') or 'the client'} ({user.get('email', '')}): {prompt}\n"
             if site_text:
                 user_text += f"\nWebsite ({site_url}) content excerpt:\n{site_text}\n"
-            user_text += "\nWrite the instant plan now."
+            user_text += "\nDeliver the 360 snapshot and the aggressive 90-day plan now."
             async for ev in chat.stream_message(UserMessage(text=user_text)):
                 if isinstance(ev, TextDelta):
                     collected.append(ev.content)
                     yield f"data: {json.dumps({'token': ev.content})}\n\n"
                 elif isinstance(ev, StreamDone):
                     break
-            plan = Plan(lead_id=lead.id, prompt=prompt, url=site_url, plan="".join(collected))
+            plan = Plan(lead_id=lead.id, user_id=user.get("user_id", ""), prompt=prompt, url=site_url, plan="".join(collected))
             pdoc = plan.model_dump()
             pdoc['created_at'] = pdoc['created_at'].isoformat()
             await db.plans.insert_one(pdoc)
             yield f"data: {json.dumps({'done': True, 'plan_id': plan.id})}\n\n"
         except Exception:
-            logger.exception("Plan generation failed")
-            yield f"data: {json.dumps({'error': 'Plan generation failed. Please try again.'})}\n\n"
+            logger.exception("Research generation failed")
+            yield f"data: {json.dumps({'error': 'Research failed. Please try again.'})}\n\n"
 
     return StreamingResponse(
         gen(),

@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Minus, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 
 const BRAND = ["#F7941E", "#2BBCC4", "#1FA84A", "#E200C4", "#2B39D1", "#91268F", "#ED1C24", "#FFD900"];
 
 // Published 2026 list prices (researched Aug 2026), INR at ~₹87/USD. per: "user" = ₹/user/month, "flat" = ₹/month.
+// Per-seat tools are priced at SEATS seats for a like-for-like team comparison.
+const SEATS = 5;
 const TOOLS = [
   { name: "Profound", cat: "AI visibility", price: 35000, per: "flat" },
   { name: "Peec AI", cat: "AI visibility", price: 19000, per: "flat" },
@@ -34,7 +36,6 @@ const inr = (n) => `₹${Math.round(n).toLocaleString("en-IN")}`;
 
 export default function StackCalculator() {
   const [selected, setSelected] = useState(DEFAULT_SELECTED);
-  const [users, setUsers] = useState(10);
 
   const toggle = (name) =>
     setSelected((prev) => (prev.includes(name) ? prev.filter((x) => x !== name) : [...prev, name]));
@@ -43,10 +44,10 @@ export default function StackCalculator() {
     const chosen = TOOLS.filter((t) => selected.includes(t.name));
     const lines = chosen.map((t) => ({
       ...t,
-      cost: t.per === "user" ? t.price * users : t.price,
+      cost: t.per === "user" ? t.price * SEATS : t.price,
     }));
     return { lines, monthly: lines.reduce((s, l) => s + l.cost, 0) };
-  }, [selected, users]);
+  }, [selected]);
 
   const monthlySavings = Math.max(0, monthly - ENGINE_MONTHLY);
   const savings = monthlySavings * 12;
@@ -93,41 +94,16 @@ export default function StackCalculator() {
               );
             })}
           </div>
-
-          <p className="mt-8 font-display text-lg font-semibold text-black">How many users?</p>
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              onClick={() => setUsers((u) => Math.max(1, u - 1))}
-              data-testid="users-minus"
-              aria-label="Fewer users"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-200 transition-colors hover:border-black/40"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <input
-              type="number"
-              min="1"
-              max="500"
-              value={users}
-              onChange={(e) => setUsers(Math.max(1, Math.min(500, parseInt(e.target.value, 10) || 1)))}
-              data-testid="users-input"
-              className="h-10 w-20 rounded-xl border border-neutral-200 text-center text-sm font-semibold outline-none focus:border-black/40"
-            />
-            <button
-              onClick={() => setUsers((u) => Math.min(500, u + 1))}
-              data-testid="users-plus"
-              aria-label="More users"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-200 transition-colors hover:border-black/40"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+          <p className="mt-6 text-xs text-neutral-400">
+            Per-seat tools priced at {SEATS} seats for a like-for-like comparison. High On AI never charges per
+            user: one flat $30/hour, your whole team included.
+          </p>
         </div>
 
         <div>
           <p className="font-display text-lg font-semibold text-black">
             Tools to replace{" "}
-            <span className="block text-xs font-normal text-neutral-400">for {users} users · per month</span>
+            <span className="block text-xs font-normal text-neutral-400">per month · list prices</span>
           </p>
           {lines.length === 0 ? (
             <p className="mt-4 text-sm text-neutral-400" data-testid="stack-empty">
@@ -141,7 +117,7 @@ export default function StackCalculator() {
                     <span className="text-neutral-600">{l.name}</span>
                     <span className="flex-1 border-b border-dotted border-neutral-300" aria-hidden="true" />
                     <span className="font-medium text-black">
-                      {l.per === "user" ? `${inr(l.price)} / user` : inr(l.cost)}
+                      {l.per === "user" ? `${inr(l.cost)} · ${SEATS} seats` : inr(l.cost)}
                     </span>
                   </li>
                 ))}

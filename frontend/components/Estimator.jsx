@@ -3,48 +3,49 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Check, X } from "lucide-react";
+import { ArrowUpRight, Target, Timer, X } from "lucide-react";
 import PayButton from "@/components/PayButton";
 import { CXO_PACKS } from "@/components/SuccessPacks";
 
 const CAL = "https://cal.com/sunnyrai/30min";
 const RATE = 2600; // flat $30/hour, charged in INR
 
-const NEEDS = [
-  { id: "geo", label: "AI visibility (GEO)", sub: "Get cited by ChatGPT, Gemini and Perplexity", hours: 20, market: 220000 },
-  { id: "video", label: "AI video engine", sub: "Weekly videos, scripted, generated, repurposed", hours: 15, market: 160000 },
-  { id: "voice", label: "Outbound + Voice AI", sub: "Agents that qualify leads and book meetings", hours: 15, market: 130000 },
-  { id: "cxo", label: "Fractional CXO leadership", sub: "Strategy, weekly cadence, team ownership", hours: 25, market: 260000 },
-  { id: "revops", label: "Live dashboard + RevOps", sub: "One command center for every signal", hours: 8, market: 100000 },
+// Effort scoped for a standard 12-week pace. market = what agencies + tools charge for the same outcome.
+const GOALS = [
+  { id: "geo", label: "Get cited by AI", sub: "Show up inside ChatGPT, Gemini and Perplexity answers", hours: 40, market: 220000 },
+  { id: "pipeline", label: "₹10L revenue pipeline", sub: "Qualified meetings and demand, fast", hours: 60, market: 420000 },
+  { id: "revenue", label: "₹1Cr revenue run-rate", sub: "A full growth engine that compounds", hours: 120, market: 900000 },
+  { id: "reach", label: "Brand reach · 1M+ impressions", sub: "Video-first awareness at scale", hours: 50, market: 350000 },
+  { id: "launch", label: "Launch a new product", sub: "Positioning, GTM and demand in one sprint", hours: 90, market: 600000 },
 ];
 
-function sizeMultiplier(size) {
-  if (size <= 10) return 1;
-  if (size <= 50) return 1.2;
-  if (size <= 200) return 1.4;
-  return 1.6;
-}
+// Compressing the timeline means parallel workstreams and senior hours up front, so investment rises.
+const TIMELINES = [
+  { id: "4w", label: "4 weeks", weeks: 4, mult: 1.9 },
+  { id: "8w", label: "8 weeks", weeks: 8, mult: 1.4 },
+  { id: "12w", label: "12 weeks", weeks: 12, mult: 1 },
+  { id: "6m", label: "6 months", weeks: 26, mult: 0.8 },
+];
 
 export default function Estimator({ open, onClose }) {
-  const [size, setSize] = useState("10");
-  const [selected, setSelected] = useState(["geo", "cxo"]);
+  const [goal, setGoal] = useState("pipeline");
+  const [timeline, setTimeline] = useState("12w");
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const estimate = useMemo(() => {
-    const chosen = NEEDS.filter((n) => selected.includes(n.id));
-    const base = chosen.reduce((s, n) => s + n.hours, 0);
-    if (!base) return null;
-    const hours = Math.ceil(base * sizeMultiplier(parseInt(size, 10) || 1));
+    const g = GOALS.find((x) => x.id === goal);
+    const t = TIMELINES.find((x) => x.id === timeline);
+    if (!g || !t) return null;
+    const hours = Math.ceil(g.hours * t.mult);
     const cost = hours * RATE;
-    const market = chosen.reduce((s, n) => s + n.market, 0);
+    const weekly = Math.max(1, Math.round(hours / t.weeks));
+    const market = Math.round(g.market * (t.mult > 1 ? 1 + (t.mult - 1) * 0.5 : 1));
     const savingsPct = Math.min(75, Math.max(0, Math.round((1 - cost / market) * 100)));
-    const pack = CXO_PACKS.find((p) => p.hours >= hours) || CXO_PACKS[CXO_PACKS.length - 1];
-    return { hours, cost, market, savingsPct, pack };
-  }, [size, selected]);
-
-  const toggle = (id) =>
-    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    const biggest = CXO_PACKS[CXO_PACKS.length - 1];
+    const pack = CXO_PACKS.find((p) => p.hours >= hours) || biggest;
+    return { hours, cost, weekly, market, savingsPct, pack, custom: hours > biggest.hours, weeks: t.weeks };
+  }, [goal, timeline]);
 
   if (!mounted) return null;
 
@@ -75,62 +76,68 @@ export default function Estimator({ open, onClose }) {
 
             <h2 className="font-display text-2xl font-semibold tracking-tight text-black">Project Estimator</h2>
             <p className="mt-2 text-sm leading-relaxed text-neutral-500">
-              A strong engagement needs strategy, execution and reporting scoped to your stage. Tell us what you
-              need and we estimate the hours, the investment, and the success pack that fits.
+              Tell us the goal you are chasing and how fast you want it. The tighter the timeline, the more
+              parallel workstreams we run, and the higher the investment.
             </p>
 
-            <div className="mt-6 flex items-center gap-3 text-sm">
-              <label htmlFor="company-size" className="font-medium text-neutral-700">Your company size</label>
-              <input
-                id="company-size"
-                type="number"
-                min="1"
-                value={size}
-                onChange={(e) => setSize(e.target.value)}
-                data-testid="estimator-size-input"
-                className="w-20 rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-sm outline-none focus:border-black/40"
-              />
-              <span className="text-neutral-500">employees</span>
-            </div>
-
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              {NEEDS.map((n) => {
-                const on = selected.includes(n.id);
+            <p className="mt-6 flex items-center gap-2 text-sm font-medium text-neutral-700">
+              <Target className="h-4 w-4 text-brand-magenta" /> Your goal
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {GOALS.map((g) => {
+                const on = goal === g.id;
                 return (
                   <button
-                    key={n.id}
-                    onClick={() => toggle(n.id)}
-                    data-testid={`estimator-need-${n.id}`}
+                    key={g.id}
+                    onClick={() => setGoal(g.id)}
+                    data-testid={`estimator-goal-${g.id}`}
                     aria-pressed={on}
-                    className={`flex items-start gap-3 rounded-2xl border p-4 text-left transition-all ${
+                    className={`rounded-2xl border p-4 text-left transition-all ${
                       on ? "border-black bg-neutral-50 shadow-sm" : "border-neutral-200 hover:border-black/40"
                     }`}
                   >
-                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${on ? "border-black bg-black" : "border-neutral-300 bg-white"}`}>
-                      {on && <Check className="h-3 w-3 text-white" />}
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-black">{n.label}</span>
-                      <span className="mt-0.5 block text-xs leading-relaxed text-neutral-500">{n.sub}</span>
-                    </span>
+                    <span className="block text-sm font-semibold text-black">{g.label}</span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-neutral-500">{g.sub}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="mt-6 flex items-center gap-2 text-sm font-medium text-neutral-700">
+              <Timer className="h-4 w-4 text-brand-blue" /> You want it in
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Timeline">
+              {TIMELINES.map((t) => {
+                const on = timeline === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setTimeline(t.id)}
+                    data-testid={`estimator-timeline-${t.id}`}
+                    aria-pressed={on}
+                    className={`rounded-full border px-5 py-2 text-sm font-medium transition-all ${
+                      on ? "border-black bg-black text-white shadow-sm" : "border-neutral-200 text-neutral-600 hover:border-black/40 hover:text-black"
+                    }`}
+                  >
+                    {t.label}
                   </button>
                 );
               })}
             </div>
 
             <div className="mt-6 rounded-2xl border border-black/5 bg-neutral-50/70 p-6" data-testid="estimator-result">
-              {estimate ? (
+              {estimate && (
                 <div className="flex flex-wrap items-center justify-between gap-6">
                   <div>
                     <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">
-                      Estimated scope · {estimate.hours} hours
+                      Estimated scope · {estimate.hours} hours over {estimate.weeks} weeks · ~{estimate.weekly} hrs/week
                     </p>
                     <p className="mt-1 font-display text-3xl font-bold tracking-tight text-black" data-testid="estimator-cost">
                       ₹{estimate.cost.toLocaleString("en-IN")}
                     </p>
                     <p className="mt-1 text-xs text-neutral-400">Flat $30/hour · indicative, confirmed in your working session</p>
                     <p className="mt-3 text-sm text-neutral-600">
-                      Agencies + tools for this scope: ≈ ₹{estimate.market.toLocaleString("en-IN")}
+                      Agencies + tools for this goal: ≈ ₹{estimate.market.toLocaleString("en-IN")}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-brand-green" data-testid="estimator-savings">
                       You save ~{estimate.savingsPct}%
@@ -140,6 +147,7 @@ export default function Estimator({ open, onClose }) {
                       <span className="font-semibold" style={{ color: estimate.pack.color }} data-testid="estimator-recommendation">
                         {estimate.pack.name}
                       </span>
+                      {estimate.custom && <span className="text-neutral-400"> · custom top-up, sized together</span>}
                     </p>
                   </div>
                   <div className="flex flex-col items-start gap-3">
@@ -155,10 +163,6 @@ export default function Estimator({ open, onClose }) {
                     </a>
                   </div>
                 </div>
-              ) : (
-                <p className="text-sm text-neutral-400" data-testid="estimator-empty">
-                  Select at least one need above to see your estimate.
-                </p>
               )}
             </div>
           </motion.div>

@@ -17,7 +17,6 @@ function useIsMobile() {
 }
 
 const CARDS = [
-  { t: "Engine showreel", views: "12.4k", dur: "0:04", x: "3%", y: "12%", xm: "58%", ym: "74%", d: 1.8, color: "#E200C4", src: "/hero-ad.mp4" },
   { t: "Ad creative · V3", views: "4.2k", dur: "0:18", x: "83%", y: "60%", xm: null, ym: null, d: 1.8, color: "#F7941E" },
 ];
 
