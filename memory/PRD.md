@@ -151,6 +151,15 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Estimator scope section rebuilt as clickable expandable service cards: 7 service product cards + 1 Fractional CXO card (under its own "billed hourly only" divider). Card header shows colored monogram, name, unit price, in-scope qty pill (e.g. × 6) and a "Suggested" badge for auto-recommended services. Expanding a card reveals blurb, 3 "what's included" bullets and the quantity stepper (affiliate card shows tier pills). Goal + timeline still auto-suggest; steppers inside cards adjust live; ledger/subtotals/savings unchanged and verified (videos 6 to 7 moved total ₹5,78,000 to ₹5,85,000).
 
 
+## Rev 25 (2026-08-17) — Pricing-first /fractional-cxo page (Odoo-style)
+- Hero section removed from /fractional-cxo. The page now opens directly with the estimator as an inline section (id="estimator", testid estimator-section): slim "Pricing · transparent by default" eyebrow, H1 "Build your growth engine, priced like a product.", goal cards + timeline pills, expandable service cards on the left and a sticky live estimate summary on the right (Odoo pricing pattern).
+- Estimator.jsx converted from modal (createPortal) to inline section component with no props. All pricing logic, testids (estimator-goal-*, estimator-timeline-*, estimator-service-*, estimator-cost, etc.) preserved.
+- Hero content (Fractional AI CXO eyebrow, "C-level growth leadership, without the C-level hire." headline, 10-20 hrs/week subcopy, working-session CTA) moved into SuccessPacks above the packs table. Testids cxo-hero/cxo-eyebrow/cxo-headline/cxo-hero-cta kept on the moved elements.
+- SuccessPacks "Project Estimator" button is now an anchor link to #estimator (modal removed, Estimator import dropped). FAQ "What does it cost?" rewritten to reference published per-unit pricing.
+- Page metadata updated to pricing focus: title "Pricing · AI Videos, GEO Pages, Voice AI & Fractional CXO at $30/hour".
+- Verified: goal+timeline changes update sticky summary live (revenue/4w = ₹17,72,800), card expansion works, anchor scrolls to top, mobile stacks cleanly, lint clean.
+
+
 
 - P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
 - P1: Confirm pilot tier pricing (₹24,999/₹49,999/₹99,999 assumed). Auth-protect /dashboard (currently public demo data).

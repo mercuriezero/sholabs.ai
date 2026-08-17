@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Check, ChevronDown, Minus, Plus, Sparkles, Target, Timer, X } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, Minus, Plus, Sparkles } from "lucide-react";
 import PayButton from "@/components/PayButton";
 
 const CAL = "https://cal.com/sunnyrai/30min";
@@ -104,7 +103,7 @@ function Stepper({ value, onChange, min = 0, max = 999, step = 1, testid }) {
   );
 }
 
-export default function Estimator({ open, onClose }) {
+export default function Estimator() {
   const [goal, setGoal] = useState("pipeline");
   const [timeline, setTimeline] = useState("12w");
   const [videos, setVideos] = useState(6);
@@ -117,8 +116,6 @@ export default function Estimator({ open, onClose }) {
   const [cxoHours, setCxOHours] = useState(60);
   const [suggested, setSuggested] = useState(new Set());
   const [openCard, setOpenCard] = useState(null);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   // Auto-suggest quantities from goal + timeline; the visitor can adjust anything afterwards.
   useEffect(() => {
@@ -169,9 +166,8 @@ export default function Estimator({ open, onClose }) {
     return { lines, services, cxoCost, total, market, savingsPct, usage: voice > 0 || sdr > 0, weekly: Math.max(1, Math.round(cxoHours / t.weeks)) };
   }, [timeline, videos, pages, ugc, voice, sdr, socialMonths, aff, cxoHours]);
 
-  if (!mounted) return null;
-
   const qtyOf = { videos, pages, ugc, voice, sdr, social: socialMonths, cxo: cxoHours };
+  const unitLabel = { videos: "videos", pages: "blocks of 20", ugc: "creatives", voice: "agents", sdr: "motions", social: "months", cxo: "hours" };
 
   const cardControl = (id) => {
     switch (id) {
@@ -203,16 +199,14 @@ export default function Estimator({ open, onClose }) {
     }
   };
 
-  const unitLabel = { videos: "videos", pages: "blocks of 20", ugc: "creatives", voice: "agents", sdr: "motions", social: "months", cxo: "hours" };
-
   const renderCard = (s, inScope, isAff) => {
     const expanded = openCard === s.id;
     const qty = isAff ? (aff !== "none" ? AFF_TIERS.find((x) => x.id === aff)?.label : null) : qtyOf[s.id];
     return (
       <div
         key={s.id}
-        className={`rounded-2xl border transition-all ${
-          inScope ? "border-black bg-white shadow-sm" : "border-neutral-200 bg-white hover:border-black/30"
+        className={`rounded-2xl border bg-white transition-all ${
+          inScope ? "border-black shadow-sm" : "border-neutral-200 hover:border-black/30"
         }`}
       >
         <button
@@ -274,117 +268,104 @@ export default function Estimator({ open, onClose }) {
     );
   };
 
-  return createPortal(
-    <AnimatePresence>
-      {open && estimate && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[95] flex items-center justify-center p-4 md:p-6"
-          data-testid="estimator-modal"
-        >
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-black/5 bg-white p-6 shadow-2xl md:p-8"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Project estimator"
-          >
-            <button onClick={onClose} data-testid="estimator-close" aria-label="Close" className="absolute right-5 top-5 text-neutral-400 transition-colors hover:text-black">
-              <X className="h-5 w-5" />
-            </button>
+  return (
+    <section className="relative overflow-hidden py-16 md:py-20" data-testid="estimator-section" id="estimator">
+      <div className="hero-grid-bg pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="relative mx-auto max-w-6xl px-6">
+        <div className="max-w-3xl">
+          <div className="flex items-center gap-3">
+            <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
+            <span className="text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500" data-testid="estimator-eyebrow">
+              Pricing · transparent by default
+            </span>
+          </div>
+          <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-tighter text-black sm:text-5xl lg:text-6xl" data-testid="estimator-heading">
+            Build your growth engine, <span className="glassy-brand-text">priced like a product.</span>
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-neutral-500 md:text-lg">
+            Pick a goal and a timeline. We suggest the scope; tap any service to see what is inside and adjust
+            quantities. Service products are priced per unit · CXO leadership is billed separately, by the hour.
+          </p>
+        </div>
 
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-black">Project Estimator</h2>
-            <p className="mt-2 text-sm leading-relaxed text-neutral-500">
-              Pick your goal and timeline. We suggest a scope; tap any service to see what is inside and adjust
-              quantities. CXO leadership is billed separately, by the hour.
-            </p>
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" role="group" aria-label="Your goal">
+          {GOALS.map((g) => {
+            const on = goal === g.id;
+            return (
+              <button
+                key={g.id}
+                onClick={() => setGoal(g.id)}
+                data-testid={`estimator-goal-${g.id}`}
+                aria-pressed={on}
+                className={`rounded-2xl border bg-white p-4 text-left transition-all ${
+                  on ? "border-black shadow-md" : "border-neutral-200 hover:border-black/40"
+                }`}
+              >
+                <span className="block text-sm font-semibold text-black">{g.label}</span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-neutral-500">{g.sub}</span>
+              </button>
+            );
+          })}
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-neutral-200 bg-white/60 p-4" role="group" aria-label="Timeline">
+            <span className="w-full text-xs font-medium text-neutral-500">You want it in</span>
+            {TIMELINES.map((t) => {
+              const on = timeline === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTimeline(t.id)}
+                  data-testid={`estimator-timeline-${t.id}`}
+                  aria-pressed={on}
+                  className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all ${
+                    on ? "border-black bg-black text-white shadow-sm" : "border-neutral-200 text-neutral-600 hover:border-black/40 hover:text-black"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            <p className="mt-5 flex items-center gap-2 text-sm font-medium text-neutral-700">
-              <Target className="h-4 w-4 text-brand-magenta" /> Your goal
-            </p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {GOALS.map((g) => {
-                const on = goal === g.id;
-                return (
-                  <button
-                    key={g.id}
-                    onClick={() => setGoal(g.id)}
-                    data-testid={`estimator-goal-${g.id}`}
-                    aria-pressed={on}
-                    className={`rounded-2xl border p-3.5 text-left transition-all ${
-                      on ? "border-black bg-neutral-50 shadow-sm" : "border-neutral-200 hover:border-black/40"
-                    }`}
-                  >
-                    <span className="block text-sm font-semibold text-black">{g.label}</span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-neutral-500">{g.sub}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <p className="mt-5 flex items-center gap-2 text-sm font-medium text-neutral-700">
-              <Timer className="h-4 w-4 text-brand-blue" /> You want it in
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Timeline">
-              {TIMELINES.map((t) => {
-                const on = timeline === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setTimeline(t.id)}
-                    data-testid={`estimator-timeline-${t.id}`}
-                    aria-pressed={on}
-                    className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
-                      on ? "border-black bg-black text-white shadow-sm" : "border-neutral-200 text-neutral-600 hover:border-black/40 hover:text-black"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <p className="mt-6 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Service products · tap a card to explore</p>
+        <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Service products · tap a card to explore</p>
             <div className="mt-2 space-y-2" data-testid="estimator-scope">
               {SERVICES.map((s) => {
                 const inScope = s.id === "aff" ? aff !== "none" : qtyOf[s.id] > 0;
                 return renderCard(s, inScope, s.id === "aff");
               })}
             </div>
-
             <p className="mt-5 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Fractional CXO · billed hourly only</p>
             <div className="mt-2">
               {renderCard(CXO_CARD, cxoHours > 0, false)}
             </div>
+          </div>
 
-            <div className="mt-6 rounded-2xl border border-black/5 bg-neutral-50/70 p-6" data-testid="estimator-result">
-              <ul className="space-y-1.5" data-testid="estimator-lines">
-                {estimate.lines.map((l) => (
-                  <li key={l.label} className="flex items-baseline justify-between gap-3 text-sm">
-                    <span className="text-neutral-600">{l.label}{l.usage && <span className="text-neutral-400"> *</span>}</span>
-                    <span className="flex-1 border-b border-dotted border-neutral-300" aria-hidden="true" />
-                    <span className="font-medium text-black">{inr(l.cost)}</span>
-                  </li>
-                ))}
-              </ul>
-              {estimate.lines.length > 0 && (
-                <div className="mt-3 flex items-baseline justify-between text-sm">
-                  <span className="text-neutral-500">Service products subtotal</span>
-                  <span className="font-semibold text-black" data-testid="estimator-services-subtotal">{inr(estimate.services)}</span>
+          <div className="lg:sticky lg:top-24">
+            {estimate && (
+              <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-[0_24px_80px_-24px_rgba(10,10,10,0.15)]" data-testid="estimator-result">
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">Your estimate · live</p>
+                <ul className="mt-4 space-y-1.5" data-testid="estimator-lines">
+                  {estimate.lines.map((l) => (
+                    <li key={l.label} className="flex items-baseline justify-between gap-3 text-sm">
+                      <span className="text-neutral-600">{l.label}{l.usage && <span className="text-neutral-400"> *</span>}</span>
+                      <span className="flex-1 border-b border-dotted border-neutral-300" aria-hidden="true" />
+                      <span className="font-medium text-black">{inr(l.cost)}</span>
+                    </li>
+                  ))}
+                </ul>
+                {estimate.lines.length > 0 && (
+                  <div className="mt-3 flex items-baseline justify-between text-sm">
+                    <span className="text-neutral-500">Service products subtotal</span>
+                    <span className="font-semibold text-black" data-testid="estimator-services-subtotal">{inr(estimate.services)}</span>
+                  </div>
+                )}
+                <div className="mt-1.5 flex items-baseline justify-between text-sm">
+                  <span className="text-neutral-500">CXO hours · {cxoHours} × {inr(CXO_RATE)} · ~{estimate.weekly} hrs/week</span>
+                  <span className="font-semibold text-black" data-testid="estimator-cxo-subtotal">{inr(estimate.cxoCost)}</span>
                 </div>
-              )}
-              <div className="mt-1.5 flex items-baseline justify-between text-sm">
-                <span className="text-neutral-500">CXO hours · {cxoHours} × {inr(CXO_RATE)} · ~{estimate.weekly} hrs/week</span>
-                <span className="font-semibold text-black" data-testid="estimator-cxo-subtotal">{inr(estimate.cxoCost)}</span>
-              </div>
-              <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-black/10 pt-4">
-                <div>
+                <div className="mt-4 border-t border-black/10 pt-4">
                   <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-400">Total indicative investment</p>
                   <p className="mt-1 font-display text-3xl font-bold tracking-tight text-black" data-testid="estimator-cost">{inr(estimate.total)}</p>
                   <p className="mt-1 text-xs text-neutral-400">
@@ -394,23 +375,22 @@ export default function Estimator({ open, onClose }) {
                     <p className="mt-2 text-xs text-neutral-400">* Voice AI and AI SDR usage billed on actuals at ₹10/minute.</p>
                   )}
                 </div>
-                <div className="flex flex-col items-start gap-3">
+                <div className="mt-5 flex flex-col items-stretch gap-3">
                   <PayButton
                     key={estimate.total}
                     label="Lock this scope"
                     testid="estimator-book-button"
                     initialPackage={{ name: `Estimated scope · ${GOALS.find((g) => g.id === goal)?.label || "growth engine"}`, price: estimate.total }}
                   />
-                  <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="estimator-call-link" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:underline">
+                  <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="estimator-call-link" className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-brand-blue hover:underline">
                     Or talk it through first <ArrowUpRight className="h-3.5 w-3.5" />
                   </a>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
-    document.body
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

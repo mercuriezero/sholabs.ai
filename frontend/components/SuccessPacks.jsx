@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Check, Minus } from "lucide-react";
+import { ArrowUpRight, Calculator, Check, Minus } from "lucide-react";
 import PayButton from "@/components/PayButton";
-import Estimator from "@/components/Estimator";
+
+const CAL = "https://cal.com/sunnyrai/30min";
 
 export const CXO_PACKS = [
   { name: "Trial Pack · 4 hours", hours: 4, price: 10400, color: "#ED1C24", tag: "Audit snapshot + quick wins in a week" },
@@ -25,29 +25,51 @@ const FEATURES = [
 ];
 
 export default function SuccessPacks() {
-  const [estimatorOpen, setEstimatorOpen] = useState(false);
-
   return (
-    <section className="border-t border-black/5 py-20 md:py-24" data-testid="cxo-packs">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="flex flex-wrap items-end justify-between gap-6">
+    <section className="relative overflow-hidden border-t border-black/5 py-20 md:py-24" data-testid="cxo-packs">
+      <div className="hero-grid-bg pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="relative mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-3xl text-center" data-testid="cxo-hero">
+          <div className="flex items-center justify-center gap-3">
+            <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
+            <span className="text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500" data-testid="cxo-eyebrow">
+              Fractional AI CXO
+            </span>
+            <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
+          </div>
+          <h2 className="mt-8 font-display text-3xl font-semibold leading-[1.1] tracking-tight text-black md:text-5xl" data-testid="cxo-headline">
+            C-level growth leadership, <span className="glassy-brand-text">without the C-level hire.</span>
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-neutral-500 md:text-base">
+            A Fractional AI Marketing CXO owns your growth number · positioning, demand generation, GEO, and the
+            AI stack that automates them · in 10–20 hours a week, for a fraction of a full-time salary.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="cxo-hero-cta" className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg">
+              Book a 20-minute working session <ArrowUpRight className="h-4 w-4" />
+            </a>
+            <p className="text-xs text-neutral-400">No pitch deck. A working session and a written 90-day plan.</p>
+          </div>
+        </div>
+
+        <div className="mt-16 flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400">Hourly success packs</p>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-black md:text-4xl" data-testid="packs-heading">
+            <h3 className="mt-4 font-display text-3xl font-semibold tracking-tight text-black md:text-4xl" data-testid="packs-heading">
               Buy CXO hours <span className="glassy-brand-text">like a product.</span>
-            </h2>
+            </h3>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500 md:text-base">
               No retainer negotiations, no lock-ins. Pick a pack, we start this week · unused hours roll over for
               90 days.
             </p>
           </div>
-          <button
-            onClick={() => setEstimatorOpen(true)}
+          <a
+            href="#estimator"
             data-testid="open-estimator-button"
             className="inline-flex items-center gap-2 rounded-full bg-brand-purple px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >
             <Calculator className="h-4 w-4" /> Project Estimator
-          </button>
+          </a>
         </div>
 
         <div className="mt-10 overflow-x-auto rounded-3xl border border-black/5 bg-white shadow-sm" data-testid="packs-table">
@@ -115,8 +137,6 @@ export default function SuccessPacks() {
           via Razorpay
         </p>
       </div>
-
-      <Estimator open={estimatorOpen} onClose={() => setEstimatorOpen(false)} />
     </section>
   );
 }

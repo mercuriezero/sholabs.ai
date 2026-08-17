@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, Compass, Eye, Megaphone, Users, CalendarClock, BarChart3, Check } from "lucide-react";
 import Footer from "@/components/Footer";
 import SuccessPacks from "@/components/SuccessPacks";
+import Estimator from "@/components/Estimator";
 
 const CAL = "https://cal.com/sunnyrai/30min";
 
@@ -55,7 +56,7 @@ const FAQS = [
   },
   {
     q: "What does it cost?",
-    a: "A monthly retainer sized to scope · consistently far below a full-time CMO's fully-loaded cost. Book a working session and we'll scope it against your goals, not a rate card.",
+    a: "Service products have published per-unit pricing · ₹7,000 per AI video, ₹80,000 per 20 GEO pages, and so on. CXO hours are flat ₹2,600/hour via the packs below. Build your scope in the estimator above and the number updates live.",
   },
 ];
 
@@ -82,31 +83,7 @@ export default function FractionalCxO() {
       </header>
 
       <main>
-        <section className="relative overflow-hidden" data-testid="cxo-hero">
-          <div className="hero-grid-bg pointer-events-none absolute inset-0" aria-hidden="true" />
-          <div className="relative mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
-            <div className="flex items-center justify-center gap-3">
-              <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
-              <span className="text-[11px] font-medium uppercase tracking-[0.28em] text-neutral-500" data-testid="cxo-eyebrow">
-                Fractional AI CXO
-              </span>
-              <span className="stripe-gradient h-[3px] w-8 rounded-full" aria-hidden="true" />
-            </div>
-            <h1 className="mt-8 font-display text-5xl font-bold leading-[1.05] tracking-tighter text-black md:text-6xl" data-testid="cxo-headline">
-              C-level growth leadership, <span className="glassy-brand-text">without the C-level hire.</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-neutral-500 md:text-lg">
-              A Fractional AI Marketing CXO owns your growth number · positioning, demand generation, GEO, and the
-              AI stack that automates them · in 10–20 hours a week, for a fraction of a full-time salary.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <a href={CAL} target="_blank" rel="noopener noreferrer" data-testid="cxo-hero-cta" className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg">
-                Book a 20-minute working session <ArrowUpRight className="h-4 w-4" />
-              </a>
-              <p className="text-xs text-neutral-400">No pitch deck. A working session and a written 90-day plan.</p>
-            </div>
-          </div>
-        </section>
+        <Estimator />
 
         <SuccessPacks />
 

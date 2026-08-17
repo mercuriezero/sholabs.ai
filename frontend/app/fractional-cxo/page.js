@@ -1,19 +1,19 @@
 import FractionalCxO from "@/components/FractionalCxO";
 
 export const metadata = {
-  title: "Fractional AI CXO · C-Level Growth Leadership at $30/hour | High On AI",
+  title: "Pricing · AI Videos, GEO Pages, Voice AI & Fractional CXO at $30/hour | High On AI",
   description:
-    "Hire a Fractional AI Marketing CXO: growth strategy, GEO, demand engine and team leadership at a flat $30/hour. Success packs from 4 to 100 hours, priced like a product. Powered by High On AI.",
+    "Transparent, productized pricing: AI videos ₹7,000 each, GEO/LLM citation pages ₹80,000 per 20, Voice AI and AI SDR agents, social, UGC ads and affiliate programs · plus Fractional AI CXO hours billed hourly at flat $30/hour. Build your scope and see the total live.",
   alternates: { canonical: "/fractional-cxo" },
   openGraph: {
-    title: "Fractional AI CXO · C-Level Growth Leadership at $30/hour",
+    title: "Pricing · AI Videos, GEO Pages, Voice AI & Fractional CXO at $30/hour",
     description:
-      "Growth strategy, GEO, demand engine and team leadership at a flat $30/hour. Success packs from 4 to 100 hours, priced like a product.",
+      "Transparent, productized pricing across every AI growth service · plus Fractional AI CXO hours at flat $30/hour. Build your scope and see the total live.",
   },
   twitter: {
-    title: "Fractional AI CXO · C-Level Growth Leadership at $30/hour",
+    title: "Pricing · AI Videos, GEO Pages, Voice AI & Fractional CXO at $30/hour",
     description:
-      "Growth strategy, GEO, demand engine and team leadership at a flat $30/hour. Success packs from 4 to 100 hours.",
+      "Transparent, productized pricing across every AI growth service · plus Fractional AI CXO hours at flat $30/hour.",
   },
 };
 
