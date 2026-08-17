@@ -101,3 +101,119 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: >
+  Restored the "High On AI" Next.js app from GitHub. User reported (a) production
+  deployment failed and (b) "the app isn't showing properly". Root causes found:
+  (1) frontend code reads process.env.NEXT_PUBLIC_BACKEND_URL but the environment
+  only provides REACT_APP_BACKEND_URL, so the backend URL was undefined and all
+  API-driven features silently failed; (2) build produced Next .next output while
+  Emergent's deploy expects a static build/ or dist/ folder.
+
+frontend:
+  - task: "Backend URL wiring (NEXT_PUBLIC_BACKEND_URL mapping)"
+    implemented: true
+    working: true
+    file: "frontend/next.config.mjs"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Mapped REACT_APP_BACKEND_URL -> NEXT_PUBLIC_BACKEND_URL via next.config env so all API calls (ChatBot, PromptBox, Account, CommandCenter, PayButton, AuthContext) hit the correct backend. Verified build inlines the sholabs-ai backend URL (no purples-3 fallback). Needs functional verification of API-driven flows."
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Backend URL mapping is working correctly. All API requests go to https://sholabs-ai.preview.emergentagent.com/api/... NO 'undefined/api' URLs detected. Tested: /api/auth/me, /api/chat/stream endpoints. The NEXT_PUBLIC_BACKEND_URL fix is successful."
+
+  - task: "Homepage / landing renders correctly"
+    implemented: true
+    working: true
+    file: "frontend/app/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Hero H1 and content present in DOM (scrollHeight 8280). Needs verification that page + nav render for a real user and no console errors block interactivity."
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Homepage loads and renders correctly. Hero headline 'Human intelligence + AI for marketing, sales & growth.' is visible. Navigation links (Services, Pricing, Command Center, Help, 'Book a growth call') all render correctly. No fatal console errors blocking interaction."
+
+  - task: "AI concierge chat + hero prompt submission (LLM via EMERGENT_LLM_KEY)"
+    implemented: true
+    working: true
+    file: "frontend/components/ChatBot.jsx, frontend/components/PromptBox.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "EMERGENT_LLM_KEY set in backend .env. Verify hero prompt submit and concierge chat call /api and return a response."
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: AI Concierge chat works perfectly. Chat opens, accepts messages, calls https://sholabs-ai.preview.emergentagent.com/api/chat/stream, and returns AI-generated responses. Hero prompt box correctly shows auth modal for non-authenticated users (expected behavior). Both components use correct backend URL."
+
+  - task: "Fractional CXO pricing estimator page"
+    implemented: true
+    working: true
+    file: "frontend/app/fractional-cxo/page.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Estimator should load and totals should recalculate as service cards/quantities change."
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Fractional CXO page loads correctly. Pricing estimator works perfectly - goal selection updates scope, service card expansion works, quantity steppers (+/-) update totals in real-time. Tested: changed goal from '₹10L revenue pipeline' (₹5,78,000) to 'Get cited by AI' (₹4,80,000), increased video quantity, final estimate updated to ₹4,94,000. Savings percentage displays correctly (~51%)."
+
+backend:
+  - task: "Backend boots with restored env (JWT_SECRET, EMERGENT_LLM_KEY)"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Backend restarted cleanly after installing razorpay and setting JWT_SECRET + EMERGENT_LLM_KEY. 'Application startup complete' in logs."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Backend URL wiring (NEXT_PUBLIC_BACKEND_URL mapping)"
+    - "Homepage / landing renders correctly"
+    - "AI concierge chat + hero prompt submission (LLM via EMERGENT_LLM_KEY)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "main"
+    -message: >
+      Fixed two issues after restoring the app from GitHub: mapped the backend URL
+      to NEXT_PUBLIC_BACKEND_URL (was undefined) and switched the build to static
+      export into build/. Please verify the PREVIEW frontend: homepage renders, nav
+      works, and API-driven flows connect to the backend (hero prompt submit, AI
+      concierge chat, and the fractional-cxo pricing estimator). Note: Razorpay
+      payment completion and email alerts require the owner's live keys and are
+      out of scope for this verification.
+    -agent: "testing"
+    -message: >
+      TESTING COMPLETE - ALL FLOWS VERIFIED WORKING. The NEXT_PUBLIC_BACKEND_URL mapping fix is successful. 
+      All API requests correctly go to https://sholabs-ai.preview.emergentagent.com/api/... with NO 'undefined/api' URLs detected.
+      Verified working: (1) Homepage renders with correct hero headline and navigation, (2) AI Concierge chat opens, sends messages, 
+      and receives AI responses via /api/chat/stream, (3) Hero prompt box correctly shows auth modal for non-authenticated users, 
+      (4) Fractional CXO page loads, (5) Pricing estimator updates totals correctly when goals/quantities change. 
+      The 401 errors on /api/auth/me are expected for non-authenticated users. All core functionality is working as designed.
