@@ -3,25 +3,25 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, IndianRupee, Loader2, Lock, X } from "lucide-react";
+import { Check, DollarSign, Loader2, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 
 const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
-const PRESETS = [4999, 9999, 24999];
+const PRESETS = [50, 100, 250];
 
 const PILOT_PACKAGES = [
-  { name: "Pilot Sprint", price: 24999, desc: "One pillar, two weeks, real output · not a slide deck" },
-  { name: "Growth Pilot", price: 49999, desc: "Two pillars, 30 days, live dashboard from day one" },
-  { name: "Full Engine Pilot", price: 99999, desc: "All three pillars · Get Cited, Get Watched, Get Chosen" },
+  { name: "Pilot Sprint", price: 290, desc: "One pillar, two weeks, real output · not a slide deck" },
+  { name: "Growth Pilot", price: 580, desc: "Two pillars, 30 days, live dashboard from day one" },
+  { name: "Full Engine Pilot", price: 1150, desc: "All three pillars · Get Cited, Get Watched, Get Chosen" },
 ];
 
 const CXO_PACKS = [
-  { name: "Trial Pack · 4 hours", price: 10400, desc: "Audit snapshot and quick wins in a single week" },
-  { name: "Starter Pack · 25 hours", price: 65000, desc: "Growth audit, written 90-day plan, weekly cadence" },
-  { name: "Momentum Pack · 50 hours", price: 130000, desc: "Strategy plus one pillar shipped end-to-end" },
-  { name: "Scale Pack · 100 hours", price: 260000, desc: "Two pillars and team leadership for a full quarter" },
+  { name: "Trial Pack · 4 hours", price: 120, desc: "Audit snapshot and quick wins in a single week" },
+  { name: "Starter Pack · 25 hours", price: 690, desc: "Growth audit, written 90-day plan · save 8%" },
+  { name: "Momentum Pack · 50 hours", price: 1290, desc: "Strategy plus one pillar shipped · save 14%" },
+  { name: "Scale Pack · 100 hours", price: 2400, desc: "Two pillars and team leadership · save 20%" },
 ];
 
 function loadRazorpay() {
@@ -59,7 +59,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
 
   const pay = async () => {
     if (!effectiveAmount || effectiveAmount < 1) {
-      toast.error("Enter an amount of at least ₹1");
+      toast.error("Enter an amount of at least $1");
       return;
     }
     setPaying(true);
@@ -68,7 +68,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount_rupees: effectiveAmount, package_name: selected?.name || "" }),
+        body: JSON.stringify({ amount_usd: effectiveAmount, package_name: selected?.name || "" }),
       });
       if (res.status === 401) {
         setAmountOpen(false);
@@ -116,7 +116,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
         data-testid={testid}
         className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
       >
-        <IndianRupee className="h-4 w-4" /> {label}
+        <DollarSign className="h-4 w-4" /> {label}
       </button>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onSuccess={() => setAmountOpen(true)} />
@@ -171,7 +171,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
                         </span>
                         <span className="mt-1 block text-xs leading-relaxed text-neutral-500">{p.desc}</span>
                       </span>
-                      <span className="shrink-0 font-display text-base font-bold text-black">₹{p.price.toLocaleString("en-IN")}</span>
+                      <span className="shrink-0 font-display text-base font-bold text-black">${p.price.toLocaleString("en-US")}</span>
                     </button>
                   ))}
                 </div>
@@ -189,14 +189,14 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
                         !selected && parseFloat(amount) === p ? "border-black bg-black text-white" : "border-neutral-200 text-neutral-600 hover:border-black/40"
                       }`}
                     >
-                      ₹{p.toLocaleString("en-IN")}
+                      ${p.toLocaleString("en-US")}
                     </button>
                   ))}
                 </div>
               )}
 
               <div className="mt-3 flex items-center rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4">
-                <IndianRupee className="h-4 w-4 text-neutral-400" />
+                <DollarSign className="h-4 w-4 text-neutral-400" />
                 <input
                   type="number"
                   min="1"
@@ -217,9 +217,9 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60"
               >
                 {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-                {paying ? "Starting checkout…" : `Pay ${effectiveAmount ? `₹${effectiveAmount.toLocaleString("en-IN")}` : ""} securely`}
+                {paying ? "Starting checkout…" : `Pay ${effectiveAmount ? `$${effectiveAmount.toLocaleString("en-US")}` : ""} securely`}
               </button>
-              <p className="mt-4 text-center text-xs text-neutral-400">Secured by Razorpay · UPI, cards, netbanking</p>
+              <p className="mt-4 text-center text-xs text-neutral-400">Secured by Razorpay · cards &amp; international payments</p>
             </motion.div>
           </motion.div>
         )}

@@ -6,23 +6,23 @@ import { ArrowUpRight, Check, ChevronDown, Minus, Plus, Sparkles } from "lucide-
 import PayButton from "@/components/PayButton";
 
 const CAL = "https://cal.com/sunnyrai/30min";
-const CXO_RATE = 2600; // flat $30/hour, charged in INR, billed hourly only
+const CXO_RATE = 30; // flat $30/hour, billed hourly only
 
 const PRICE = {
-  video: 7000, // per video
-  pageBlock: 80000, // per 20 GEO/LLM citation pages
-  voiceSetup: 100000, // per agent + ₹10/min usage on actuals
-  sdr: 200000, // per motion + ₹10/min usage on actuals
-  social: 60000, // per month
+  video: 85, // per video
+  pageBlock: 950, // per 20 GEO/LLM citation pages
+  voiceSetup: 1150, // per agent + $0.12/min usage on actuals
+  sdr: 2300, // per motion + $0.12/min usage on actuals
+  social: 700, // per month
 };
 
-const ugcUnit = (qty) => (qty >= 5000 ? 6000 : qty >= 500 ? 7000 : 10000);
+const ugcUnit = (qty) => (qty >= 5000 ? 70 : qty >= 500 ? 80 : 115);
 
 const AFF_TIERS = [
   { id: "none", label: "None", monthly: 0 },
-  { id: "starter", label: "Starter", monthly: 20000 },
-  { id: "growth", label: "Growth", monthly: 60000 },
-  { id: "pro", label: "Pro", monthly: 125000 },
+  { id: "starter", label: "Starter", monthly: 230 },
+  { id: "growth", label: "Growth", monthly: 700 },
+  { id: "pro", label: "Pro", monthly: 1450 },
 ];
 
 const TIMELINES = [
@@ -36,9 +36,9 @@ const TIMELINES = [
 const GOALS = [
   { id: "geo", label: "Get cited by AI", sub: "Show up inside ChatGPT, Gemini and Perplexity answers", cxo: 40,
     mix: { pages: 1, videos: 8, ugc: 6, voice: 0, sdr: 0, social: true, aff: "none" } },
-  { id: "pipeline", label: "₹10L revenue pipeline", sub: "Qualified meetings and demand, fast", cxo: 60,
+  { id: "pipeline", label: "$120K revenue pipeline", sub: "Qualified meetings and demand, fast", cxo: 60,
     mix: { pages: 1, videos: 6, ugc: 0, voice: 1, sdr: 1, social: false, aff: "none" } },
-  { id: "revenue", label: "₹1Cr revenue run-rate", sub: "A full growth engine that compounds", cxo: 120,
+  { id: "revenue", label: "$1.2M revenue run-rate", sub: "A full growth engine that compounds", cxo: 120,
     mix: { pages: 2, videos: 16, ugc: 12, voice: 1, sdr: 1, social: true, aff: "growth" } },
   { id: "reach", label: "Brand reach · 1M+ impressions", sub: "Video-first awareness at scale", cxo: 50,
     mix: { pages: 0, videos: 20, ugc: 15, voice: 0, sdr: 0, social: true, aff: "none" } },
@@ -49,37 +49,37 @@ const GOALS = [
 ];
 
 // What agencies + tools typically charge for the same scope (market rates researched Aug 2026).
-const MARKET = { video: 18000, pageBlock: 140000, ugc: 20000, voice: 250000, sdr: 300000, social: 100000, cxoHour: 6500, affMult: 1.8 };
+const MARKET = { video: 210, pageBlock: 1650, ugc: 230, voice: 2900, sdr: 3450, social: 1150, cxoHour: 75, affMult: 1.8 };
 
 const SERVICES = [
-  { id: "videos", name: "AI Videos", price: "₹7,000 / video", color: "#F7941E",
+  { id: "videos", name: "AI Videos", price: "$85 / video", color: "#F7941E",
     blurb: "A weekly video engine: scripted, generated and repurposed for every channel.",
     includes: ["Hook-first scripts written for your category", "AI presenters, voiceover, captions and edits", "Repurposed into Shorts, Reels and LinkedIn cuts"] },
-  { id: "pages", name: "GEO / LLM citation pages", price: "₹80,000 / 20 pages", color: "#2B39D1",
+  { id: "pages", name: "GEO / LLM citation pages", price: "$950 / 20 pages", color: "#2B39D1",
     blurb: "Pages engineered so ChatGPT, Gemini and Perplexity cite you.",
     includes: ["Question-led research mapped to buyer prompts", "Structured answers, schema and citations LLMs trust", "Internal linking and refresh cadence built in"] },
-  { id: "ugc", name: "UGC ad creatives", price: "from ₹10,000 / creative", color: "#ED1C24",
+  { id: "ugc", name: "UGC ad creatives", price: "from $115 / creative", color: "#ED1C24",
     blurb: "Creator-style ads that convert, without creator logistics.",
-    includes: ["Scroll-stopping hooks and script variations", "AI presenters matched to your audience", "Volume tiers: ₹7,000 at 500+, ₹6,000 at 5000+"] },
-  { id: "voice", name: "Voice AI agents", price: "₹1,00,000 setup / agent", color: "#2BBCC4",
+    includes: ["Scroll-stopping hooks and script variations", "AI presenters matched to your audience", "Volume tiers: $80 at 500+, $70 at 5000+"] },
+  { id: "voice", name: "Voice AI agents", price: "$1,150 setup / agent", color: "#2BBCC4",
     blurb: "Agents that answer, qualify and book meetings on live calls.",
-    includes: ["Custom call flows tuned to your pitch", "Qualification, routing and calendar booking", "₹10/minute usage billed on actuals"] },
-  { id: "sdr", name: "AI SDR outbound", price: "₹2,00,000 / motion", color: "#1FA84A",
+    includes: ["Custom call flows tuned to your pitch", "Qualification, routing and calendar booking", "$0.12/minute usage billed on actuals"] },
+  { id: "sdr", name: "AI SDR outbound", price: "$2,300 / motion", color: "#1FA84A",
     blurb: "An outbound motion that finds, enriches and follows up for you.",
-    includes: ["ICP list building and enrichment", "Multi-touch sequences across email and LinkedIn", "₹10/minute usage billed on actuals"] },
-  { id: "social", name: "Social media", price: "₹60,000 / month", color: "#E200C4",
+    includes: ["ICP list building and enrichment", "Multi-touch sequences across email and LinkedIn", "$0.12/minute usage billed on actuals"] },
+  { id: "social", name: "Social media", price: "$700 / month", color: "#E200C4",
     blurb: "A content engine that keeps your brand loud every week.",
     includes: ["Monthly content calendar and production", "Founder and brand channel management", "Community replies and trend-jacking"] },
-  { id: "aff", name: "Affiliate & Partners", price: "from ₹15,000 / month", color: "#91268F",
+  { id: "aff", name: "Affiliate & Partners", price: "from $175 / month", color: "#91268F",
     blurb: "A partner program with tracking, payouts and recruitment done for you.",
     includes: ["Starter: up to 25 partners · 2% commission", "Growth: up to 100 partners · 1.5% commission", "Pro: unlimited, fully managed · 1% commission"] },
 ];
 
-const CXO_CARD = { id: "cxo", name: "Fractional CXO", price: "₹2,600 / hour", color: "#0A0A0A",
+const CXO_CARD = { id: "cxo", name: "Fractional CXO", price: "$30 / hour", color: "#0A0A0A",
   blurb: "C-level growth leadership, billed hourly only. No retainer lock-in.",
   includes: ["Growth strategy, GEO direction and demand engine design", "Team and agency leadership with weekly reviews", "Board-ready reporting on pipeline and spend"] };
 
-const inr = (n) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+const inr = (n) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 function Stepper({ value, onChange, min = 0, max = 999, step = 1, testid }) {
   return (
@@ -401,7 +401,7 @@ export default function Estimator() {
                     Agencies + tools for this scope: ≈ {inr(estimate.market)} · <span className="font-semibold text-brand-green" data-testid="estimator-savings">you save ~{estimate.savingsPct}%</span>
                   </p>
                   {estimate.usage && (
-                    <p className="mt-2 text-xs text-neutral-400">* Voice AI and AI SDR usage billed on actuals at ₹10/minute.</p>
+                    <p className="mt-2 text-xs text-neutral-400">* Voice AI and AI SDR usage billed on actuals at $0.12/minute.</p>
                   )}
                 </div>
                 <div className="mt-5 flex flex-col items-stretch gap-3">

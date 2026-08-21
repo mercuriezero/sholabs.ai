@@ -86,7 +86,7 @@ class LoginInput(BaseModel):
 
 
 class OrderInput(BaseModel):
-    amount_rupees: float = Field(gt=0, le=1000000)
+    amount_usd: float = Field(gt=0, le=100000)
     package_name: str = Field(default="", max_length=80)
 
 
@@ -579,11 +579,11 @@ async def google_session(request: Request, response: Response):
 @api_router.post("/payments/create-order")
 async def create_order(input: OrderInput, request: Request):
     user = await get_current_user(request)
-    amount_paise = int(round(input.amount_rupees * 100))
+    amount_cents = int(round(input.amount_usd * 100))
     try:
         order = await asyncio.to_thread(
             rzp_client.order.create,
-            {"amount": amount_paise, "currency": "INR", "payment_capture": 1, "receipt": f"rcpt_{uuid.uuid4().hex[:12]}"},
+            {"amount": amount_cents, "currency": "USD", "payment_capture": 1, "receipt": f"rcpt_{uuid.uuid4().hex[:12]}"},
         )
     except Exception:
         logger.exception("Razorpay order creation failed")
@@ -595,14 +595,14 @@ async def create_order(input: OrderInput, request: Request):
         "user_id": user["user_id"],
         "name": user.get("name", ""),
         "email": user.get("email", ""),
-        "amount": amount_paise,
-        "currency": "INR",
+        "amount": amount_cents,
+        "currency": "USD",
         "package_name": input.package_name.strip(),
         "status": "created",
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.payments.insert_one(doc)
-    return {"order_id": order["id"], "amount": amount_paise, "currency": "INR", "key_id": os.environ.get("RAZORPAY_KEY_ID")}
+    return {"order_id": order["id"], "amount": amount_cents, "currency": "USD", "key_id": os.environ.get("RAZORPAY_KEY_ID")}
 
 
 @api_router.post("/payments/verify")
