@@ -186,6 +186,78 @@ frontend:
         -agent: "testing"
         -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: Fractional CXO page loads correctly at /fractional-cxo. Page heading 'Build your growth engine, priced like a product.' is visible. Found 27 pricing elements (₹ symbols), 16 goal-related elements. Goal cards visible: 'Get cited by AI', '₹10L revenue pipeline', '₹1Cr revenue run-rate', etc. Timeline selector works (4 weeks, 8 weeks, 12 weeks, 6 months). Service products display with pricing: AI Videos (₹7,000/video), GEO/LLM citation pages (₹80,000/20 pages), UGC ad creatives. Live estimate showing ₹42,200 total with breakdown. Page renders and functions correctly."
 
+  - task: "USD pricing conversion - Estimator section"
+    implemented: true
+    working: true
+    file: "frontend/components/Estimator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: USD pricing conversion is working perfectly on DESKTOP (1920x1080). All prices display in USD with $ symbol: AI Videos ($85/video), GEO pages ($950/20 pages), Fractional CXO ($30/hour). Goal cards show $120K revenue pipeline and $1.2M revenue run-rate (no ₹ symbols). Live estimate displays USD amounts (found 12 $ symbols, 0 ₹ symbols). Tested interaction: changed goal to 'Get cited by AI' (estimate updated from $6,710 to $5,620), increased AI Videos quantity (estimate updated to $5,705). Live estimate updates correctly in real-time. All amounts are in USD format."
+
+  - task: "USD pricing conversion - Success Packs with tiered discounts"
+    implemented: true
+    working: true
+    file: "frontend/components/SuccessPacks.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Success Packs section shows USD prices with correct tiered discounts. Trial Pack: $120 (no discount), Starter Pack: $690 (list $750 struck through, Save 8%), Momentum Pack: $1,290 (list $1,500, Save 14%), Scale Pack: $2,400 (list $3,000, Save 20%). No ₹ symbols found in Success Packs section. All pricing is in USD format as required."
+
+  - task: "Mobile responsive pricing table (390x844)"
+    implemented: true
+    working: true
+    file: "frontend/components/SuccessPacks.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Mobile responsiveness is working perfectly. DESKTOP (1920x1080): Comparison table (data-testid='packs-table') is VISIBLE, mobile cards (data-testid='packs-cards') are HIDDEN. MOBILE (390x844): Stacked pack cards are VISIBLE, comparison table is HIDDEN. No horizontal overflow detected (body width: 390px, viewport: 390px). All pack prices show in USD on mobile ($120, $690, $1,290, $2,400). No ₹ symbols in mobile view. Page layout adapts correctly to viewport size."
+
+  - task: "Payment modal USD pricing"
+    implemented: true
+    working: true
+    file: "frontend/components/PayButton.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Payment modal displays USD pricing correctly. When clicking 'Book' button for Starter Pack ($690), auth modal appears for non-authenticated users (expected behavior). After authentication, amount modal shows package prices in USD format (e.g., '$690'), and pay button displays 'Pay $690 securely'. All payment-related amounts are in USD. Modal shows user email and package selection correctly."
+
+  - task: "Custom Google OAuth integration"
+    implemented: true
+    working: true
+    file: "frontend/components/AuthModal.jsx, backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Custom Google OAuth is working correctly. CRITICAL SUCCESS: Clicking 'Continue with Google' button (data-testid='auth-google-button') redirects to accounts.google.com (NOT auth.emergentagent.com), confirming the app is using CUSTOM Google OAuth, NOT Emergent auth. OAuth parameters verified: client_id contains '933685387815' (custom Google OAuth app), redirect_uri is 'https://sholabs-ai.preview.emergentagent.com/api/auth/google/callback', scope is 'openid email profile', response_type is 'code'. The redirect URL host is 'accounts.google.com' as required. Did not complete Google login (no credentials provided as per instructions)."
+
+  - task: "Email authentication (register + login)"
+    implemented: true
+    working: true
+    file: "frontend/components/AuthModal.jsx, frontend/context/AuthContext.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: Email authentication is working correctly. Successfully registered new user (name: 'QA User', email: 'qatest_9sr0qidx@example.com', password: 'Test@12345'). Auth modal closed after registration, amount modal appeared showing user is authenticated. User email displayed correctly in payment modal. Tested logout (cleared cookies) and re-login with same credentials - login successful, amount modal appeared. Both registration and login flows work correctly. Email auth remains functional alongside Google OAuth."
+
   - task: "Command Center navigation"
     implemented: true
     working: true
@@ -244,12 +316,12 @@ backend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 3
+  test_sequence: 4
   run_ui: false
 
 test_plan:
   current_focus:
-    - "USD payment testing complete"
+    - "USD pricing conversion and Google OAuth testing complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -319,3 +391,54 @@ agent_communication:
       ✅ Unauthorized Access: Both /api/auth/me and /api/payments/create-order correctly return 401 without auth
       
       CRITICAL FINDING: The Razorpay live account DOES have International/USD payments enabled. No 502 errors encountered. The payment gateway integration is fully functional and ready for production use. Order creation works correctly with USD currency and amounts in cents.
+    -agent: "testing"
+    -message: >
+      USD PRICING CONVERSION & CUSTOM GOOGLE AUTH TESTING COMPLETE - ALL TESTS PASSED!
+      
+      Tested two major feature areas on PREVIEW (https://sholabs-ai.preview.emergentagent.com):
+      
+      === A) USD PRICING & MOBILE RESPONSIVENESS ===
+      
+      DESKTOP (1920x1080):
+      ✅ Estimator section: All prices in USD ($85/video, $950/20 pages, $30/hour)
+      ✅ Goal cards: $120K revenue pipeline, $1.2M revenue run-rate (no ₹ symbols)
+      ✅ Live estimate: Shows USD amounts (12 $ symbols, 0 ₹), updates correctly when goal/quantity changes
+      ✅ Success Packs: USD prices with tiered discounts (Trial $120, Starter $690 save 8%, Momentum $1,290 save 14%, Scale $2,400 save 20%)
+      ✅ Desktop layout: Comparison table VISIBLE (data-testid='packs-table'), mobile cards HIDDEN
+      
+      MOBILE (390x844):
+      ✅ Estimator: USD pricing maintained on mobile
+      ✅ Success Packs: Stacked cards VISIBLE (data-testid='packs-cards'), comparison table HIDDEN
+      ✅ No horizontal overflow: body width 390px matches viewport
+      ✅ All pack prices in USD ($120, $690, $1,290, $2,400)
+      ✅ No ₹ symbols in mobile view
+      
+      PAYMENT MODAL:
+      ✅ Shows USD prices (e.g., '$690' for Starter Pack)
+      ✅ Pay button displays 'Pay $690 securely'
+      ✅ Auth modal appears for non-authenticated users (expected)
+      
+      === B) CUSTOM GOOGLE AUTH ===
+      
+      GOOGLE OAUTH:
+      ✅ CRITICAL SUCCESS: 'Continue with Google' button redirects to accounts.google.com (NOT auth.emergentagent.com)
+      ✅ This confirms the app is using CUSTOM Google OAuth, NOT Emergent auth
+      ✅ client_id contains '933685387815' (custom Google OAuth app)
+      ✅ OAuth parameters correct: redirect_uri, scope (openid email profile), response_type (code)
+      ✅ URL host is 'accounts.google.com' as required
+      
+      EMAIL AUTH:
+      ✅ User registration successful (name: 'QA User', email: 'qatest_9sr0qidx@example.com')
+      ✅ Auth modal closes, amount modal appears (user authenticated)
+      ✅ User email displayed in payment modal
+      ✅ Logout and re-login successful with same credentials
+      ✅ Email auth remains functional alongside Google OAuth
+      
+      SCREENSHOTS CAPTURED:
+      - desktop-pricing-packs.png (Desktop Success Packs with USD pricing)
+      - mobile-pricing-packs.png (Mobile stacked cards with USD pricing)
+      - auth-modal-initial.png (Auth modal with Google button)
+      - google-oauth-page.png (Google OAuth consent screen at accounts.google.com)
+      - amount-modal-authenticated.png (Payment modal after authentication)
+      
+      ALL CRITICAL FUNCTIONALITY VERIFIED! Both feature areas are working correctly on the preview site.

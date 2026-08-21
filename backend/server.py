@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, RedirectResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -44,6 +44,12 @@ SITE_URL = os.environ.get("SITE_URL", "")
 
 JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALGORITHM = "HS256"
+
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 rzp_client = razorpay.Client(auth=(os.environ.get("RAZORPAY_KEY_ID", ""), os.environ.get("RAZORPAY_KEY_SECRET", "")))
 
@@ -573,6 +579,99 @@ async def google_session(request: Request, response: Response):
     })
     response.set_cookie("session_token", token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
     return {k: v for k, v in user.items() if k not in ("password_hash", "_id")}
+
+
+# ---------- Custom Google OAuth (sholabs.ai) ----------
+def _google_redirect_uri(origin: str) -> str:
+    return f"{origin.rstrip('/')}/api/auth/google/callback"
+
+
+async def _create_session(user_id: str) -> str:
+    token = f"sess_{uuid.uuid4().hex}{uuid.uuid4().hex}"
+    await db.user_sessions.insert_one({
+        "user_id": user_id,
+        "session_token": token,
+        "expires_at": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return token
+
+
+@api_router.get("/auth/google/login")
+async def google_login(request: Request, origin: str = ""):
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="Google auth not configured")
+    if not origin:
+        origin = str(request.base_url).rstrip("/")
+    state = jwt.encode(
+        {"origin": origin, "nonce": uuid.uuid4().hex,
+         "exp": datetime.now(timezone.utc) + timedelta(minutes=10)},
+        JWT_SECRET, algorithm=JWT_ALGORITHM,
+    )
+    from urllib.parse import urlencode
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": _google_redirect_uri(origin),
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "access_type": "online",
+        "prompt": "select_account",
+        "include_granted_scopes": "true",
+    }
+    return RedirectResponse(f"{GOOGLE_AUTH_URL}?{urlencode(params)}", status_code=302)
+
+
+@api_router.get("/auth/google/callback")
+async def google_callback(request: Request, code: str = "", state: str = "", error: str = ""):
+    fallback = str(request.base_url).rstrip("/")
+    try:
+        payload = jwt.decode(state, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        origin = payload.get("origin") or fallback
+    except jwt.InvalidTokenError:
+        return RedirectResponse(f"{fallback}/?auth=error", status_code=302)
+    if error or not code:
+        return RedirectResponse(f"{origin}/?auth=error", status_code=302)
+    redirect_uri = _google_redirect_uri(origin)
+    try:
+        async with httpx.AsyncClient(timeout=15) as http:
+            tok = await http.post(GOOGLE_TOKEN_URL, data={
+                "code": code,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+            })
+            tok.raise_for_status()
+            access_token = tok.json().get("access_token")
+            ui = await http.get(GOOGLE_USERINFO_URL, headers={"Authorization": f"Bearer {access_token}"})
+            ui.raise_for_status()
+            info = ui.json()
+    except Exception:
+        logger.exception("Google OAuth exchange failed")
+        return RedirectResponse(f"{origin}/?auth=error", status_code=302)
+    email = (info.get("email") or "").lower()
+    if not email:
+        return RedirectResponse(f"{origin}/?auth=error", status_code=302)
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    is_new = user is None
+    if is_new:
+        user = {
+            "user_id": f"user_{uuid.uuid4().hex[:12]}",
+            "email": email,
+            "name": info.get("name", ""),
+            "picture": info.get("picture", ""),
+            "auth_provider": "google",
+            "role": "user",
+            "onboarded": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        await db.users.insert_one(user)
+    token = await _create_session(user["user_id"])
+    dest = f"{origin}/?welcome=1" if (is_new or not user.get("onboarded")) else f"{origin}/"
+    resp = RedirectResponse(dest, status_code=302)
+    resp.set_cookie("session_token", token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
+    return resp
 
 
 # ---------- Payments (auth required) ----------

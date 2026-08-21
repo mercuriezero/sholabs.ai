@@ -18,9 +18,8 @@ export default function AuthModal({ open, onClose, onSuccess }) {
   useEffect(() => setMounted(true), []);
 
   const googleLogin = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + "/";
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    const origin = window.location.origin;
+    window.location.href = `${origin}/api/auth/google/login?origin=${encodeURIComponent(origin)}`;
   };
 
   const submit = async (e) => {
