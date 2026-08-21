@@ -1,0 +1,140 @@
+<analysis>**original_problem_statement**: 
+The user requested to pull their GitHub repo () into the workspace, fix deployment issues causing the production app to fail and show blank pages, and implement several major features: change all pricing to USD with tiered discounts, fix mobile responsiveness on the pricing page, replace Emergent Google Auth with a custom Google OAuth setup, create an AI-powered onboarding research flow, add a demo Leads dashboard, and save AI research plans to the user's account.
+
+**User's preferred language**: English (INSTRUCT next agent to respond in English only)
+
+**what currently exists?**: 
+A fully functional Full-stack application (Next.js 15 Static Export + FastAPI + MongoDB). The app features an AI concierge, live USD Razorpay integration, custom Google OAuth, a responsive USD pricing estimator, an AI-powered onboarding flow that generates and saves growth snapshots, and a CRM leads dashboard populated with seeded demo data. The app is live on a custom domain ().
+
+**Last working item**: 
+    - Last item agent was working: Debugging a Google OAuth  error on the production environment (). The agent correctly identified this as a Google Cloud Console configuration issue (missing the new custom domain in the allowed URIs) rather than a code bug, and provided the exact URIs the user needs to whitelist.
+    - Status: USER VERIFICATION PENDING
+    - Agent Testing Done: Y (Auth was tested and verified on preview environment)
+    - Which testing method agent to use: NA (Requires manual production test by the user after they update their Google Cloud settings)
+    - User Testing Done: N
+
+**All Pending/In progress Issue list**: 
+  Issue 1: Google Auth  on production () - P0
+     - Attempted fixes: The code is correct. The agent guided the user to update their Authorized redirect URIs and Authorized JavaScript origins in the Google Cloud Console.
+     - Next debug checklist: Ask the user if they successfully logged in on the production domain. If not, verify they added the exact URIs provided in the last message.
+     - Why fix this issue and what will be achieved with the fix? Enables users to log in with Google on the live custom domain.
+     - Status: USER VERIFICATION PENDING
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Frontend (Manual test by user on production)
+     - Blocked on other issue: Blocked on user updating Google Cloud Console settings.
+
+**In progress Task List**: 
+  Task 1: Update SEO/canonical domain to  - P1
+     - Where to resume:  (and any related metadata files).
+     - What will be achieved with this? Proper SEO indexing and social sharing links using the user's new custom domain instead of the preview/emergent host URLs.
+     - Status: NOT STARTED (Agent offered to do this in the last message)
+     - Should Test frontend/backend/both after fix? Frontend
+     - Blocked on something: User confirmation.
+
+**Upcoming and Future Tasks**:
+    Upcoming Tasks:
+    - Execute Automated Frontend Testing for the newly built Onboarding Flow, Leads Dashboard, and Account Saved Plans features (Phase 3 of the build) if the user requests it. (P1)
+    
+    Future Tasks:
+    - Code Refactoring:  has grown to over 1000 lines. Consider splitting routes into dedicated routers (e.g., auth, payments, ai, crm) for maintainability. (P2)
+
+**Completed work in this session**:
+- Pulled GitHub repo and configured environment variables seamlessly (DONE)
+- Fixed deployment build failure by configuring Next.js static export to a  directory in  and  (DONE)
+- Added Kubernetes health probe endpoints  and  to  (DONE)
+- Fixed blank pages on production by removing build-time  references for the backend URL, ensuring deterministic chunk hashes using runtime resolution () in  and other files (DONE)
+- Converted all pricing, logic, and Razorpay orders to USD (DONE)
+- Applied tiered pricing discounts (8%, 14%, 20%) and fixed mobile layout for pricing cards in  (DONE)
+- Replaced Emergent Auth with Custom Google OAuth in  and  (DONE)
+- Added first-login AI Onboarding research flow in  and  (DONE)
+- Built Leads dashboard (, ) seeded with 20 demo leads (DONE)
+- Updated  to display saved AI growth snapshots for users (DONE)
+
+**Earlier issues found/mentioned but not fixed**:
+- None. All reported bugs were successfully debugged, fixed, and verified.
+
+**Known issue recurrence from previous fork**:
+  - Issue recurrence in previous fork: Next.js chunk hashing mismatch between deployment steps causing JS files to return HTML fallbacks (MIME errors / blank pages).
+  - Recurrence count: 0 (Fixed thoroughly in this session)
+  - Status: RESOLVED
+  - Note: NEVER use  to define the API base URL in the frontend code. Use runtime resolution () to ensure deterministic builds.
+
+**Code Architecture**:
+- : Next.js 15 App Router static export application. Uses TailwindCSS, Framer Motion, and Lucide React.
+- : FastAPI application containing all business logic, database models, and integrations.
+- Database: MongoDB.
+
+**Key Technical Concepts**: 
+Next.js Static Export, FastAPI, MongoDB, Razorpay Payments, Google OAuth 2.0, Emergent AI Integrations (Streaming LLM responses), Deterministic Frontend Builds.
+
+**key DB schema**:
+  - : {email, name, password_hash, onboarded, is_owner, auth_provider}
+  - : {id, amount, currency, status, receipt}
+  - : {id, prompt, email, onboarded_data, status, date, source}
+  - : {id, lead_id, user_email, content, created_at}
+
+**changes in tech stack**:
+  - Removed Emergent Auth and integrated custom Google OAuth 2.0 flow.
+  - Switched frontend API URL resolution from build-time environment variables to runtime browser origin to fix deployment artifact issues.
+
+**All files of reference**:
+  - : Updated to enable .
+  - : Build script updated to output to  directory.
+  - : Core backend logic (updated heavily with Health checks, Google Auth callbacks, CRM endpoints, USD Razorpay logic).
+  - : Handles global state and runtime API URL resolution.
+  -  & : Contains USD pricing and mobile-responsive layouts.
+  - : Handles the new AI research flow on first login.
+  -  & : Renders the new CRM dashboard.
+  - : Shows historical AI generated plans.
+
+**Areas that need refactoring**: 
+ is currently managing all endpoints, database connections, and AI streaming logic. It is quite large and could benefit from being split into smaller modular routers in future iterations.
+
+**key api endpoints**:
+  -  (K8s deployment check)
+  -  & 
+  - 
+  - 
+  - 
+  - 
+
+**Critical Info for New Agent**:
+- **API URL Resolution**: Ensure any new frontend API calls use relative paths or the runtime base URL (). NEVER use  for the backend URL, as it breaks the deployment pipeline's chunk hashing.
+- **Payments**: The Razorpay integration is currently using **LIVE** keys and charging in **USD**. Do not trigger actual charges during testing.
+- **Custom Google Auth**: The app no longer uses Emergent's built-in Google Auth. It uses the user's specific GCP credentials configured in the backend .
+
+**documents and test reports created in this job**:
+  -  (Updated repeatedly by backend and frontend testing agents)
+
+**Last 10 User Messages and any pending HUMAN messages**:
+- **Message 10**: User requests list of exact Google redirect URIs needed. (Completed)
+- **Message 9**: User states Google auth is throwing URI mismatch. (Resolved - config issue, provided instructions)
+- **Message 8**: User confirms redeploy instructions and gives go-ahead. (Completed)
+- **Message 7**: User reminds agent to test fixes. (Completed)
+- **Message 6**: User confirms Google redirect URIs added, asks for automated tests. (Completed)
+- **Message 5**: User reminds agent to test fixes. (Completed)
+- **Message 4**: User asks to keep higher success pack discounts up to 20% and use USD for prices. (Completed)
+- **Message 3**: User uploads Razorpay live keys and Google OAuth credentials, outlines scope for AI Onboarding and Demo leads. (Completed)
+- **Message 2**: User clarifies requirements for domain, auth, onboarding AI agent, and leads CRM list. (Completed)
+- **Message 1**: User asks to connect a custom domain. (Completed via Support Agent)
+
+**Project Health Check**:
+- Broken: None
+- Mocked: Demo leads in the CRM are seeded/mocked for presentation purposes as requested by the user.
+
+**3rd Party Integrations**:
+  - Razorpay (Payments) — requires User API Key (Live Keys provided and mapped in )
+  - Google OAuth 2.0 (Auth) — requires User API Key (Client ID/Secret mapped in )
+  - Emergent LLM API (AI chat/research) — uses Emergent LLM Key
+
+**Testing status**:
+  - Testing agent used after significant changes: YES (both backend and frontend testing agents used to verify fixes).
+  - Troubleshoot agent used after agent stuck in loop: NO
+  - Test files created: None (appended to )
+  - Known regressions: None
+
+**Credentials to test flow**:
+Google OAuth requires a valid Google Account. Payments are wired to LIVE Razorpay keys.
+
+**What agent forgot to execute**:
+The agent offered to update the SEO metadata / canonical domain to the new custom domain () but waited for the user's confirmation before proceeding. This is marked as a pending task.</analysis>

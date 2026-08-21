@@ -124,13 +124,13 @@ frontend:
         -comment: "Mapped REACT_APP_BACKEND_URL -> NEXT_PUBLIC_BACKEND_URL via next.config env so all API calls (ChatBot, PromptBox, Account, CommandCenter, PayButton, AuthContext) hit the correct backend. Verified build inlines the sholabs-ai backend URL (no purples-3 fallback). Needs functional verification of API-driven flows."
         -working: true
         -agent: "testing"
-        -comment: "VERIFIED: Backend URL mapping is working correctly. All API requests go to https://sholabs-ai.preview.emergentagent.com/api/... NO 'undefined/api' URLs detected. Tested: /api/auth/me, /api/chat/stream endpoints. The NEXT_PUBLIC_BACKEND_URL fix is successful."
+        -comment: "VERIFIED: Backend URL mapping is working correctly. All API requests go to https://crm-research-flow.preview.emergentagent.com/api/... NO 'undefined/api' URLs detected. Tested: /api/auth/me, /api/chat/stream endpoints. The NEXT_PUBLIC_BACKEND_URL fix is successful."
         -working: true
         -agent: "main"
         -comment: "PRODUCTION BLANK-PAGE FIX: Root cause was non-deterministic chunk hashes. The backend URL was baked into the client bundle at build time via next.config env, so Emergent's two frontend build steps produced different chunk hashes; the served HTML referenced chunks the asset server didn't have, returning HTML for .js requests (MIME error) -> no hydration -> blank pages. Fix: removed all build-time process.env usage; API base is now resolved at runtime via window.location.origin + '/api' in ChatBot.jsx, PromptBox.jsx, and AuthContext.jsx. Verified two local builds now produce IDENTICAL chunk hashes. Needs re-verification on preview."
         -working: true
         -agent: "testing"
-        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: The runtime resolution fix is working perfectly! All API requests correctly go to https://sholabs-ai.preview.emergentagent.com/api/... with NO 'undefined/api' URLs detected. Tested 4 API requests: POST /api/chat/stream, GET /api/auth/me (3x). NO MIME type errors detected. NO 'Refused to execute script' errors. JS chunks loading correctly. The fix successfully resolves the blank page issue."
+        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: The runtime resolution fix is working perfectly! All API requests correctly go to https://crm-research-flow.preview.emergentagent.com/api/... with NO 'undefined/api' URLs detected. Tested 4 API requests: POST /api/chat/stream, GET /api/auth/me (3x). NO MIME type errors detected. NO 'Refused to execute script' errors. JS chunks loading correctly. The fix successfully resolves the blank page issue."
 
   - task: "Homepage / landing renders correctly"
     implemented: true
@@ -163,10 +163,10 @@ frontend:
         -comment: "EMERGENT_LLM_KEY set in backend .env. Verify hero prompt submit and concierge chat call /api and return a response."
         -working: true
         -agent: "testing"
-        -comment: "VERIFIED: AI Concierge chat works perfectly. Chat opens, accepts messages, calls https://sholabs-ai.preview.emergentagent.com/api/chat/stream, and returns AI-generated responses. Hero prompt box correctly shows auth modal for non-authenticated users (expected behavior). Both components use correct backend URL."
+        -comment: "VERIFIED: AI Concierge chat works perfectly. Chat opens, accepts messages, calls https://crm-research-flow.preview.emergentagent.com/api/chat/stream, and returns AI-generated responses. Hero prompt box correctly shows auth modal for non-authenticated users (expected behavior). Both components use correct backend URL."
         -working: true
         -agent: "testing"
-        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: AI Concierge chat works perfectly. Chat launcher opens, accepts message 'What does High On AI do?', sends POST request to https://sholabs-ai.preview.emergentagent.com/api/chat/stream (SAME ORIGIN), and receives AI-generated streaming response (688 chars). The runtime resolution (window.location.origin + '/api') is working correctly. No 'undefined/api' errors."
+        -comment: "RE-VERIFIED AFTER RUNTIME RESOLUTION FIX: AI Concierge chat works perfectly. Chat launcher opens, accepts message 'What does High On AI do?', sends POST request to https://crm-research-flow.preview.emergentagent.com/api/chat/stream (SAME ORIGIN), and receives AI-generated streaming response (688 chars). The runtime resolution (window.location.origin + '/api') is working correctly. No 'undefined/api' errors."
 
   - task: "Fractional CXO pricing estimator page"
     implemented: true
@@ -244,7 +244,7 @@ frontend:
     status_history:
         -working: true
         -agent: "testing"
-        -comment: "VERIFIED: Custom Google OAuth is working correctly. CRITICAL SUCCESS: Clicking 'Continue with Google' button (data-testid='auth-google-button') redirects to accounts.google.com (NOT auth.emergentagent.com), confirming the app is using CUSTOM Google OAuth, NOT Emergent auth. OAuth parameters verified: client_id contains '933685387815' (custom Google OAuth app), redirect_uri is 'https://sholabs-ai.preview.emergentagent.com/api/auth/google/callback', scope is 'openid email profile', response_type is 'code'. The redirect URL host is 'accounts.google.com' as required. Did not complete Google login (no credentials provided as per instructions)."
+        -comment: "VERIFIED: Custom Google OAuth is working correctly. CRITICAL SUCCESS: Clicking 'Continue with Google' button (data-testid='auth-google-button') redirects to accounts.google.com (NOT auth.emergentagent.com), confirming the app is using CUSTOM Google OAuth, NOT Emergent auth. OAuth parameters verified: client_id contains '933685387815' (custom Google OAuth app), redirect_uri is 'https://crm-research-flow.preview.emergentagent.com/api/auth/google/callback', scope is 'openid email profile', response_type is 'code'. The redirect URL host is 'accounts.google.com' as required. Did not complete Google login (no credentials provided as per instructions)."
 
   - task: "Email authentication (register + login)"
     implemented: true
@@ -314,7 +314,7 @@ backend:
         -comment: "Production deploy health probe was hitting GET /health and getting 404 (all routes were under /api). Added app-level @app.get('/health') and @api_router.get('/health') returning {status: ok} with no DB dependency. Verify GET /health returns 200 and does not require /api prefix, and that /api/health also returns 200."
         -working: false
         -agent: "testing"
-        -comment: "CRITICAL ISSUE: The @app.get('/health') endpoint exists in FastAPI and works correctly when tested directly (localhost:8001/health returns 200 with {status: ok}), BUT it is unreachable from the external URL (https://sholabs-ai.preview.emergentagent.com/health returns 404). Root cause: Kubernetes ingress routes /health to the Next.js frontend instead of the backend. The ingress only routes /api/* to the backend. VERIFIED WORKING: (1) GET /api/health returns 200 with {status: ok}, (2) GET /api/ returns 200 with {message: High On AI API}, (3) Internal GET localhost:8001/health returns 200 with {status: ok}. SOLUTION NEEDED: Update Kubernetes ingress configuration to route /health to the backend service, OR configure the health probe to use /api/health instead of /health."
+        -comment: "CRITICAL ISSUE: The @app.get('/health') endpoint exists in FastAPI and works correctly when tested directly (localhost:8001/health returns 200 with {status: ok}), BUT it is unreachable from the external URL (https://crm-research-flow.preview.emergentagent.com/health returns 404). Root cause: Kubernetes ingress routes /health to the Next.js frontend instead of the backend. The ingress only routes /api/* to the backend. VERIFIED WORKING: (1) GET /api/health returns 200 with {status: ok}, (2) GET /api/ returns 200 with {message: High On AI API}, (3) Internal GET localhost:8001/health returns 200 with {status: ok}. SOLUTION NEEDED: Update Kubernetes ingress configuration to route /health to the backend service, OR configure the health probe to use /api/health instead of /health."
 
   - task: "Backend boots with restored env (JWT_SECRET, EMERGENT_LLM_KEY)"
     implemented: true
@@ -360,7 +360,7 @@ agent_communication:
     -agent: "testing"
     -message: >
       TESTING COMPLETE - ALL FLOWS VERIFIED WORKING. The NEXT_PUBLIC_BACKEND_URL mapping fix is successful. 
-      All API requests correctly go to https://sholabs-ai.preview.emergentagent.com/api/... with NO 'undefined/api' URLs detected.
+      All API requests correctly go to https://crm-research-flow.preview.emergentagent.com/api/... with NO 'undefined/api' URLs detected.
       Verified working: (1) Homepage renders with correct hero headline and navigation, (2) AI Concierge chat opens, sends messages, 
       and receives AI responses via /api/chat/stream, (3) Hero prompt box correctly shows auth modal for non-authenticated users, 
       (4) Fractional CXO page loads, (5) Pricing estimator updates totals correctly when goals/quantities change. 
@@ -370,11 +370,11 @@ agent_communication:
       HEALTH CHECK ENDPOINT TESTING COMPLETE. CRITICAL FINDING: The root-level /health endpoint is NOT accessible externally due to Kubernetes ingress routing. 
       The FastAPI code is correct (@app.get('/health') exists and works on localhost:8001/health), but the ingress routes /health to the frontend instead of the backend.
       WORKING: /api/health (200 OK), /api/ (200 OK), localhost:8001/health (200 OK internal test).
-      NOT WORKING: https://sholabs-ai.preview.emergentagent.com/health (404 from Next.js frontend).
+      NOT WORKING: https://crm-research-flow.preview.emergentagent.com/health (404 from Next.js frontend).
       SOLUTION: Either (1) update Kubernetes ingress to route /health to backend, OR (2) configure health probe to use /api/health instead.
     -agent: "testing"
     -message: >
-      RUNTIME RESOLUTION FIX VERIFICATION COMPLETE - ALL TESTS PASSED! The runtime resolution fix (window.location.origin + '/api') is working perfectly on the preview site (https://sholabs-ai.preview.emergentagent.com).
+      RUNTIME RESOLUTION FIX VERIFICATION COMPLETE - ALL TESTS PASSED! The runtime resolution fix (window.location.origin + '/api') is working perfectly on the preview site (https://crm-research-flow.preview.emergentagent.com).
       
       VERIFIED WORKING:
       1. ✅ Homepage loads with VISIBLE hero headline "Human intelligence + AI for marketing, sales & growth." (confirmed via screenshots)
@@ -384,7 +384,7 @@ agent_communication:
       5. ✅ Command Center navigation works, displays dashboard with "One dashboard. Every signal. Live."
       
       CRITICAL SUCCESS - API REQUESTS:
-      ✅ ALL 4 API requests go to SAME ORIGIN: https://sholabs-ai.preview.emergentagent.com/api/...
+      ✅ ALL 4 API requests go to SAME ORIGIN: https://crm-research-flow.preview.emergentagent.com/api/...
       ✅ NO "undefined/api" requests detected
       ✅ NO MIME type errors (no "Refused to execute script" errors)
       ✅ JS chunks loading correctly
@@ -410,7 +410,7 @@ agent_communication:
     -message: >
       USD PRICING CONVERSION & CUSTOM GOOGLE AUTH TESTING COMPLETE - ALL TESTS PASSED!
       
-      Tested two major feature areas on PREVIEW (https://sholabs-ai.preview.emergentagent.com):
+      Tested two major feature areas on PREVIEW (https://crm-research-flow.preview.emergentagent.com):
       
       === A) USD PRICING & MOBILE RESPONSIVENESS ===
       

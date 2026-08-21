@@ -154,7 +154,7 @@ export default function Account() {
               </p>
             </div>
 
-            {data?.is_owner && <OwnerTools onLogged={loadSummary} />}
+            {data?.is_admin && <OwnerTools isOwner={data?.is_owner} onLogged={loadSummary} />}
 
             <div className="mt-14" data-testid="account-snapshots">
               <div className="flex flex-wrap items-center justify-between gap-3">

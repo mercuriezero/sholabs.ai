@@ -168,7 +168,7 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 
 
 
-- P0: User action — register webhook https://purples-3.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
+- P0: User action — register webhook https://crm-research-flow.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
 - P1: Confirm pilot tier pricing (₹24,999/₹49,999/₹99,999 assumed). Auth-protect /dashboard (currently public demo data).
 - P1: Owner UI for logging hours (currently API-only, owner-gated).
 - P1: Case studies / testimonials / client logos section (real proof points from user).
@@ -181,3 +181,13 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Lead notifications: managed Resend proxy (EMERGENT_EMAIL_KEY), server-side template + guardrail gate, fires on every new brief. OWNER_EMAIL empty → alerts paused pending user's email.
 - Live command center at /dashboard: real briefs/plans KPIs + auto-refreshing signal feed; landing "See the Dashboard" now links there.
 - Motion: Lenis smooth scrolling (anchor-aware), masked line-by-line hero reveal, mouse-parallax brand orbs, editorial marquee strip, numbered chapter eyebrows (01–06), section scroll-reveals via Reveal wrapper.
+
+## Rev 27 (2026-06 fork) — Discount coupons + role-based admin + SEO domain
+- CONFIRMED: USD pricing left unchanged (user verified current prices are correct). Backend AI prompts (RESEARCH_PROMPT + BOT_BASE_PROMPT) converted from ₹ to matching USD so the concierge/research agent quote the same currency as the site.
+- Coupon system: one-click "Apply 9% launch discount" (reserved HIA9-xxxxx codes, generated per transaction) + admin-created custom promo codes (code, % off, optional expiry date, optional max uses). Discounts are MUTUALLY EXCLUSIVE (one coupon per transaction). All discounts recomputed/validated SERVER-SIDE in POST /api/payments/create-order (client % never trusted). New: POST /api/coupons/validate (preview), /api/admin/coupons GET/POST/DELETE (require_admin). used_count increments on payment verify/webhook (custom coupons only), guarded by coupon_redeemed flag.
+- Coupon UI lives in the PayButton amount modal (coupon-section): launch button, "Have a promo code?" input, applied badge with savings + remove. Pay button reflects discounted total.
+- Role-based admin: OWNER_EMAIL=sun@sohighon.ai is ALWAYS super-owner/admin. Super-owner can promote/demote registered users to role "admin" via /account Admin tools (admins-panel, owner-only). Admins can manage coupons, log hours, train concierge. Helpers: is_owner_email(), user_is_admin(), require_admin(); public_user() adds is_owner/is_admin to /auth/me, login, register, google responses; account/summary returns is_admin. Endpoints /api/admin/users + /api/admin/set-role are owner-only; super-owner cannot be demoted.
+- SEO: layout.js SITE_URL changed sholabs-ai.emergent.host → https://sohighon.ai (drives metadataBase, canonical, OG, JSON-LD Organization URL). CAVEAT: takes effect on the production deploy only; ensure old preview/*.emergent.host URLs 301-redirect to sohighon.ai and submit the new domain's sitemap in Search Console to avoid split SEO signals.
+- Verified: 17 backend pytest cases (coupon math, CRUD, expiry/reserved/duplicate, owner-only role mgmt, non-admin 403) all pass; frontend flows (owner panel, coupon create/delete, promote/demote, 9% + custom code apply/remove in payment modal, mutual exclusivity, non-admin hidden) all pass. LIVE Razorpay never charged. Backend regression suite: /app/backend/tests/backend_test.py.
+- Fixes post-test: money() now always shows 2 decimals on fractional amounts; PayButton handles auth-loading (user===undefined) so logged-in users don't briefly see the login modal.
+- KNOWN (low risk): used_count is not reserved at order creation, so a promo code could be over-redeemed under concurrent checkouts.

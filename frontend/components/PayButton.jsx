@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, DollarSign, Loader2, Lock, X } from "lucide-react";
+import { BadgePercent, Check, DollarSign, Loader2, Lock, Tag, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
@@ -23,6 +23,8 @@ const CXO_PACKS = [
   { name: "Momentum Pack · 50 hours", price: 1290, desc: "Strategy plus one pillar shipped · save 14%" },
   { name: "Scale Pack · 100 hours", price: 2400, desc: "Two pillars and team leadership · save 20%" },
 ];
+
+const money = (n) => `$${Number(n).toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2, maximumFractionDigits: 2 })}`;
 
 function loadRazorpay() {
   return new Promise((resolve) => {
@@ -44,18 +46,78 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
   const [amount, setAmount] = useState("");
   const [paying, setPaying] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [pendingStart, setPendingStart] = useState(false);
+  // Coupon state
+  const [applied, setApplied] = useState(null); // { code, discount_pct, discount_amount, final_amount, launch }
+  const [couponBusy, setCouponBusy] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
+
   useEffect(() => setMounted(true), []);
 
-  const start = () => {
+  const openFor = (u) => {
     if (initialPackage) {
       setSelected(initialPackage);
       setAmount(String(initialPackage.price));
     }
-    if (user) setAmountOpen(true);
+    setApplied(null);
+    setShowCode(false);
+    setCodeInput("");
+    if (u) setAmountOpen(true);
     else setAuthOpen(true);
   };
 
+  const start = () => {
+    if (user === undefined) {
+      setPendingStart(true); // auth still resolving · open once we know
+      return;
+    }
+    openFor(user);
+  };
+
+  useEffect(() => {
+    if (pendingStart && user !== undefined) {
+      setPendingStart(false);
+      openFor(user);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingStart, user]);
+
   const effectiveAmount = selected ? selected.price : parseFloat(amount);
+  const finalToPay = applied ? applied.final_amount : effectiveAmount;
+
+  const clearCoupon = () => {
+    setApplied(null);
+    setShowCode(false);
+    setCodeInput("");
+  };
+
+  const applyDiscount = async ({ launch, code }) => {
+    if (!effectiveAmount || effectiveAmount < 1) {
+      toast.error("Enter an amount first");
+      return;
+    }
+    setCouponBusy(true);
+    try {
+      const res = await fetch(`${API}/coupons/validate`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount_usd: effectiveAmount, launch: !!launch, coupon_code: code || "" }),
+      });
+      const d = await res.json();
+      if (d.valid) {
+        setApplied({ ...d, launch: !!launch });
+        toast.success(launch ? `9% launch discount applied · ${d.code}` : `Code ${d.code} applied · ${d.discount_pct}% off`);
+      } else {
+        toast.error(d.error || "This code isn't valid.");
+      }
+    } catch {
+      toast.error("Couldn't check that code. Please try again.");
+    } finally {
+      setCouponBusy(false);
+    }
+  };
 
   const pay = async () => {
     if (!effectiveAmount || effectiveAmount < 1) {
@@ -68,7 +130,12 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount_usd: effectiveAmount, package_name: selected?.name || "" }),
+        body: JSON.stringify({
+          amount_usd: effectiveAmount,
+          package_name: selected?.name || "",
+          coupon_code: applied && !applied.launch ? applied.code : "",
+          launch: applied?.launch || false,
+        }),
       });
       if (res.status === 401) {
         setAmountOpen(false);
@@ -99,6 +166,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
           setAmountOpen(false);
           setSelected(null);
           setAmount("");
+          clearCoupon();
         },
       });
       rzp.open();
@@ -159,6 +227,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
                       onClick={() => {
                         setSelected(p);
                         setAmount(String(p.price));
+                        clearCoupon();
                       }}
                       className={`flex w-full items-start justify-between gap-3 rounded-2xl border p-4 text-left transition-all ${
                         selected?.name === p.name ? "border-black bg-neutral-50 shadow-sm" : "border-neutral-200 hover:border-black/40"
@@ -184,6 +253,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
                       onClick={() => {
                         setSelected(null);
                         setAmount(String(p));
+                        clearCoupon();
                       }}
                       className={`rounded-2xl border px-3 py-3 text-sm font-semibold transition-colors ${
                         !selected && parseFloat(amount) === p ? "border-black bg-black text-white" : "border-neutral-200 text-neutral-600 hover:border-black/40"
@@ -204,12 +274,81 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
                   onChange={(e) => {
                     setAmount(e.target.value);
                     setSelected(null);
+                    clearCoupon();
                   }}
                   data-testid="amount-input"
                   placeholder="Custom amount"
                   className="w-full bg-transparent px-3 py-3 text-sm outline-none"
                 />
               </div>
+
+              {/* Discount section */}
+              <div className="mt-4 rounded-2xl border border-dashed border-brand-green/40 bg-brand-green/[0.04] p-4" data-testid="coupon-section">
+                {applied ? (
+                  <div className="flex items-start justify-between gap-3" data-testid="coupon-applied">
+                    <div className="min-w-0">
+                      <p className="flex items-center gap-1.5 text-sm font-semibold text-brand-green">
+                        <BadgePercent className="h-4 w-4" /> {applied.discount_pct}% off applied
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-neutral-500">
+                        Code <span className="font-semibold text-black">{applied.code}</span> · you save {money(applied.discount_amount)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={clearCoupon}
+                      data-testid="coupon-remove-button"
+                      aria-label="Remove discount"
+                      className="shrink-0 rounded-full p-1 text-neutral-400 transition-colors hover:bg-white hover:text-brand-red"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => applyDiscount({ launch: true })}
+                      disabled={couponBusy}
+                      data-testid="coupon-launch-button"
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-4 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60"
+                    >
+                      {couponBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgePercent className="h-4 w-4" />}
+                      Apply 9% launch discount
+                    </button>
+                    {showCode ? (
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="flex flex-1 items-center rounded-xl border border-neutral-200 bg-white px-3">
+                          <Tag className="h-4 w-4 text-neutral-400" />
+                          <input
+                            value={codeInput}
+                            onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                            onKeyDown={(e) => e.key === "Enter" && applyDiscount({ code: codeInput })}
+                            data-testid="coupon-code-input"
+                            placeholder="PROMO CODE"
+                            className="w-full bg-transparent px-2 py-2.5 text-sm uppercase tracking-wide outline-none"
+                          />
+                        </div>
+                        <button
+                          onClick={() => applyDiscount({ code: codeInput })}
+                          disabled={couponBusy || !codeInput.trim()}
+                          data-testid="coupon-apply-code-button"
+                          className="shrink-0 rounded-full bg-black px-4 py-2.5 text-xs font-semibold text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowCode(true)}
+                        data-testid="coupon-have-code-button"
+                        className="mt-2 block w-full text-center text-xs font-medium text-neutral-500 underline-offset-2 hover:text-black hover:underline"
+                      >
+                        Have a promo code?
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+
               <button
                 onClick={pay}
                 disabled={paying}
@@ -217,9 +356,14 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60"
               >
                 {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-                {paying ? "Starting checkout…" : `Pay ${effectiveAmount ? `$${effectiveAmount.toLocaleString("en-US")}` : ""} securely`}
+                {paying ? "Starting checkout…" : `Pay ${finalToPay ? money(finalToPay) : ""} securely`}
               </button>
-              <p className="mt-4 text-center text-xs text-neutral-400">Secured by Razorpay · cards &amp; international payments</p>
+              {applied && (
+                <p className="mt-2 text-center text-xs text-neutral-400" data-testid="coupon-savings-line">
+                  <span className="line-through">{money(effectiveAmount)}</span> · you save {money(applied.discount_amount)}
+                </p>
+              )}
+              <p className="mt-3 text-center text-xs text-neutral-400">Secured by Razorpay · cards &amp; international payments</p>
             </motion.div>
           </motion.div>
         )}

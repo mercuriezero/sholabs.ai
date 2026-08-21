@@ -6,7 +6,7 @@ import Providers from "./providers";
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-display" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-const SITE_URL = "https://sholabs-ai.emergent.host";
+const SITE_URL = "https://sohighon.ai";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

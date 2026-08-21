@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 EMAIL_BASE_URL = "https://integrations.emergentagent.com"
 EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "High On AI")
-OWNER_EMAIL = os.environ.get("OWNER_EMAIL") or None
+OWNER_EMAIL = (os.environ.get("OWNER_EMAIL") or "").strip().lower() or None
 SITE_URL = os.environ.get("SITE_URL", "")
 
 JWT_SECRET = os.environ["JWT_SECRET"]
@@ -94,6 +94,8 @@ class LoginInput(BaseModel):
 class OrderInput(BaseModel):
     amount_usd: float = Field(gt=0, le=100000)
     package_name: str = Field(default="", max_length=80)
+    coupon_code: str = Field(default="", max_length=40)
+    launch: bool = False
 
 
 class VerifyInput(BaseModel):
@@ -161,6 +163,28 @@ async def get_current_user(request: Request) -> dict:
         except jwt.InvalidTokenError:
             pass
     raise HTTPException(status_code=401, detail="Not authenticated")
+
+
+def is_owner_email(email: str) -> bool:
+    return bool(OWNER_EMAIL) and (email or "").strip().lower() == OWNER_EMAIL
+
+
+def user_is_admin(user: dict) -> bool:
+    return is_owner_email(user.get("email", "")) or user.get("role") == "admin"
+
+
+def public_user(user: dict) -> dict:
+    u = {k: v for k, v in user.items() if k not in ("password_hash", "_id")}
+    u["is_owner"] = is_owner_email(user.get("email", ""))
+    u["is_admin"] = user_is_admin(user)
+    return u
+
+
+async def require_admin(request: Request) -> dict:
+    user = await get_current_user(request)
+    if not user_is_admin(user):
+        raise HTTPException(status_code=403, detail="Admin only")
+    return user
 
 
 # ---------- Email guardrail gate (G2/G3 structural checks) ---
@@ -346,9 +370,10 @@ RESEARCH_PROMPT = """You are the High On AI 360 research agent · a senior growt
 A logged-in client gives you their website and/or growth goal. Do an end-to-end marketing read and deliver a one-page snapshot plus an aggressive 90-day plan.
 
 High On AI services and pricing (weave the right ones into the plan by name):
-- Service products, priced per unit: AI Videos ₹7,000 per video · GEO/LLM citation pages ₹80,000 per 20 pages · UGC ad creatives ₹10,000 each (volume tiers drop to ₹7,000 at 500+ and ₹6,000 at 5000+) · Social media management ₹60,000/month · Voice AI agent ₹1,00,000 setup per agent plus ₹10/minute usage · AI SDR outbound motion ₹2,00,000 plus ₹10/minute usage · Affiliate and Partners program: Starter ₹15,000-25,000/month (up to 25 partners, 2% commission on partner sales), Growth ₹40,000-75,000/month (up to 100 partners, 1.5%), Pro managed ₹1,25,000+/month (unlimited, 1%).
-- Fractional AI CXO leadership is billed separately, hourly only: flat $30/hour (about ₹2,600/hour) via success packs: Trial 4h ₹10,400 · Starter 25h ₹65,000 · Momentum 50h ₹1,30,000 · Scale 100h ₹2,60,000.
-- Pilot tiers: Pilot Sprint ₹24,999 · Growth Pilot ₹49,999 · Full Engine Pilot ₹99,999.
+- Service products, priced per unit: AI Videos $85 per video · GEO/LLM citation pages $950 per 20 pages · UGC ad creatives $115 each (volume tiers drop to $80 at 500+ and $70 at 5000+) · Social media management $700/month · Voice AI agent $1,150 setup per agent plus $0.12/minute usage · AI SDR outbound motion $2,300 plus $0.12/minute usage · Affiliate and Partners program: Starter $175-290/month (up to 25 partners, 2% commission on partner sales), Growth $460-860/month (up to 100 partners, 1.5%), Pro managed $1,450+/month (unlimited, 1%).
+- Fractional AI CXO leadership is billed separately, hourly only: flat $30/hour via success packs: Trial 4h $120 · Starter 25h $690 · Momentum 50h $1,290 · Scale 100h $2,400.
+- Pilot tiers: Pilot Sprint $290 · Growth Pilot $580 · Full Engine Pilot $1,150.
+- A one-click 9% launch discount is available to everyone at checkout; the team may also issue special promo codes. Do not invent any other discounts.
 
 Output rules:
 - Plain text with markdown formatting only: '## ' section headings, '### ' phase headings and '- ' bullets. No tables, no code blocks, no links.
@@ -537,7 +562,7 @@ async def register(input: RegisterInput, response: Response):
     }
     await db.users.insert_one(user)
     set_auth_cookies(response, user["user_id"], email)
-    return {k: v for k, v in user.items() if k not in ("password_hash", "_id")}
+    return public_user(user)
 
 
 @api_router.post("/auth/login")
@@ -554,9 +579,7 @@ async def login(input: LoginInput, request: Request, response: Response):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     await db.login_attempts.delete_many({"identifier": identifier})
     set_auth_cookies(response, user["user_id"], email)
-    user.pop("password_hash", None)
-    user.pop("_id", None)
-    return user
+    return public_user(user)
 
 
 @api_router.post("/auth/logout")
@@ -572,7 +595,8 @@ async def logout(request: Request, response: Response):
 
 @api_router.get("/auth/me")
 async def auth_me(request: Request):
-    return await get_current_user(request)
+    user = await get_current_user(request)
+    return public_user(user)
 
 
 @api_router.post("/auth/refresh")
@@ -628,7 +652,7 @@ async def google_session(request: Request, response: Response):
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
     response.set_cookie("session_token", token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
-    return {k: v for k, v in user.items() if k not in ("password_hash", "_id")}
+    return public_user(user)
 
 
 # ---------- Custom Google OAuth (sholabs.ai) ----------
@@ -728,7 +752,12 @@ async def google_callback(request: Request, code: str = "", state: str = "", err
 @api_router.post("/payments/create-order")
 async def create_order(input: OrderInput, request: Request):
     user = await get_current_user(request)
-    amount_cents = int(round(input.amount_usd * 100))
+    disc = await resolve_discount(input.amount_usd, input.coupon_code, input.launch)
+    if disc["error"]:
+        raise HTTPException(status_code=400, detail=disc["error"])
+    pct = disc["pct"]
+    original_cents = int(round(input.amount_usd * 100))
+    amount_cents = int(round(input.amount_usd * (1 - pct / 100) * 100))
     try:
         order = await asyncio.to_thread(
             rzp_client.order.create,
@@ -745,13 +774,18 @@ async def create_order(input: OrderInput, request: Request):
         "name": user.get("name", ""),
         "email": user.get("email", ""),
         "amount": amount_cents,
+        "original_amount": original_cents,
+        "coupon_code": disc["code"],
+        "discount_pct": pct,
+        "coupon_is_custom": disc["is_custom"],
+        "coupon_redeemed": False,
         "currency": "USD",
         "package_name": input.package_name.strip(),
         "status": "created",
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.payments.insert_one(doc)
-    return {"order_id": order["id"], "amount": amount_cents, "currency": "USD", "key_id": os.environ.get("RAZORPAY_KEY_ID")}
+    return {"order_id": order["id"], "amount": amount_cents, "currency": "USD", "key_id": os.environ.get("RAZORPAY_KEY_ID"), "discount_pct": pct, "coupon_code": disc["code"]}
 
 
 @api_router.post("/payments/verify")
@@ -790,6 +824,12 @@ async def verify_payment(input: VerifyInput, request: Request):
             package_name=payment.get("package_name", ""),
             payment_id=input.razorpay_payment_id,
         ))
+    if payment.get("status") != "paid" and payment.get("coupon_is_custom") and payment.get("coupon_code"):
+        await db.payments.update_one(
+            {"order_id": input.razorpay_order_id, "user_id": user["user_id"]},
+            {"$set": {"coupon_redeemed": True}},
+        )
+        await db.coupons.update_one({"code": payment["coupon_code"]}, {"$inc": {"used_count": 1}})
     return {"status": "paid"}
 
 
@@ -830,6 +870,9 @@ async def razorpay_webhook(request: Request):
             {"order_id": order_id},
             {"$set": {"status": "paid", "payment_id": payment_id, "paid_at": datetime.now(timezone.utc).isoformat()}},
         )
+        if payment.get("coupon_is_custom") and payment.get("coupon_code") and not payment.get("coupon_redeemed"):
+            await db.payments.update_one({"order_id": order_id}, {"$set": {"coupon_redeemed": True}})
+            await db.coupons.update_one({"code": payment["coupon_code"]}, {"$inc": {"used_count": 1}})
         if payment.get("email") and EMAIL_KEY:
             asyncio.create_task(send_receipt(
                 to=payment["email"],
@@ -867,7 +910,8 @@ async def account_summary(request: Request):
         p["hours_used"] = p.get("hours_used", 0)
     return {
         "user": {"name": user.get("name", ""), "email": user.get("email", "")},
-        "is_owner": bool(OWNER_EMAIL) and user.get("email") == OWNER_EMAIL,
+        "is_owner": is_owner_email(user.get("email", "")),
+        "is_admin": user_is_admin(user),
         "payments": payments,
         "hours_total": sum(p["hours_total"] for p in payments),
         "hours_used": sum(p["hours_used"] for p in payments),
@@ -878,8 +922,8 @@ async def account_summary(request: Request):
 @api_router.get("/account/all-payments")
 async def all_payments(request: Request):
     user = await get_current_user(request)
-    if not OWNER_EMAIL or user.get("email") != OWNER_EMAIL:
-        raise HTTPException(status_code=403, detail="Owner only")
+    if not user_is_admin(user):
+        raise HTTPException(status_code=403, detail="Admin only")
     payments = await db.payments.find({"status": "paid"}, {"_id": 0}).to_list(500)
     for p in payments:
         p["hours_total"] = _pack_hours(p.get("package_name", ""))
@@ -890,8 +934,8 @@ async def all_payments(request: Request):
 @api_router.post("/account/log-hours")
 async def log_hours(input: LogHoursInput, request: Request):
     user = await get_current_user(request)
-    if not OWNER_EMAIL or user.get("email") != OWNER_EMAIL:
-        raise HTTPException(status_code=403, detail="Owner only")
+    if not user_is_admin(user):
+        raise HTTPException(status_code=403, detail="Admin only")
     result = await db.payments.update_one({"id": input.payment_id}, {"$inc": {"hours_used": input.hours}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Payment not found")
@@ -918,6 +962,154 @@ async def get_payments():
     return payments
 
 
+# ---------- Coupons & discounts ----------
+LAUNCH_PCT = 9
+
+
+def _gen_launch_code() -> str:
+    return f"HIA9-{uuid.uuid4().hex[:5].upper()}"
+
+
+def _coupon_expired(doc: dict) -> bool:
+    exp = doc.get("expiry")
+    if not exp:
+        return False
+    try:
+        return datetime.fromisoformat(exp).date() < datetime.now(timezone.utc).date()
+    except ValueError:
+        return False
+
+
+async def resolve_discount(amount_usd: float, coupon_code: str, launch: bool) -> dict:
+    """Server-authoritative discount resolution. Never trust a client-sent percentage."""
+    if launch:
+        return {"pct": LAUNCH_PCT, "code": _gen_launch_code(), "is_custom": False, "error": None}
+    code = (coupon_code or "").strip().upper()
+    if not code:
+        return {"pct": 0, "code": "", "is_custom": False, "error": None}
+    doc = await db.coupons.find_one({"code": code}, {"_id": 0})
+    if not doc or not doc.get("active", True):
+        return {"pct": 0, "code": "", "is_custom": False, "error": "This code isn't valid."}
+    if _coupon_expired(doc):
+        return {"pct": 0, "code": "", "is_custom": False, "error": "This code has expired."}
+    mx = doc.get("max_uses")
+    if mx is not None and doc.get("used_count", 0) >= mx:
+        return {"pct": 0, "code": "", "is_custom": False, "error": "This code has reached its usage limit."}
+    return {"pct": doc["discount_pct"], "code": code, "is_custom": True, "error": None}
+
+
+class CouponCheck(BaseModel):
+    amount_usd: float = Field(gt=0, le=100000)
+    coupon_code: str = Field(default="", max_length=40)
+    launch: bool = False
+
+
+@api_router.post("/coupons/validate")
+async def validate_coupon(input: CouponCheck, request: Request):
+    await get_current_user(request)
+    r = await resolve_discount(input.amount_usd, input.coupon_code, input.launch)
+    if r["error"]:
+        return {"valid": False, "error": r["error"]}
+    pct = r["pct"]
+    discount = round(input.amount_usd * pct / 100, 2)
+    return {
+        "valid": pct > 0,
+        "discount_pct": pct,
+        "code": r["code"],
+        "launch": input.launch,
+        "discount_amount": discount,
+        "final_amount": round(input.amount_usd - discount, 2),
+    }
+
+
+class CouponCreate(BaseModel):
+    code: str = Field(min_length=3, max_length=40)
+    discount_pct: float = Field(gt=0, le=90)
+    label: str = Field(default="", max_length=120)
+    expiry: str = Field(default="", max_length=40)
+    max_uses: int | None = Field(default=None, ge=1, le=1000000)
+
+
+@api_router.get("/admin/coupons")
+async def list_coupons(request: Request):
+    await require_admin(request)
+    return await db.coupons.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+
+
+@api_router.post("/admin/coupons")
+async def create_coupon(input: CouponCreate, request: Request):
+    admin = await require_admin(request)
+    code = input.code.strip().upper()
+    if not re.fullmatch(r"[A-Z0-9\-]{3,40}", code):
+        raise HTTPException(status_code=400, detail="Codes may use letters, numbers and dashes only.")
+    if code.startswith("HIA9"):
+        raise HTTPException(status_code=400, detail="Codes starting with HIA9 are reserved for the launch discount.")
+    if await db.coupons.find_one({"code": code}):
+        raise HTTPException(status_code=400, detail="A coupon with this code already exists.")
+    expiry = input.expiry.strip()
+    if expiry:
+        try:
+            datetime.fromisoformat(expiry)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid expiry date.")
+    doc = {
+        "id": str(uuid.uuid4()),
+        "code": code,
+        "discount_pct": input.discount_pct,
+        "label": input.label.strip(),
+        "expiry": expiry,
+        "max_uses": input.max_uses,
+        "used_count": 0,
+        "active": True,
+        "created_by": admin.get("email", ""),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.coupons.insert_one(doc)
+    return {k: v for k, v in doc.items() if k != "_id"}
+
+
+@api_router.delete("/admin/coupons/{coupon_id}")
+async def delete_coupon(coupon_id: str, request: Request):
+    await require_admin(request)
+    await db.coupons.delete_one({"id": coupon_id})
+    return {"status": "deleted"}
+
+
+# ---------- Admin: role management (super-owner only) ----------
+class RoleInput(BaseModel):
+    email: str = Field(min_length=3, max_length=320)
+    role: str = Field(pattern="^(user|admin)$")
+
+
+@api_router.get("/admin/users")
+async def admin_users(request: Request):
+    await _owner_only(request)
+    users = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(2000)
+    return [
+        {
+            "user_id": u.get("user_id"),
+            "email": u.get("email"),
+            "name": u.get("name", ""),
+            "role": u.get("role", "user"),
+            "is_owner": is_owner_email(u.get("email", "")),
+            "auth_provider": u.get("auth_provider", "email"),
+        }
+        for u in users
+    ]
+
+
+@api_router.post("/admin/set-role")
+async def set_role(input: RoleInput, request: Request):
+    await _owner_only(request)
+    email = input.email.strip().lower()
+    if is_owner_email(email):
+        raise HTTPException(status_code=400, detail="The super-owner is always an admin and can't be changed.")
+    result = await db.users.update_one({"email": email}, {"$set": {"role": input.role}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="No registered user with that email. Ask them to sign up first.")
+    return {"status": "ok", "email": email, "role": input.role}
+
+
 # ---------- AI concierge ----------
 BOT_BASE_PROMPT = """You are the High On AI concierge: part salesperson, part senior growth consultant. You answer questions about High On AI and guide visitors to the right next step.
 
@@ -926,8 +1118,9 @@ ABOUT HIGH ON AI (ground truth):
 - Promise: human intelligence + AI for marketing, sales and growth, delivered as one full-stack H.I.A.I. engine.
 - Three pillars. Get Cited (GEO: getting brands cited by ChatGPT, Gemini, Perplexity, Claude and Google AI Overviews; 94% of B2B buyers now research with LLMs and AI cites only 3-4 brands per answer). Get Watched (AI video engine: videos scripted, generated and repurposed weekly; 89% of buyers say video seals the deal). Get Chosen (agentic outbound plus Voice AI agents that qualify leads, follow up in seconds and book meetings).
 - One live command center dashboard across every pillar: AI citation rate, share of voice vs competitors, views, watch-through, pipeline, reply rates. Real-time, not monthly PDFs.
-- Fractional AI CXO: C-level growth ownership at a flat $30/hour. Success packs: Starter 25 hours ₹65,000, Momentum 50 hours ₹1,30,000, Scale 100 hours ₹2,60,000, Embedded 200 hours ₹5,20,000. Unused hours roll over 90 days. A project estimator on the Fractional CXO page scopes hours and recommends a pack.
-- Pilots: Pilot Sprint ₹24,999 (one pillar, 2 weeks), Growth Pilot ₹49,999 (two pillars, 30 days), Full Engine Pilot ₹99,999 (all three pillars). No long-term contract. No sales call needed to get a plan.
+- Fractional AI CXO: C-level growth ownership at a flat $30/hour. Success packs: Trial 4 hours $120, Starter 25 hours $690, Momentum 50 hours $1,290, Scale 100 hours $2,400. Unused hours roll over 90 days. A project estimator on the Fractional CXO page scopes hours and recommends a pack.
+- Pilots: Pilot Sprint $290 (one pillar, 2 weeks), Growth Pilot $580 (two pillars, 30 days), Full Engine Pilot $1,150 (all three pillars). No long-term contract. No sales call needed to get a plan.
+- A one-click 9% launch discount is available to everyone at checkout; the team can also issue special promo codes. Do not invent any other discounts.
 - Free instant plan: visitors paste their website plus goal in the homepage prompt box and get an AI-generated growth plan in seconds.
 - Next step for serious prospects: a free 20-minute working session with a written 90-day plan (no pitch deck) at https://cal.com/sunnyrai/30min
 - Positioning vs alternatives: one accountable engine instead of 5+ disconnected vendors; clients typically save 50-75% versus the equivalent tool stack and agencies.
@@ -1026,13 +1219,13 @@ async def _owner_only(request: Request) -> dict:
 
 @api_router.get("/chat/teach")
 async def list_facts(request: Request):
-    await _owner_only(request)
+    await require_admin(request)
     return await db.bot_knowledge.find({}, {"_id": 0}).to_list(200)
 
 
 @api_router.post("/chat/teach")
 async def teach_fact(input: TeachInput, request: Request):
-    await _owner_only(request)
+    await require_admin(request)
     doc = {"id": str(uuid.uuid4()), "fact": input.fact.strip(), "created_at": datetime.now(timezone.utc).isoformat()}
     await db.bot_knowledge.insert_one(doc)
     return {"id": doc["id"], "fact": doc["fact"], "created_at": doc["created_at"]}
@@ -1040,7 +1233,7 @@ async def teach_fact(input: TeachInput, request: Request):
 
 @api_router.delete("/chat/teach/{fact_id}")
 async def delete_fact(fact_id: str, request: Request):
-    await _owner_only(request)
+    await require_admin(request)
     await db.bot_knowledge.delete_one({"id": fact_id})
     return {"status": "deleted"}
 

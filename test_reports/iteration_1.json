@@ -1,0 +1,33 @@
+{
+  "summary": "Tested the new coupon system + role-based admin panel end to end on the preview URL. Backend: 17 pytest cases (coupon validate math, admin coupon CRUD with persistence/expiry/reserved-prefix/duplicate checks, owner-only role management incl. promote/demote and self-demote block, non-admin 403s, create-order rejecting invalid coupons) - all 17 passed. Frontend: owner login on /account shows owner-tools with coupons-panel + admins-panel + log-hours + train-concierge; created QATEST15 (15% off, exp 2026-12-31, max 5) -> rendered as '15% off ... 0 / 5 used' and deleted successfully; super-owner badge present; promoted+demoted a second user via admins-panel UI (with correct error toast for unknown email); payment modal on /fractional-cxo: 9% launch discount on $1,290 pack -> HIA9-xxxxx code, pay button $1,173.9, savings line struck-through $1,290, remove restores $1,290; invalid promo code shows 'This code isn't valid.' toast with no discount; custom code QAUI20 (20%) on $690 pack -> $552 and launch button hidden (mutual exclusivity); non-admin user sees no owner-tools. No real Razorpay payment was initiated.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PayButton (amount modal)", "issue": "Money formatting drops trailing zero: shows 'Pay $1,173.9 securely' and 'you save $116.1' instead of $1,173.90 / $116.10 (money() uses maximumFractionDigits:2 without minimumFractionDigits:2 for discounted values).", "selector": "[data-testid='amount-pay-button'], [data-testid='coupon-savings-line']", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Book pack while auth state is still loading", "issue": "AuthContext initialises user=undefined (checking). PayButton.start() does `if (user) ... else setAuthOpen(true)`, so clicking a Book button before /api/auth/me resolves opens the login modal for an already-logged-in user. Reproduced once (fast click after page load); closing the modal then required a second click. Suggested fix: treat user===undefined as 'loading' (disable/spinner) instead of unauthenticated.", "affected_selectors": ["[data-testid='cxo-pack-pay-desktop-50']", "[data-testid='auth-modal']"]}
+    ],
+    "design_issues": [
+      {"screen": "/account admin tools - coupon form", "issues": ["Expiry field uses the browser-native date input (type=date, mm/dd/yyyy) rather than a styled date picker; inconsistent with the rest of the polished form styling (minor)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Fix money formatting so discounted amounts always show 2 decimals ($1,173.90, you save $116.10).",
+    "Handle the auth 'loading' state in PayButton so logged-in users are not shown the login modal on an early click."
+  ],
+  "critical_code_review_comments": [
+    "server.py is >1200 lines and mixes auth, payments, coupons, admin, chat - consider splitting into routers.",
+    "Discount is correctly recomputed server-side in /api/payments/create-order and coupon percentages are never trusted from the client - good.",
+    "used_count only increments on verify/webhook; max_uses therefore does not reserve on order creation, so a coupon could be over-redeemed under concurrent checkouts (low risk, worth noting)."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "100% (all requested flows passed; 2 cosmetic/UX nits)"},
+  "seed_data_creation": "Registered sun@sohighon.ai / OwnerPass123! (super-owner) and a throwaway user qa_ui_1787290903@example.test / UserPass123! (demoted back to 'user'). All test coupons (QATEST15, QAUI20, TEST*) were deleted after testing; admin coupon list is empty.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Super-owner: sun@sohighon.ai / OwnerPass123!  |  Normal user: qa_ui_1787290903@example.test / UserPass123!",
+  "context_for_next_testing_agent": "Backend regression suite lives at /app/backend/tests/backend_test.py (17 tests, all green, self-cleaning). On /account an onboarding overlay (data-testid=onboarding-overlay) blocks clicks right after first login - dismiss with onboarding-skip-text. Before clicking Book buttons, wait for the /api/auth/me response or the login modal will appear. LIVE Razorpay keys: never click past amount-pay-button.",
+  "rca_of_the_issue": "Auth-modal-on-logged-in-user: AuthProvider sets user=undefined while /api/auth/me is in flight; PayButton's truthiness check treats that as logged out. Money formatting: money() helper only sets maximumFractionDigits."
+}
