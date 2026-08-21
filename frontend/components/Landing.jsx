@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Lenis from "lenis";
+import { useAuth } from "@/context/AuthContext";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import Portal from "@/components/Portal";
@@ -14,6 +16,16 @@ import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 
 export default function Landing() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // Logged-in users belong in the portal, not the marketing site.
+  useEffect(() => {
+    if (user && !window.location.hash?.includes("session_id=")) {
+      router.replace("/portal");
+    }
+  }, [user, router]);
+
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const lenis = new Lenis({ lerp: 0.09 });

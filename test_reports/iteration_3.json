@@ -1,0 +1,25 @@
+{
+  "summary": "Focused frontend re-test of 3 fixes + 1 regression on the High On AI portal (Next.js + FastAPI). FIX1: registered brand-new user qanew589935@example.com via marketing AuthModal (auth-mode-signup) -> redirected to /portal with onboarding-overlay count = 0, zero 'growth 360' text, scan-url-input visible/clickable/typable and scan-start-button present (no modal to skip). FIX2: at 390x844 logged in as seeded user, portal-view-site-mobile and portal-logout-mobile are both visible in the topbar; clicking portal-logout-mobile logged the user out and returned to the marketing site (/) with marketing nav rendered. FIX3: chat-launcher and onboarding-overlay counts are 0 on /portal, /portal/leads, /portal/pages and on a public generated page /p?slug=roadmap-release-and-enterprise-issue-tracking-for--4e9ba5 (verified via computed-style fixed-element scan too). REGRESSION: /portal/leads at 390x844 renders leads-table with the 1 seeded lead; filter row stacks (leads-search full width 308px, spam toggle + export on a second row, no horizontal document overflow: scrollWidth == clientWidth == 390). No LLM scan/generate triggered, no Razorpay, no Regenerate confirm triggered.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Marketing landing at 390x844", "issues": ["Floating hero chips (e.g. 'Voice AI') extend past the right edge of the viewport and are clipped - purely cosmetic, no document-level horizontal scroll observed on portal pages"]},
+      {"screen": "/portal/leads at 390x844", "issues": ["Leads table itself still scrolls horizontally (the 'Answers/Notes' column is cut off); acceptable as table overflow-x but consider a stacked card layout on mobile"]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "providers.jsx MarketingOverlays uses pathname.startsWith('/p') to suppress overlays - this is a prefix match that would also silence Onboarding/ChatBot on any future marketing route beginning with 'p' (e.g. /pricing, /partners). Prefer pathname === '/p' || pathname.startsWith('/p?') || pathname.startsWith('/p/')."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested (frontend-only request)", "frontend": "100% (4/4 targeted checks passed)"},
+  "seed_data_creation": "Registered one throwaway user qanew589935@example.com / password123 (no scan run, so no downstream data created).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "test_credentials": "New: qanew589935@example.com / password123. Seeded: qaportal991221@example.com / password123 (1 scan, 6 pages, 1 lead).",
+  "context_for_next_testing_agent": "All 3 iteration_2 fixes verified. Current slugs on seeded account: roadmap-release-and-enterprise-issue-tracking-for--4e9ba5, customer-feedback-request-intake-and-product-ops-s-186a01, ai-powered-product-development-and-issue-triage-fo-820b96. Notes for automation: on mobile viewport the marketing nav-mobile-menu-button click did not reliably reveal nav-mobile-login-button (heavy landing animation) - log in at 1920x1080 then resize to 390x844 instead. Use wait_until='domcontentloaded' + explicit selector waits (networkidle times out). Visiting /portal while logged out renders the marketing landing page while keeping the /portal URL.",
+  "rca_of_the_issue": "N/A - all targeted fixes confirmed working."
+}

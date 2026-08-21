@@ -1,0 +1,34 @@
+{
+  "summary": "Frontend-only E2E testing of the new authenticated PORTAL and routing separation on the preview URL. Verified: self-registration -> auto redirect to /portal; visiting / while logged in bounces to /portal; portal shell (sidebar/topbar/user email/logout/view-site); real LLM scan of https://linear.app (completed ~60s, 90 queries); Opportunities screen (count, top-5 cards, missed-searches 4,900 = sum of top5, 90-row table with volume + 'Not visible yet'); generate-pages via real LLM (6 published page cards with reach + keyword chips + live links); public /p?slug=... landing page (title, 3 services, 4 FAQ accordion expand) with lead form submit -> success state; lead appears in /portal/leads with correct name/email/company, leads-stat-total=1, search filter, status change + notes save (toast 'Lead updated', persisted after reload), CSV export download; logged-out auth guard on /portal, /portal/opportunities, /portal/leads all redirect to /; logout returns to marketing. Pricing CTA responsiveness at 390x844 on /fractional-cxo verified with no overflow/clipping. All primary flows PASS; two portal UX gaps found.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Onboarding (rendered globally in app/providers.jsx)", "issue": "For a newly registered user the legacy 'Let's scan your business / Run my growth 360' onboarding modal (onboarding-overlay, z-[100]) opens ON TOP of the portal Discover screen, fully blocking scan-url-input/scan-start-button until 'Skip for now' is clicked. It is a second, competing scan flow and contradicts the new portal-first UX. Suggest not rendering Onboarding inside /portal routes (or replacing the portal scan with it).", "selector": "[data-testid=\"onboarding-overlay\"]", "priority": "HIGH"},
+      {"component": "PortalShell", "issue": "No way to log out or 'View site' on mobile/tablet (<768px): portal-logout and portal-view-site live only inside the md:flex sidebar; the mobile topbar avatar is not a menu. Mobile users are stuck in the portal.", "selector": "[data-testid=\"portal-logout\"]", "priority": "MEDIUM"},
+      {"component": "PortalLeadsBoard (mobile 390px)", "issue": "Filter row cramped: the 'Show spam' checkbox label is pushed flush to the right edge and the Export button wraps to its own line (no viewport overflow, cosmetic).", "selector": "[data-testid=\"leads-spam-toggle\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Portal (all screens)", "issues": ["Floating chat widget sits over the bottom-left sidebar area and, on mobile /portal, near the 'Start AI analysis' button; clicks still register (elementFromPoint at portal-logout returns portal-logout) but it visually overlaps the 'Log out' label."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Do not render the legacy Onboarding growth-360 modal on /portal routes (it blocks the portal scan form for every new user).",
+    "Expose Log out / View site in the portal mobile topbar (or a mobile menu) since the sidebar is hidden below md.",
+    "Optional: tighten the leads filter row layout at 390px."
+  ],
+  "critical_code_review_comments": [
+    "PortalScan/Opportunities/GeneratedPages/PortalLeadsBoard build API base from window.location.origin instead of process.env.REACT_APP_BACKEND_URL — works today because frontend and API share the origin, but it deviates from the env-var rule and will break if the API host differs.",
+    "Fetch error handling swallows the real error (catch {} + generic toast) with no HTTP status surfaced; a failed 120s LLM scan gives the user no diagnostic. Consider surfacing status/detail.",
+    "GeneratedPages 'Regenerate' has no confirmation — one click replaces all published pages (and orphans their public URLs)."
+  ],
+  "updated_files": ["/app/frontend/components/portal/PortalShell.jsx"],
+  "success_rate": {"backend": "not tested (frontend-only request)", "frontend": "95%"},
+  "seed_data_creation": "Registered portal test users qaportal822748@example.com and qaportal991221@example.com (password123). qaportal991221 has a linear.app scan (90 queries), 6 generated pages, and 1 lead (QA Lead Tester / qalead991221@example.com / QA Test Co, status Contacted, note 'QA note from test').",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "qaportal991221@example.com / password123 (portal user with full data: scan + 6 pages + 1 lead). Public page slug: linear-the-modern-jira-alternative-for-saas-produc-a8f59a",
+  "context_for_next_testing_agent": "AuthModal mode toggles are data-testid auth-mode-login / auth-mode-signup (NOT 'register'). Landing page uses heavy animation so page.wait_for_load_state('networkidle') times out — use domcontentloaded + explicit selector waits. LLM scan took ~60s and page generation ~90s; use 150s waits. A global Onboarding overlay must be skipped ([data-testid=onboarding-skip]) right after login before interacting with /portal. Portal mobile tab links now have data-testid portal-nav-<x>-mobile (added by this agent). Coupons/admin (iteration_1) and Razorpay payment were not touched.",
+  "rca_of_the_issue": "Onboarding is mounted globally in app/providers.jsx, so it renders on every route including the new /portal shell; its z-[100] fixed overlay covers the portal Discover screen for users who have not completed/skipped onboarding."
+}

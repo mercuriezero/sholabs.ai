@@ -37,7 +37,7 @@ function loadRazorpay() {
   });
 }
 
-export default function PayButton({ label = "Pay now", testid = "pay-button", context, initialPackage }) {
+export default function PayButton({ label = "Pay now", testid = "pay-button", context, initialPackage, block = false }) {
   const packages = context === "pilot" ? PILOT_PACKAGES : context === "cxo" ? CXO_PACKS : null;
   const { user } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
@@ -182,7 +182,7 @@ export default function PayButton({ label = "Pay now", testid = "pay-button", co
       <button
         onClick={start}
         data-testid={testid}
-        className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
+        className={`inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg ${block ? "w-full sm:w-auto" : ""}`}
       >
         <DollarSign className="h-4 w-4" /> {label}
       </button>

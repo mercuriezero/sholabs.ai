@@ -1,15 +1,21 @@
 {
-  "theme": "White theme only (No dark theme)",
+  "theme": "light",
+  "typography": {
+    "headings": {
+      "font": "Outfit, sans-serif",
+      "strategy": "Expressive and dense. Use tracking-tight for H1-H3 to ensure a highly polished, professional look. Avoid generic defaults. Font-black or font-light depending on context. For portal stat-headers, use Outfit font-semibold."
+    },
+    "body": {
+      "font": "Inter, sans-serif",
+      "strategy": "High legibility for dense tabular data. Use text-sm for standard dashboard text, text-xs for meta-data and tags."
+    }
+  },
   "colors": {
     "background": "#FFFFFF",
+    "foreground": "#0A0A0A",
     "surface": "#F9FAFB",
-    "surface_soft": "#F3F4F6",
-    "text_primary": "#0A0A0A",
-    "text_secondary": "#525252",
     "border": "#E5E7EB",
-    "cta_background": "#0A0A0A",
-    "cta_text": "#FFFFFF",
-    "brand_stripes": {
+    "brand_palette": {
       "yellow": "#FFD900",
       "cyan": "#2BBCC4",
       "green": "#1FA84A",
@@ -18,107 +24,92 @@
       "royal_blue": "#2B39D1",
       "orange": "#F7941E",
       "purple": "#91268F"
-    }
-  },
-  "typography": {
-    "heading_font": "Outfit",
-    "body_font": "Inter",
-    "mono_font": "JetBrains Mono",
-    "scale": {
-      "h1": "text-5xl md:text-6xl lg:text-[72px] font-bold tracking-tighter leading-[1.1] text-[#0A0A0A]",
-      "h2": "text-4xl md:text-5xl font-semibold tracking-tight text-[#0A0A0A]",
-      "h3": "text-2xl md:text-3xl font-medium tracking-tight text-[#0A0A0A]",
-      "body": "text-lg leading-relaxed text-[#525252]",
-      "small": "text-sm font-medium tracking-wide uppercase text-[#525252]"
     },
-    "pairing_justification": "Outfit delivers a striking, geometric display aesthetic for high-end agency branding, while Inter provides sterile, high-legibility contrast for UI components like the prompt CTA and dashboard panels."
-  },
-  "grids": {
-    "hero": "Single-column centered layout (max-w-4xl) to ensure tight typography and focus on the CTA.",
-    "portal": "Vertical stack with top-aligned tabs and a large 16:9 or 21:9 UI panel below. Center the tabs horizontally.",
-    "footer": "Standard multi-column grid for links, followed by a massive full-width container for the brand visual at the very bottom."
+    "strategy": "White theme predominantly. Use Ink (#0A0A0A) for sharp contrasts, text, and active states. Use the 8-color stripe palette exclusively for semantic highlights (e.g., green for successful scans, red for 'Not visible yet' warnings, cyan for AI generative states, purple/magenta for tags). Do not use generic tailwind blues for primary CTAs, stick to Ink (#0A0A0A) or brand colors."
   },
   "layouts": {
-    "spacing_scale": "Use 2-3x standard spacing. Apply py-24 or py-32 for section pacing. gap-8 and gap-12 for flex components.",
-    "hero_section": "Generous vertical rhythm. Eyebrow -> H1 -> Subtitle -> Stat -> Prompt Box CTA.",
-    "portal_section": "Max-w-6xl container. Ensure enough padding so the active tinted panel feels like a premium embedded product window.",
-    "glassy_brand_footer": "Relative positioning with overflow-hidden on the footer container. The very bottom should feature the 8 brand stripes vertically, overlaid with a giant glassy text mask reading 'high on ai'."
-  },
-  "components": {
-    "nav": {
-      "description": "Sticky top navigation, backdrop-blur-xl bg-white/70, 1px bottom border border-black/5.",
-      "elements": "Logo (left), Navigation Links (center), Primary CTA (right)."
+    "marketing_site_fixes": {
+      "pricing_cta": "Make sure CTA buttons are wrapped in flex containers with flex-wrap on mobile, or grid-cols-1 on mobile and grid-cols-2 on desktop. Ensure no awkward text wrapping. Add p-4 to buttons, ensure w-full on mobile, auto width on desktop. Must be fully responsive."
     },
-    "hero": {
-      "description": "Gushwork-style centered hero. Bold, minimal, grid-backed.",
-      "elements": "Eyebrow ('Full-Stack H.I.A.I. Engine'), Headline, Subtitle, Stat Callout."
+    "portal_shell": {
+      "structure": "Separate authenticated shell. Sidebar (w-64) fixed on left, Topbar fixed on top. Main content area takes up remaining space (calc(100vw-16rem)).",
+      "sidebar": "Dense, tool-like. Includes navigation items: Dashboard, AI Scan, Opportunities, Pages, Settings. Logout at the bottom with 'Back to Site' button routing back to marketing site.",
+      "topbar": "Contains page breadcrumbs, user profile, and high-level actions."
     },
-    "prompt_box_cta": {
-      "description": "Clay.com style giant prompt input box.",
-      "elements": "White/Soft background box with heavy shadow-2xl, rounded-2xl. Rotating typewriter placeholder text. Quick-action chips (rounded-full). Submit button is a solid black circle with a white arrow."
+    "onboarding_ai_scan": {
+      "layout": "2-column grid. Left: Live progress checklist with Framer Motion entering animations (Scanning content... Finding demand... etc). Right: Live-findings panel simulating a Google/LLM search with glowing AI borders using brand cyan/magenta."
     },
-    "services_portal": {
-      "description": "Auto-cycling interactive tabbed showcase.",
-      "elements": "Pill-shaped tab bar. Cycles between 4 services: GEO leads, AI videos, Voice AI, Hire fractional CXO. Cycles every 3s. The active tab and display panel are tinted utilizing different brand colors for each state."
+    "opportunities_screen": {
+      "layout": "Bento Grid. Top section: Hero stat '100 Opportunities to Get Found'. Below: Horizontal scroll or grid of top-5 query cards. Middle section: Sample SERP snippet with a warning card '220 searches last month didn't find you'. Bottom: Full width shadcn Data Table with ~100 opportunities."
     },
-    "faq": {
-      "description": "Accordion-style genuine GEO/LLM-focused FAQ.",
-      "elements": "Clean lines, 1px borders, bold question text."
+    "generated_pages_screen": {
+      "layout": "Grid layout (grid-cols-1 md:grid-cols-2 lg:grid-cols-3) for published page cards. Each card uses bento-style internal padding, showing 'Service/Published' tags, title, keyword-cluster chips, and 'Go to Live Page' button."
+    },
+    "public_landing_page_template": {
+      "layout": "Standard marketing layout for generated pages. Centered hero, 3-column services grid with 'Book Now' CTAs, single column FAQ accordion. Includes a 'Request Call Back' Lead capture modal form (Full Name, Company, Email, Phone+Country)."
+    },
+    "leads_dashboard": {
+      "layout": "Dense B2B data view. Top control bar: Search input, 'Show spam' toggle, 'Apply Filters' dropdown, 'Invite', 'Export Report' buttons. Main view: Table with columns (WHEN, NAME, ACTION, STATUS, ADD NOTES inline, VIEW JOURNEY)."
     }
   },
   "visual_enhancers": {
-    "grid_background": "Implement a subtle grid background in the hero: background-image with repeating linear gradients (black/5), masked with a radial-gradient to fade at the edges.",
-    "color_infusion": "Use the 8 vibrant brand colors strategically as accents (active chips, portal panel tints) against the stark white theme. Avoid muddy gradients.",
-    "glassmorphism": "For the bottom footer brand treatment, use backdrop-blur and partial opacity (bg-white/30) over the vibrant color stripes to create a premium glass effect."
+    "surface_styles": "Use 'Neumorphism / Clay & Crisp' for dashboard cards: Flat background (White or #F9FAFB), 1px solid border (#E5E7EB), subtle shadow-sm. No muddy gradients.",
+    "ai_elements": "For the 'AI Scan' progress and generative moments, use 'The Tracing Beam' (animated 1px border gradient) or a 'Glassmorphism' container with backdrop-blur-xl and a subtle brand stripe gradient behind it."
+  },
+  "grids": {
+    "dashboard_grid": "Tight gap (gap-4 or gap-6). Use col-span-1 for summary widgets, col-span-2 or 3 for main data tables. Always use mobile-first responsive grids."
   },
   "motion": {
-    "typewriter": "Use an interval or typing animation library for the prompt box placeholder text.",
-    "portal_cycling": "Use Framer Motion AnimatePresence to smoothly crossfade the active portal panel and slide the active tab indicator every 3 seconds.",
-    "interactions": "Micro-animations on hover: buttons elevate (-translate-y-1) and shadows intensify."
+    "strategy": "Micro-interactions for feedback. Staggered list animations for the AI Scan checklist. Hover lifts (-translate-y-1) for generated page cards."
   },
-  "seo_schema": {
-    "organization": "JSON-LD targeting QuantumAI OS Pvt Ltd and High On AI.",
-    "faq": "JSON-LD FAQPage schema wrapping the semantic accordion."
+  "components": [
+    {
+      "name": "Sidebar",
+      "instructions": "Use lucide-react icons. Add 'data-testid' to all nav links. Provide active state styling with Ink (#0A0A0A) background and White text."
+    },
+    {
+      "name": "DataTable",
+      "instructions": "Use shadcn/ui Table. Ensure dense padding (py-2 px-3) for B2B feel. Left-align text."
+    },
+    {
+      "name": "MetricCard",
+      "instructions": "Flat surface, sharp borders, bold Outfit typography for the number."
+    },
+    {
+      "name": "AIChecklist",
+      "instructions": "Framer motion staggered children. Active item highlighted, completed items get a green checkmark."
+    },
+    {
+      "name": "Badge/Chip",
+      "instructions": "Use the 8-color palette for background tints (e.g., bg-cyan-100 text-cyan-900) for keyword clusters and statuses."
+    }
+  ],
+  "accessibility": {
+    "contrast": "Ensure Ink (#0A0A0A) on White/Gray meets APCA/WCAG standards. Do not use fully transparent backgrounds for overlays, always use a blur or semi-solid scrim.",
+    "testing": "All interactive elements (buttons, inputs, toggles, nav links) MUST include a 'data-testid' attribute (e.g., 'data-testid=\"sidebar-opportunities-link\"')."
   },
   "media": {
-    "logo": "https://customer-assets-4nw71qhi.emergentagent.net/job_df4d2516-00a7-4efb-a317-c500996e2312/artifacts/f0m7l0j4_logo.webp",
-    "favicon": "https://customer-assets-4nw71qhi.emergentagent.net/job_df4d2516-00a7-4efb-a317-c500996e2312/artifacts/9bqbpgwr_fevicon.webp",
-    "portal_images": [
+    "image_urls": [
       {
-        "category": "Futuristic UI Mock",
-        "url": "https://images.unsplash.com/photo-1720962158937-7ea890052166?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwYWklMjBpbnRlcmZhY2UlMjBkYXNoYm9hcmR8ZW58MHx8fHwxNzg2Nzc4MjkzfDA&ixlib=rb-4.1.0&q=85"
+        "url": "https://images.unsplash.com/photo-1750365920056-d4b4ca73fbaa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGdsb3dpbmclMjBhaSUyMHRlY2hub2xvZ3l8ZW58MHx8fHwxNzg3MzAxMTk4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract glowing AI bulb",
+        "category": "marketing_hero_or_scan_visual"
       },
       {
-        "category": "AI Video Generation",
-        "url": "https://images.unsplash.com/photo-1677442135751-15e514d909f3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwyfHxhaSUyMHZpZGVvJTIwZ2VuZXJhdGlvbiUyMGFic3RyYWN0fGVufDB8fHx8MTc4Njc3ODI5M3ww&ixlib=rb-4.1.0&q=85"
+        "url": "https://images.unsplash.com/photo-1573496130141-209d200cebd8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBiMmIlMjB0ZWFtJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg3MzAxMTk4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "B2B professional team portrait",
+        "category": "dashboard_avatars_or_landing_page_team"
       }
-    ]
+    ],
+    "guidelines": "Use abstract AI images sparingly to indicate generative actions. Use professional portraits for user avatars or mock CRM data. Never use placeholder texts for logos."
   },
-  "accessibility": {
-    "contrast": "Maintain WCAG AA compliance. Dark text on light backgrounds. For CTA chips using brand colors, ensure text is readable (white on dark colors, black on light colors).",
-    "motion": "Respect prefers-reduced-motion for the automatic 3s cycling."
-  },
-  "3d_libraries": {
-    "framer_motion": "Required for layout transitions in the portal tabs and prompt box animations.",
-    "lucide_react": "Required for scalable UI iconography."
-  },
-  "instructions_to_main_agent": [
-    "Install 'framer-motion' and 'lucide-react'.",
-    "Ensure 'Outfit' and 'Inter' fonts are loaded via Google Fonts or standard imports.",
-    "Set up Tailwind configuration to include the 8 custom brand colors under a 'brand' object.",
-    "Construct the Hero section using a Gushwork-inspired centered aesthetic with a subtle technical grid background.",
-    "Build the Prompt Box CTA mirroring Clay.com's aesthetic: large rounded input, quick-action chips underneath, and a black arrow submit button. Incorporate a typing effect for the placeholder.",
-    "Develop the Services Portal component. Create an automated cycle (0 to 3) running every 3 seconds to switch active tabs. Sync this state to display corresponding content in the main glass-tinted UI panel below. Animate state changes smoothly.",
-    "Integrate the 8 brand stripes directly into the bottom-most footer section, overlaid by a giant, partially transparent 'high on ai' text or SVG.",
-    "Implement structured JSON-LD schemas (FAQPage and Organization) in the document head.",
-    "Ensure the final aesthetic feels premium, high-end, and starkly distinct from generic dark-mode AI templates."
-  ],
-  "universal_guidelines_for_main_agent": [
-    "Strictly adhere to a White/Light theme; dark mode is strictly forbidden.",
-    "Include 'data-testid' attributes on all interactive elements (buttons, links, inputs).",
-    "Apply 2-3x standard spacing to create a luxurious, premium layout.",
-    "Use proper semantic HTML elements (section, nav, main, footer).",
-    "Left-align standard body text for readability, reserving centered alignment for hero headings or specific focal points.",
-    "Do not use generic placeholder image services; utilize the provided Unsplash URLs or generic CSS gradients/abstract shapes tinted with brand colors."
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Do not converge toward generic AI outputs. Make the portal feel like a high-end data tool.",
+    "Do not center align the app container. Left-align dense data.",
+    "Avoid generic tailwind blue; stick strictly to the Ink (#0A0A0A) and 8-color stripe palette defined in the brand.",
+    "Implement a clear structural divide: The portal (authenticated) MUST NOT share the marketing layout. Implement a completely separate layout wrapper for the portal with a persistent left sidebar.",
+    "Fix marketing page pricing CTA buttons to be fully responsive and wrap correctly without awkward overflows.",
+    "Use Framer Motion for the AI Scan flow to create an engaging experience.",
+    "Add data-testid to every clickable item for testing."
   ]
 }

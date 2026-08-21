@@ -543,6 +543,236 @@ async def crm_leads(request: Request):
     return {"leads": DEMO_LEADS, "stats": {"total": len(DEMO_LEADS), "qualified": qualified, "verified": verified, "pipeline": pipeline}}
 
 
+# ---------- Portal: demand scan · opportunities · page generation · leads ----------
+def _slugify(s: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", (s or "page").lower()).strip("-")
+    return s[:50] or "page"
+
+
+async def llm_json(system: str, user_text: str, session_prefix: str) -> dict:
+    chat = LlmChat(
+        api_key=os.environ["EMERGENT_LLM_KEY"],
+        session_id=f"{session_prefix}-{uuid.uuid4().hex[:8]}",
+        system_message=system,
+    ).with_model("openai", "gpt-5.4")
+    collected = []
+    async for ev in chat.stream_message(UserMessage(text=user_text)):
+        if isinstance(ev, TextDelta):
+            collected.append(ev.content)
+        elif isinstance(ev, StreamDone):
+            break
+    raw = "".join(collected).strip()
+    m = re.search(r"\{.*\}", raw, re.S)
+    if m:
+        raw = m.group(0)
+    return json.loads(raw)
+
+
+SCAN_SYSTEM = """You are High On AI's demand-intelligence agent. Given a company's website content and optional goal, analyze the business and surface real buyer-intent search demand.
+Return ONLY valid minified JSON (no markdown, no prose) with EXACTLY this shape:
+{"company":"","summary":"one sentence on what they do","products":["",""],"icp":"who buys from them","queries":[{"q":"buyer-intent search phrase","volume":<int>,"intent":"High|Medium"}]}
+Rules: 60 to 100 query objects. Each q is a lowercase, specific long-tail buyer-intent phrase a real prospect would type into Google or ChatGPT, tailored to the company's products and ICP. volume is a realistic estimated monthly search count between 30 and 2000 (a few high, most mid/low). intent is High or Medium. No duplicate queries."""
+
+PAGES_SYSTEM = """You are High On AI's page-generation agent. Given a company profile and target buyer-intent queries, produce SEO landing/resource pages that each cluster related queries.
+Return ONLY valid minified JSON (no markdown): {"pages":[{"title":"","subtitle":"one line","hero":"2 sentence intro","services":[{"title":"","desc":"one sentence"}],"faqs":[{"q":"","a":"2 sentence answer"}],"target_queries":["",""]}]}
+Rules: produce EXACTLY the requested number of pages. Each page clusters 8 to 15 related queries into target_queries, has exactly 3 services and exactly 4 faqs. Persuasive, specific, buyer-focused copy. FAQ answers should directly answer the target queries so LLMs can cite them."""
+
+
+class ScanInput(BaseModel):
+    url: str = Field(min_length=3, max_length=300)
+    goal: str = Field(default="", max_length=500)
+
+
+@api_router.post("/portal/scan")
+async def portal_scan(input: ScanInput, request: Request):
+    user = await get_current_user(request)
+    url = input.url.strip()
+    site_text = await fetch_site_text(url)
+    prompt = f"Website: {url}\nGoal: {input.goal or 'grow qualified pipeline'}\n"
+    if site_text:
+        prompt += f"Website content excerpt:\n{site_text[:3500]}\n"
+    prompt += "Analyze and return the JSON now."
+    try:
+        data = await llm_json(SCAN_SYSTEM, prompt, "scan")
+    except Exception:
+        logger.exception("Portal scan failed")
+        raise HTTPException(status_code=502, detail="Scan failed. Please try again.")
+    queries = [q for q in data.get("queries", []) if isinstance(q, dict) and q.get("q")]
+    for q in queries:
+        try:
+            q["volume"] = int(q.get("volume") or 0)
+        except (TypeError, ValueError):
+            q["volume"] = 0
+        q["intent"] = q.get("intent") if q.get("intent") in ("High", "Medium") else "Medium"
+    queries.sort(key=lambda q: q["volume"], reverse=True)
+    queries = queries[:100]
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["user_id"],
+        "url": url,
+        "company": data.get("company", "") or url,
+        "summary": data.get("summary", ""),
+        "products": data.get("products", [])[:20],
+        "icp": data.get("icp", ""),
+        "queries": queries,
+        "missed": sum(q["volume"] for q in queries[:5]),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.analyses.delete_many({"user_id": user["user_id"]})
+    await db.analyses.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.get("/portal/analysis")
+async def portal_analysis(request: Request):
+    user = await get_current_user(request)
+    doc = await db.analyses.find_one({"user_id": user["user_id"]}, {"_id": 0})
+    return doc or {}
+
+
+class GenPagesInput(BaseModel):
+    count: int = Field(default=6, ge=1, le=12)
+
+
+@api_router.post("/portal/generate-pages")
+async def portal_generate_pages(input: GenPagesInput, request: Request):
+    user = await get_current_user(request)
+    analysis = await db.analyses.find_one({"user_id": user["user_id"]}, {"_id": 0})
+    if not analysis:
+        raise HTTPException(status_code=400, detail="Run a scan first.")
+    top_q = [q["q"] for q in analysis.get("queries", [])[:60]]
+    prompt = (
+        f"Company: {analysis.get('company')}\nSummary: {analysis.get('summary')}\n"
+        f"Products: {', '.join(analysis.get('products', []))}\nICP: {analysis.get('icp')}\n"
+        f"Target queries: {', '.join(top_q)}\nProduce {input.count} pages now."
+    )
+    try:
+        data = await llm_json(PAGES_SYSTEM, prompt, "pages")
+    except Exception:
+        logger.exception("Portal page generation failed")
+        raise HTTPException(status_code=502, detail="Page generation failed. Please try again.")
+    vol_map = {q["q"]: q.get("volume", 0) for q in analysis.get("queries", [])}
+    await db.pages.delete_many({"user_id": user["user_id"]})
+    pages_out = []
+    for p in data.get("pages", [])[:input.count]:
+        tqs = [t for t in p.get("target_queries", []) if isinstance(t, str)]
+        reach = sum(vol_map.get(t, 0) for t in tqs) or (len(tqs) * 90)
+        doc = {
+            "id": str(uuid.uuid4()),
+            "user_id": user["user_id"],
+            "owner_email": user.get("email", ""),
+            "slug": _slugify(p.get("title", "")) + "-" + uuid.uuid4().hex[:6],
+            "company": analysis.get("company", ""),
+            "title": p.get("title", ""),
+            "subtitle": p.get("subtitle", ""),
+            "hero": p.get("hero", ""),
+            "services": p.get("services", [])[:6],
+            "faqs": p.get("faqs", [])[:8],
+            "target_queries": tqs,
+            "reach": reach,
+            "status": "published",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        await db.pages.insert_one(doc)
+        doc.pop("_id", None)
+        pages_out.append(doc)
+    return {"pages": pages_out}
+
+
+@api_router.get("/portal/pages")
+async def portal_pages(request: Request):
+    user = await get_current_user(request)
+    pages = await db.pages.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"pages": pages}
+
+
+@api_router.get("/pages/{slug}")
+async def public_page(slug: str):
+    page = await db.pages.find_one({"slug": slug}, {"_id": 0})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    return page
+
+
+class PageLeadInput(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    company: str = Field(default="", max_length=120)
+    email: str = Field(min_length=3, max_length=320)
+    phone: str = Field(default="", max_length=40)
+    country: str = Field(default="", max_length=80)
+    message: str = Field(default="", max_length=1000)
+
+
+@api_router.post("/pages/{slug}/lead")
+async def page_lead(slug: str, input: PageLeadInput):
+    page = await db.pages.find_one({"slug": slug}, {"_id": 0})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    doc = {
+        "id": str(uuid.uuid4()),
+        "owner_user_id": page["user_id"],
+        "page_slug": slug,
+        "page_title": page.get("title", ""),
+        "name": input.name.strip(),
+        "company": input.company.strip(),
+        "email": input.email.strip().lower(),
+        "phone": input.phone.strip(),
+        "country": input.country.strip(),
+        "message": input.message.strip(),
+        "action": (input.message.strip()[:60] or "Requested a demo"),
+        "status": "New Lead",
+        "notes": "",
+        "spam": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.portal_leads.insert_one(doc)
+    if OWNER_EMAIL and EMAIL_KEY:
+        asyncio.create_task(notify_owner(Lead(
+            prompt=f"Landing page lead on '{page.get('title', '')}' from {input.name} ({doc['email']}, {input.company})",
+            email=doc["email"], source="landing_page",
+        )))
+    return {"status": "ok"}
+
+
+@api_router.get("/portal/leads")
+async def portal_leads(request: Request):
+    user = await get_current_user(request)
+    leads = await db.portal_leads.find({"owner_user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return {
+        "leads": leads,
+        "stats": {
+            "total": len(leads),
+            "new": sum(1 for l in leads if l.get("status") == "New Lead"),
+            "booked": sum(1 for l in leads if l.get("status") == "Booked"),
+        },
+    }
+
+
+class LeadUpdate(BaseModel):
+    notes: str | None = Field(default=None, max_length=1000)
+    status: str | None = Field(default=None, max_length=40)
+    spam: bool | None = None
+
+
+@api_router.post("/portal/leads/{lead_id}")
+async def update_portal_lead(lead_id: str, input: LeadUpdate, request: Request):
+    user = await get_current_user(request)
+    upd = {}
+    if input.notes is not None:
+        upd["notes"] = input.notes
+    if input.status:
+        upd["status"] = input.status
+    if input.spam is not None:
+        upd["spam"] = input.spam
+    if not upd:
+        return {"status": "noop"}
+    r = await db.portal_leads.update_one({"id": lead_id, "owner_user_id": user["user_id"]}, {"$set": upd})
+    if r.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return {"status": "ok"}
+
+
 # ---------- Auth endpoints ----------
 @api_router.post("/auth/register")
 async def register(input: RegisterInput, response: Response):

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthCallback from "@/components/AuthCallback";
@@ -15,12 +16,26 @@ function HashGate({ children }) {
   return children;
 }
 
+// Marketing-only overlays: never show inside the portal or on public generated pages.
+function MarketingOverlays() {
+  const pathname = usePathname();
+  const inApp =
+    pathname === "/portal" || pathname.startsWith("/portal/") ||
+    pathname === "/p" || pathname.startsWith("/p/");
+  if (inApp) return null;
+  return (
+    <>
+      <Onboarding />
+      <ChatBot />
+    </>
+  );
+}
+
 export default function Providers({ children }) {
   return (
     <AuthProvider>
       <HashGate>{children}</HashGate>
-      <Onboarding />
-      <ChatBot />
+      <MarketingOverlays />
       <Toaster position="bottom-right" richColors />
     </AuthProvider>
   );

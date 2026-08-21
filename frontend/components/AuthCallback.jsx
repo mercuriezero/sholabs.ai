@@ -29,7 +29,7 @@ export default function AuthCallback() {
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("auth failed"))))
       .then((user) => {
         setUser(user);
-        router.replace("/");
+        router.replace("/portal");
       })
       .catch(() => {
         toast.error("Google sign-in failed. Please try again.");

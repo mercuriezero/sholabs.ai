@@ -191,3 +191,18 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Verified: 17 backend pytest cases (coupon math, CRUD, expiry/reserved/duplicate, owner-only role mgmt, non-admin 403) all pass; frontend flows (owner panel, coupon create/delete, promote/demote, 9% + custom code apply/remove in payment modal, mutual exclusivity, non-admin hidden) all pass. LIVE Razorpay never charged. Backend regression suite: /app/backend/tests/backend_test.py.
 - Fixes post-test: money() now always shows 2 decimals on fractional amounts; PayButton handles auth-loading (user===undefined) so logged-in users don't briefly see the login modal.
 - KNOWN (low risk): used_count is not reserved at order creation, so a promo code could be over-redeemed under concurrent checkouts.
+
+## Rev 28 (2026-06 fork) — Separate authenticated PORTAL + login routing + pricing CTA fix
+- PROBLEM: logged-in users still saw the public marketing site; user wanted a distinct portal (Gushwork-style demand→pages→leads engine) per attached reference PDF + audio script. Chose REAL & functional (not mock); AI-ESTIMATED search volumes (no paid keyword API — user handles real volumes manually).
+- Routing separation: after login users are REDIRECTED to /portal (Landing.jsx effect + AuthCallback → /portal). Marketing overlays (legacy Onboarding modal + ChatBot) are suppressed on /portal and /p routes (providers.jsx MarketingOverlays). PortalShell guards: user===null → redirect to /.
+- Portal (new app shell, left sidebar + topbar, distinct from marketing): 
+  • /portal (Discover) — PortalScan: enter website URL + goal → real LLM scan (fetch_site_text + gpt-5.4 JSON) → 60-100 buyer-intent queries with AI-estimated monthly volumes; animated progress. 
+  • /portal/opportunities — top-5 cards, 'demand going to competitors' missed-searches stat, full queries table ('Not visible yet'), 'Create content' → generate pages. 
+  • /portal/pages — real LLM-generated landing pages (clustered target_queries, reach estimate), published cards + 'Go to live page'. Regenerate confirms before replacing. 
+  • /portal/leads — leads dashboard: stats, search, show-spam toggle, CSV export, inline status + notes, call action. 
+- Public generated landing pages: /p?slug=... (client-rendered, PUBLIC) — hero + services (Book now) + FAQ accordion + 'Request a demo' lead form → POST /api/pages/{slug}/lead → lead lands in that owner's /portal/leads (+ owner email alert if OWNER_EMAIL+EMAIL_KEY set).
+- Backend (server.py): /api/portal/scan, /api/portal/analysis, /api/portal/generate-pages, /api/portal/pages (auth); /api/pages/{slug}, /api/pages/{slug}/lead (PUBLIC); /api/portal/leads, /api/portal/leads/{id} (auth). New collections: analyses, pages, portal_leads. Helper llm_json() collects the stream and parses JSON.
+- Pricing CTA fix: PayButton gained a `block` prop (w-full sm:w-auto); SuccessPacks mobile pack cards pass block. Verified responsive at 390px.
+- Verified: iteration_2 full portal E2E (scan→opportunities→generate→public page→lead→dashboard, routing separation, auth guard) 95%; iteration_3 targeted fixes (onboarding no longer blocks portal, mobile logout, chat hidden in portal, leads filter) 100%.
+- LIMITATIONS (flagged to user): search volumes are AI-ESTIMATED (labeled in UI), not real search data; generated /p pages are client-rendered (static-export constraint) so their own SEO is limited; pages 'publish' to our host, not the user's CMS.
+- KNOWN low-priority: portal leads table scrolls horizontally on mobile (overflow-x, acceptable).

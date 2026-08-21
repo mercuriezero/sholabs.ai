@@ -114,7 +114,7 @@ export default function SuccessPacks() {
                   ))}
                 </ul>
                 <div className="mt-5">
-                  <PayButton label="Book this pack" testid={`cxo-pack-pay-${p.hours}`} context="cxo" initialPackage={p} />
+                  <PayButton label="Book this pack" testid={`cxo-pack-pay-${p.hours}`} context="cxo" initialPackage={p} block />
                 </div>
               </div>
             </div>
