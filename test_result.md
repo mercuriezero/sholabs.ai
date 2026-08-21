@@ -271,6 +271,21 @@ frontend:
         -comment: "VERIFIED AFTER RUNTIME RESOLUTION FIX: Command Center navigation works correctly. Clicking 'Command Center' link navigates successfully. Page loads with heading 'One dashboard. Every signal. Live.' and displays dashboard content with three pillars: Get Cited (38% AI citation rate), Get Watched (64.2k views this week), Get Chosen ($184k pipeline generated). Live signal feed shows recent activity. Navigation and page rendering work correctly."
 
 backend:
+  - task: "Onboarding, saved plans, and demo leads endpoints"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Added GET /api/crm/leads (auth required) returning {leads:[20 demo leads], stats:{total,qualified,verified,pipeline}}; POST /api/account/onboard (auth) setting user.onboarded=true; GET /api/account/plans (auth) returning current user's saved growth snapshots. New email registrations now include onboarded=false. Verify: register a user, GET /api/crm/leads returns 20 leads + stats and 401 without auth; POST /api/account/onboard returns {status:ok} and GET /api/auth/me then shows onboarded=true; GET /api/account/plans returns {plans:[...]} (empty for a new user, 401 without auth)."
+        -working: true
+        -agent: "testing"
+        -comment: "VERIFIED: All three new backend endpoints are working correctly. Test results: (1) POST /api/auth/register returns 200 with user object including 'onboarded: false' ✓, (2) GET /api/crm/leads (authenticated) returns 200 with exactly 20 demo leads (each with name, company, email, phone, source, status, value, date) and stats object (total: 20, qualified: 9, verified: 7, pipeline: 55350) ✓, (3) GET /api/crm/leads (unauthenticated) returns 401 ✓, (4) POST /api/account/onboard (authenticated) returns 200 with {status: ok} ✓, (5) GET /api/auth/me after onboarding confirms 'onboarded: true' ✓, (6) POST /api/account/onboard (unauthenticated) returns 401 ✓, (7) GET /api/account/plans (authenticated) returns 200 with {plans: []} (empty array for new user) ✓, (8) GET /api/account/plans (unauthenticated) returns 401 ✓. All authentication checks, data structures, and authorization requirements are working as expected."
+
   - task: "Payments in USD via Razorpay live keys (create-order)"
     implemented: true
     working: true
@@ -316,12 +331,12 @@ backend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 4
+  test_sequence: 5
   run_ui: false
 
 test_plan:
   current_focus:
-    - "USD pricing conversion and Google OAuth testing complete"
+    - "All backend endpoints tested and working"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -442,3 +457,20 @@ agent_communication:
       - amount-modal-authenticated.png (Payment modal after authentication)
       
       ALL CRITICAL FUNCTIONALITY VERIFIED! Both feature areas are working correctly on the preview site.
+    -agent: "testing"
+    -message: >
+      ONBOARDING, CRM LEADS & ACCOUNT PLANS TESTING COMPLETE - ALL TESTS PASSED!
+      
+      Tested three new backend endpoints as requested:
+      
+      TEST RESULTS (8/8 PASSED):
+      ✅ POST /api/auth/register: Returns 200 with user object including "onboarded": false
+      ✅ GET /api/crm/leads (authenticated): Returns 200 with exactly 20 demo leads (each with name, company, email, phone, source, status, value, date) and stats object (total: 20, qualified: 9, verified: 7, pipeline: 55350)
+      ✅ GET /api/crm/leads (unauthenticated): Returns 401 as expected
+      ✅ POST /api/account/onboard (authenticated): Returns 200 with {status: ok}
+      ✅ GET /api/auth/me (after onboarding): Confirms user now has "onboarded": true
+      ✅ POST /api/account/onboard (unauthenticated): Returns 401 as expected
+      ✅ GET /api/account/plans (authenticated): Returns 200 with {plans: []} (empty array for brand-new user)
+      ✅ GET /api/account/plans (unauthenticated): Returns 401 as expected
+      
+      All authentication checks, data structures, and authorization requirements are working correctly. The onboarding flow, CRM leads endpoint, and account plans endpoint are fully functional and ready for production use.

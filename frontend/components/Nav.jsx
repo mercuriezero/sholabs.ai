@@ -47,7 +47,10 @@ export default function Nav() {
             </button>
           )}
           {user && (
-            <div className="flex items-center gap-2.5" data-testid="nav-user-menu">
+            <div className="flex items-center gap-3" data-testid="nav-user-menu">
+              <Link href="/leads" data-testid="nav-leads-link" className="text-sm font-medium text-neutral-600 transition-colors hover:text-black">
+                Leads
+              </Link>
               <Link href="/account" data-testid="nav-account-link" aria-label="My account" className="transition-transform hover:-translate-y-0.5">
                 {user.picture ? (
                   <img src={user.picture} alt="" className="h-8 w-8 rounded-full" referrerPolicy="no-referrer" />
@@ -108,6 +111,16 @@ export default function Nav() {
               >
                 Log in
               </button>
+            )}
+            {user && (
+              <Link
+                href="/leads"
+                data-testid="nav-mobile-leads-link"
+                className="w-fit text-sm font-medium text-neutral-700"
+                onClick={() => setOpen(false)}
+              >
+                Leads
+              </Link>
             )}
             {user && (
               <button

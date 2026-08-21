@@ -469,6 +469,55 @@ async def get_plans():
     return plans
 
 
+# ---------- Onboarding + saved snapshots + demo leads ----------
+@api_router.post("/account/onboard")
+async def mark_onboarded(request: Request):
+    user = await get_current_user(request)
+    await db.users.update_one({"user_id": user["user_id"]}, {"$set": {"onboarded": True}})
+    return {"status": "ok"}
+
+
+@api_router.get("/account/plans")
+async def account_plans(request: Request):
+    user = await get_current_user(request)
+    plans = await db.plans.find({"user_id": user["user_id"]}, {"_id": 0}).to_list(100)
+    plans.sort(key=lambda p: p.get("created_at", ""), reverse=True)
+    return {"plans": plans}
+
+
+DEMO_LEADS = [
+    {"name": "Priya Nair", "company": "Zenlytic", "email": "priya@zenlytic.io", "phone": "+1 415 555 0142", "source": "GEO / AI citations", "status": "Qualified", "value": 4200, "date": "2026-08-02"},
+    {"name": "Marcus Lee", "company": "Flowstate HR", "email": "marcus@flowstatehr.com", "phone": "+1 646 555 0198", "source": "AI Video", "status": "Verified", "value": 1700, "date": "2026-08-03"},
+    {"name": "Sara Gomez", "company": "Brightcart", "email": "sara@brightcart.co", "phone": "+1 312 555 0176", "source": "Voice AI", "status": "Qualified", "value": 3600, "date": "2026-08-04"},
+    {"name": "Daniel Okafor", "company": "Kairos Labs", "email": "daniel@kairoslabs.ai", "phone": "+1 202 555 0119", "source": "AI SDR outbound", "status": "New", "value": 0, "date": "2026-08-05"},
+    {"name": "Emily Chen", "company": "Northwind Health", "email": "emily@northwind.health", "phone": "+1 617 555 0155", "source": "GEO / AI citations", "status": "Verified", "value": 5100, "date": "2026-08-05"},
+    {"name": "Rahul Verma", "company": "Payloop", "email": "rahul@payloop.in", "phone": "+91 98200 11234", "source": "Fractional CXO", "status": "Qualified", "value": 6900, "date": "2026-08-06"},
+    {"name": "Olivia Brooks", "company": "Cadence Studio", "email": "olivia@cadence.studio", "phone": "+44 20 7946 0321", "source": "UGC ads", "status": "New", "value": 0, "date": "2026-08-07"},
+    {"name": "Tomás Rivera", "company": "Grivera Foods", "email": "tomas@griverafoods.com", "phone": "+1 305 555 0188", "source": "Social media", "status": "Qualified", "value": 2100, "date": "2026-08-08"},
+    {"name": "Aisha Khan", "company": "Lumen Legal", "email": "aisha@lumenlegal.com", "phone": "+1 713 555 0144", "source": "AI Video", "status": "Verified", "value": 1700, "date": "2026-08-08"},
+    {"name": "Ben Carter", "company": "Stackforge", "email": "ben@stackforge.dev", "phone": "+1 408 555 0167", "source": "AI SDR outbound", "status": "Qualified", "value": 2400, "date": "2026-08-09"},
+    {"name": "Nadia Petrova", "company": "Aurora Skincare", "email": "nadia@auroraskin.co", "phone": "+1 917 555 0133", "source": "UGC ads", "status": "Verified", "value": 1150, "date": "2026-08-10"},
+    {"name": "James Wright", "company": "Meridian SaaS", "email": "james@meridiansaas.com", "phone": "+1 512 555 0190", "source": "GEO / AI citations", "status": "Qualified", "value": 4800, "date": "2026-08-10"},
+    {"name": "Ishaan Gupta", "company": "Trailhead Fitness", "email": "ishaan@trailhead.fit", "phone": "+91 99870 44521", "source": "Voice AI", "status": "New", "value": 0, "date": "2026-08-11"},
+    {"name": "Grace Miller", "company": "Beacon Realty", "email": "grace@beaconrealty.com", "phone": "+1 480 555 0122", "source": "AI SDR outbound", "status": "Verified", "value": 2400, "date": "2026-08-11"},
+    {"name": "Leo Fernandes", "company": "Portside Logistics", "email": "leo@portside.co", "phone": "+1 206 555 0170", "source": "Fractional CXO", "status": "Qualified", "value": 6900, "date": "2026-08-12"},
+    {"name": "Hannah Cohen", "company": "Verda Wellness", "email": "hannah@verda.health", "phone": "+1 619 555 0159", "source": "AI Video", "status": "New", "value": 0, "date": "2026-08-12"},
+    {"name": "Arjun Mehta", "company": "Cloudpeak Analytics", "email": "arjun@cloudpeak.ai", "phone": "+91 90040 77812", "source": "GEO / AI citations", "status": "Verified", "value": 5100, "date": "2026-08-13"},
+    {"name": "Sofia Rossi", "company": "Bella Bakes", "email": "sofia@bellabakes.com", "phone": "+1 786 555 0111", "source": "Social media", "status": "Qualified", "value": 2100, "date": "2026-08-13"},
+    {"name": "David Kim", "company": "Nimbus Fintech", "email": "david@nimbusfin.com", "phone": "+1 415 555 0203", "source": "Voice AI", "status": "Verified", "value": 3600, "date": "2026-08-14"},
+    {"name": "Chloe Dubois", "company": "Atelier Mode", "email": "chloe@ateliermode.fr", "phone": "+33 1 70 18 99 21", "source": "UGC ads", "status": "Qualified", "value": 1600, "date": "2026-08-14"},
+]
+
+
+@api_router.get("/crm/leads")
+async def crm_leads(request: Request):
+    await get_current_user(request)
+    qualified = sum(1 for l in DEMO_LEADS if l["status"] == "Qualified")
+    verified = sum(1 for l in DEMO_LEADS if l["status"] == "Verified")
+    pipeline = sum(l["value"] for l in DEMO_LEADS)
+    return {"leads": DEMO_LEADS, "stats": {"total": len(DEMO_LEADS), "qualified": qualified, "verified": verified, "pipeline": pipeline}}
+
+
 # ---------- Auth endpoints ----------
 @api_router.post("/auth/register")
 async def register(input: RegisterInput, response: Response):
@@ -483,6 +532,7 @@ async def register(input: RegisterInput, response: Response):
         "password_hash": hash_password(input.password),
         "auth_provider": "email",
         "role": "user",
+        "onboarded": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.users.insert_one(user)

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Clock, IndianRupee, Loader2 } from "lucide-react";
+import { ArrowUpRight, Clock, DollarSign, Loader2, FileText, ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import OwnerTools from "@/components/OwnerTools";
@@ -15,6 +15,8 @@ export default function Account() {
   const { user } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const [data, setData] = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [openPlan, setOpenPlan] = useState(null);
 
   const loadSummary = useCallback(() => {
     if (!user) return;
@@ -22,6 +24,10 @@ export default function Account() {
       .then((r) => (r.ok ? r.json() : null))
       .then(setData)
       .catch(() => setData(null));
+    fetch(`${API}/account/plans`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setPlans(d?.plans || []))
+      .catch(() => setPlans([]));
   }, [user]);
 
   useEffect(() => {
@@ -92,10 +98,10 @@ export default function Account() {
               </div>
               <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
                 <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-brand-blue">
-                  <IndianRupee className="h-3.5 w-3.5" /> Total invested
+                  <DollarSign className="h-3.5 w-3.5" /> Total invested
                 </p>
                 <p className="mt-2 font-display text-4xl font-bold tracking-tight text-black" data-testid="account-spend">
-                  ₹{data ? (data.spend_total / 100).toLocaleString("en-IN") : " · "}
+                  ${data ? (data.spend_total / 100).toLocaleString("en-US") : " · "}
                 </p>
                 <p className="text-xs text-neutral-500">{data?.payments?.length ?? 0} payment{data?.payments?.length === 1 ? "" : "s"}</p>
               </div>
@@ -122,10 +128,10 @@ export default function Account() {
                           <div>
                             <p className="font-display text-lg font-semibold text-black">{p.package_name || "Custom payment"}</p>
                             <p className="mt-1 text-[11px] text-neutral-400">
-                              {new Date(p.paid_at || p.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · {p.payment_id}
+                              {new Date(p.paid_at || p.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })} · {p.payment_id}
                             </p>
                           </div>
-                          <p className="font-display text-xl font-bold text-black">₹{(p.amount / 100).toLocaleString("en-IN")}</p>
+                          <p className="font-display text-xl font-bold text-black">${(p.amount / 100).toLocaleString("en-US")}</p>
                         </div>
                         {p.hours_total > 0 && (
                           <div className="mt-4">
@@ -149,6 +155,50 @@ export default function Account() {
             </div>
 
             {data?.is_owner && <OwnerTools onLogged={loadSummary} />}
+
+            <div className="mt-14" data-testid="account-snapshots">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-black">Your growth snapshots</h2>
+                <span className="text-xs text-neutral-400">{plans.length} saved</span>
+              </div>
+              {plans.length === 0 ? (
+                <p className="mt-4 rounded-3xl border border-dashed border-black/10 bg-neutral-50/60 p-8 text-center text-sm text-neutral-400" data-testid="snapshots-empty">
+                  No snapshots yet · run a growth 360 from the concierge or on your next sign-in and it saves here.
+                </p>
+              ) : (
+                <ul className="mt-6 space-y-3" data-testid="snapshots-list">
+                  {plans.map((pl) => {
+                    const open = openPlan === pl.id;
+                    return (
+                      <li key={pl.id} className="overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm" data-testid={`snapshot-${pl.id}`}>
+                        <button
+                          onClick={() => setOpenPlan(open ? null : pl.id)}
+                          className="flex w-full items-center justify-between gap-3 px-6 py-5 text-left"
+                        >
+                          <div className="flex items-start gap-3">
+                            <FileText className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" />
+                            <div>
+                              <p className="font-display text-base font-semibold text-black">
+                                {pl.url || (pl.prompt ? pl.prompt.slice(0, 60) : "Growth 360")}
+                              </p>
+                              <p className="mt-0.5 text-[11px] text-neutral-400">
+                                {pl.created_at ? new Date(pl.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) : ""}
+                              </p>
+                            </div>
+                          </div>
+                          <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${open ? "rotate-180" : ""}`} />
+                        </button>
+                        {open && (
+                          <div className="whitespace-pre-wrap border-t border-black/5 px-6 py-5 text-sm leading-relaxed text-neutral-700">
+                            {pl.plan}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           </>
         )}
       </main>

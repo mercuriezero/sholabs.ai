@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Test Suite for USD Payment Order Creation
-Tests the Razorpay USD payment flow on the FastAPI backend.
+Backend API Test Suite for Onboarding, CRM Leads, and Account Plans
+Tests the new backend endpoints on the FastAPI backend.
 """
 
 import requests
@@ -16,7 +16,7 @@ BASE_URL = "https://sholabs-ai.preview.emergentagent.com/api"
 def random_email():
     """Generate a random test email"""
     random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
-    return f"paytest+{random_str}@example.com"
+    return f"demoqa+{random_str}@example.com"
 
 def print_section(title):
     """Print a formatted section header"""
@@ -31,10 +31,10 @@ def print_result(test_name, status, details=""):
     if details:
         print(f"   {details}")
 
-def test_auth_and_payments():
-    """Test authentication and USD payment order creation"""
+def test_onboarding_and_crm():
+    """Test onboarding, CRM leads, and account plans endpoints"""
     
-    print_section("USD PAYMENT ORDER CREATION TEST")
+    print_section("ONBOARDING, CRM LEADS & ACCOUNT PLANS TEST")
     print(f"Base URL: {BASE_URL}")
     print(f"Test Time: {datetime.utcnow().isoformat()}Z\n")
     
@@ -42,15 +42,15 @@ def test_auth_and_payments():
     session = requests.Session()
     test_email = random_email()
     test_user = {
-        "name": "Pay Tester",
+        "name": "Demo QA",
         "email": test_email,
         "password": "Test@12345"
     }
     
     # ========================================================================
-    # TEST 1: Register a new test user
+    # TEST 1: Register a new test user and verify onboarded: false
     # ========================================================================
-    print_section("TEST 1: User Registration")
+    print_section("TEST 1: User Registration with onboarded: false")
     print(f"Registering user: {test_user['name']} <{test_user['email']}>")
     
     try:
@@ -61,20 +61,27 @@ def test_auth_and_payments():
         )
         
         print(f"Status Code: {register_response.status_code}")
-        print(f"Response Headers: {dict(register_response.headers)}")
         
         if register_response.status_code == 200:
             user_data = register_response.json()
             print(f"Response Body: {json.dumps(user_data, indent=2)}")
-            print_result("User Registration", "PASS", f"User ID: {user_data.get('user_id')}")
+            
+            # Check if onboarded field exists and is false
+            if 'onboarded' in user_data:
+                if user_data['onboarded'] == False:
+                    print_result("User Registration", "PASS", f"User created with onboarded: false")
+                else:
+                    print_result("User Registration", "FAIL", f"Expected onboarded: false, got onboarded: {user_data['onboarded']}")
+            else:
+                print_result("User Registration", "FAIL", "onboarded field missing in response")
             
             # Check if cookies were set
             cookies = session.cookies.get_dict()
             print(f"\nCookies set: {list(cookies.keys())}")
-            if 'access_token' in cookies or 'refresh_token' in cookies:
-                print_result("Auth Cookies", "PASS", "access_token and/or refresh_token set")
+            if 'access_token' in cookies or 'refresh_token' in cookies or 'session_token' in cookies:
+                print_result("Auth Cookies", "PASS", "Authentication cookies set correctly")
             else:
-                print_result("Auth Cookies", "WARN", "No JWT cookies found, but registration succeeded")
+                print_result("Auth Cookies", "WARN", "No auth cookies found")
         else:
             print(f"Response Body: {register_response.text}")
             print_result("User Registration", "FAIL", f"Expected 200, got {register_response.status_code}")
@@ -85,9 +92,142 @@ def test_auth_and_payments():
         return
     
     # ========================================================================
-    # TEST 2: Verify authentication with GET /api/auth/me
+    # TEST 2: GET /api/crm/leads with authentication
     # ========================================================================
-    print_section("TEST 2: Authentication Verification (GET /api/auth/me)")
+    print_section("TEST 2: GET /api/crm/leads (authenticated)")
+    
+    try:
+        leads_response = session.get(f"{BASE_URL}/crm/leads", timeout=30)
+        print(f"Status Code: {leads_response.status_code}")
+        
+        if leads_response.status_code == 200:
+            leads_data = leads_response.json()
+            print(f"Response Keys: {list(leads_data.keys())}")
+            
+            # Check if response has 'leads' and 'stats' keys
+            checks = []
+            
+            if 'leads' in leads_data:
+                leads = leads_data['leads']
+                if isinstance(leads, list) and len(leads) == 20:
+                    checks.append(("leads array", "PASS", f"Contains exactly 20 leads"))
+                    
+                    # Check first lead structure
+                    if leads:
+                        first_lead = leads[0]
+                        required_fields = ['name', 'company', 'email', 'phone', 'source', 'status', 'value', 'date']
+                        missing_fields = [f for f in required_fields if f not in first_lead]
+                        
+                        if not missing_fields:
+                            checks.append(("lead structure", "PASS", f"All required fields present: {', '.join(required_fields)}"))
+                            print(f"\nSample lead: {json.dumps(first_lead, indent=2)}")
+                        else:
+                            checks.append(("lead structure", "FAIL", f"Missing fields: {', '.join(missing_fields)}"))
+                else:
+                    checks.append(("leads array", "FAIL", f"Expected 20 leads, got {len(leads) if isinstance(leads, list) else 'not a list'}"))
+            else:
+                checks.append(("leads array", "FAIL", "Missing 'leads' key in response"))
+            
+            if 'stats' in leads_data:
+                stats = leads_data['stats']
+                required_stats = ['total', 'qualified', 'verified', 'pipeline']
+                missing_stats = [s for s in required_stats if s not in stats]
+                
+                if not missing_stats:
+                    checks.append(("stats object", "PASS", f"All required stats present"))
+                    print(f"\nStats: {json.dumps(stats, indent=2)}")
+                    
+                    # Verify total is 20
+                    if stats.get('total') == 20:
+                        checks.append(("stats.total", "PASS", f"total = 20"))
+                    else:
+                        checks.append(("stats.total", "FAIL", f"Expected total = 20, got {stats.get('total')}"))
+                    
+                    # Verify qualified, verified, pipeline are integers
+                    if isinstance(stats.get('qualified'), int):
+                        checks.append(("stats.qualified", "PASS", f"qualified = {stats.get('qualified')}"))
+                    else:
+                        checks.append(("stats.qualified", "FAIL", f"Expected int, got {type(stats.get('qualified'))}"))
+                    
+                    if isinstance(stats.get('verified'), int):
+                        checks.append(("stats.verified", "PASS", f"verified = {stats.get('verified')}"))
+                    else:
+                        checks.append(("stats.verified", "FAIL", f"Expected int, got {type(stats.get('verified'))}"))
+                    
+                    if isinstance(stats.get('pipeline'), (int, float)):
+                        checks.append(("stats.pipeline", "PASS", f"pipeline = {stats.get('pipeline')}"))
+                    else:
+                        checks.append(("stats.pipeline", "FAIL", f"Expected int/float, got {type(stats.get('pipeline'))}"))
+                else:
+                    checks.append(("stats object", "FAIL", f"Missing stats: {', '.join(missing_stats)}"))
+            else:
+                checks.append(("stats object", "FAIL", "Missing 'stats' key in response"))
+            
+            print("\nValidation Results:")
+            for check_name, status, detail in checks:
+                print_result(check_name, status, detail)
+            
+            # Overall result
+            all_passed = all(status == "PASS" for _, status, _ in checks)
+            if all_passed:
+                print_result("\nGET /api/crm/leads (authenticated)", "PASS", "All checks passed")
+            else:
+                print_result("\nGET /api/crm/leads (authenticated)", "FAIL", "Some checks failed")
+        else:
+            print(f"Response Body: {leads_response.text}")
+            print_result("GET /api/crm/leads (authenticated)", "FAIL", f"Expected 200, got {leads_response.status_code}")
+            
+    except Exception as e:
+        print_result("GET /api/crm/leads (authenticated)", "FAIL", f"Exception: {str(e)}")
+    
+    # ========================================================================
+    # TEST 3: GET /api/crm/leads without authentication (should return 401)
+    # ========================================================================
+    print_section("TEST 3: GET /api/crm/leads (unauthenticated)")
+    
+    unauth_session = requests.Session()
+    
+    try:
+        unauth_leads = unauth_session.get(f"{BASE_URL}/crm/leads", timeout=30)
+        print(f"Status Code: {unauth_leads.status_code}")
+        
+        if unauth_leads.status_code == 401:
+            print_result("GET /api/crm/leads (unauthenticated)", "PASS", "Returns 401 as expected")
+        else:
+            print(f"Response Body: {unauth_leads.text}")
+            print_result("GET /api/crm/leads (unauthenticated)", "FAIL", f"Expected 401, got {unauth_leads.status_code}")
+            
+    except Exception as e:
+        print_result("GET /api/crm/leads (unauthenticated)", "FAIL", f"Exception: {str(e)}")
+    
+    # ========================================================================
+    # TEST 4: POST /api/account/onboard (authenticated)
+    # ========================================================================
+    print_section("TEST 4: POST /api/account/onboard (authenticated)")
+    
+    try:
+        onboard_response = session.post(f"{BASE_URL}/account/onboard", timeout=30)
+        print(f"Status Code: {onboard_response.status_code}")
+        
+        if onboard_response.status_code == 200:
+            onboard_data = onboard_response.json()
+            print(f"Response Body: {json.dumps(onboard_data, indent=2)}")
+            
+            if onboard_data.get('status') == 'ok':
+                print_result("POST /api/account/onboard", "PASS", "Returns {status: ok}")
+            else:
+                print_result("POST /api/account/onboard", "FAIL", f"Expected {{status: ok}}, got {onboard_data}")
+        else:
+            print(f"Response Body: {onboard_response.text}")
+            print_result("POST /api/account/onboard", "FAIL", f"Expected 200, got {onboard_response.status_code}")
+            
+    except Exception as e:
+        print_result("POST /api/account/onboard", "FAIL", f"Exception: {str(e)}")
+    
+    # ========================================================================
+    # TEST 5: GET /api/auth/me to verify onboarded: true
+    # ========================================================================
+    print_section("TEST 5: GET /api/auth/me (verify onboarded: true)")
     
     try:
         me_response = session.get(f"{BASE_URL}/auth/me", timeout=30)
@@ -97,158 +237,86 @@ def test_auth_and_payments():
             me_data = me_response.json()
             print(f"Response Body: {json.dumps(me_data, indent=2)}")
             
-            if me_data.get('email') == test_email:
-                print_result("Auth Verification", "PASS", f"Authenticated as {me_data.get('email')}")
+            if 'onboarded' in me_data:
+                if me_data['onboarded'] == True:
+                    print_result("GET /api/auth/me", "PASS", "User now has onboarded: true")
+                else:
+                    print_result("GET /api/auth/me", "FAIL", f"Expected onboarded: true, got onboarded: {me_data['onboarded']}")
             else:
-                print_result("Auth Verification", "FAIL", f"Email mismatch: expected {test_email}, got {me_data.get('email')}")
+                print_result("GET /api/auth/me", "FAIL", "onboarded field missing in response")
         else:
             print(f"Response Body: {me_response.text}")
-            print_result("Auth Verification", "FAIL", f"Expected 200, got {me_response.status_code}")
-            return
+            print_result("GET /api/auth/me", "FAIL", f"Expected 200, got {me_response.status_code}")
             
     except Exception as e:
-        print_result("Auth Verification", "FAIL", f"Exception: {str(e)}")
-        return
+        print_result("GET /api/auth/me", "FAIL", f"Exception: {str(e)}")
     
     # ========================================================================
-    # TEST 3: Create payment order with amount_usd=120
+    # TEST 6: POST /api/account/onboard without authentication (should return 401)
     # ========================================================================
-    print_section("TEST 3: Create Payment Order (120 USD)")
-    
-    order_payload_1 = {
-        "amount_usd": 120,
-        "package_name": "Trial Pack · 4 hours"
-    }
-    
-    print(f"Request Payload: {json.dumps(order_payload_1, indent=2)}")
+    print_section("TEST 6: POST /api/account/onboard (unauthenticated)")
     
     try:
-        order_response_1 = session.post(
-            f"{BASE_URL}/payments/create-order",
-            json=order_payload_1,
-            timeout=30
-        )
+        unauth_onboard = unauth_session.post(f"{BASE_URL}/account/onboard", timeout=30)
+        print(f"Status Code: {unauth_onboard.status_code}")
         
-        print(f"Status Code: {order_response_1.status_code}")
-        print(f"Response Body: {order_response_1.text}")
-        
-        if order_response_1.status_code == 200:
-            order_data = order_response_1.json()
-            print(f"\nParsed Response: {json.dumps(order_data, indent=2)}")
-            
-            # Verify response structure
-            checks = []
-            
-            # Check order_id
-            order_id = order_data.get('order_id', '')
-            if order_id and order_id.startswith('order_'):
-                checks.append(("order_id format", "PASS", f"'{order_id}'"))
-            else:
-                checks.append(("order_id format", "FAIL", f"Expected 'order_*', got '{order_id}'"))
-            
-            # Check amount (should be 12000 cents)
-            amount = order_data.get('amount')
-            if amount == 12000:
-                checks.append(("amount", "PASS", f"{amount} cents (120 USD)"))
-            else:
-                checks.append(("amount", "FAIL", f"Expected 12000, got {amount}"))
-            
-            # Check currency
-            currency = order_data.get('currency')
-            if currency == 'USD':
-                checks.append(("currency", "PASS", f"'{currency}'"))
-            else:
-                checks.append(("currency", "FAIL", f"Expected 'USD', got '{currency}'"))
-            
-            # Check key_id
-            key_id = order_data.get('key_id', '')
-            if key_id:
-                checks.append(("key_id", "PASS", f"Present (length: {len(key_id)})"))
-            else:
-                checks.append(("key_id", "FAIL", "Missing or empty"))
-            
-            print("\nValidation Results:")
-            for check_name, status, detail in checks:
-                print_result(check_name, status, detail)
-            
-            # Overall result
-            all_passed = all(status == "PASS" for _, status, _ in checks)
-            if all_passed:
-                print_result("\nPayment Order Creation (120 USD)", "PASS", "All checks passed")
-            else:
-                print_result("\nPayment Order Creation (120 USD)", "FAIL", "Some checks failed")
-                
-        elif order_response_1.status_code == 502:
-            print_result("Payment Order Creation (120 USD)", "FAIL", 
-                        "502 Payment gateway error - Razorpay account likely does NOT have International/USD payments enabled")
-            
-            # Try with different amount as instructed
-            print_section("TEST 3b: Retry with 690 USD to confirm behavior")
-            
-            order_payload_2 = {
-                "amount_usd": 690,
-                "package_name": "Starter Pack · 25 hours"
-            }
-            
-            print(f"Request Payload: {json.dumps(order_payload_2, indent=2)}")
-            
-            order_response_2 = session.post(
-                f"{BASE_URL}/payments/create-order",
-                json=order_payload_2,
-                timeout=30
-            )
-            
-            print(f"Status Code: {order_response_2.status_code}")
-            print(f"Response Body: {order_response_2.text}")
-            
-            if order_response_2.status_code == 502:
-                print_result("Payment Order Creation (690 USD)", "FAIL", 
-                            "502 Payment gateway error - CONFIRMED: Razorpay account does NOT have International/USD payments enabled")
-            else:
-                print_result("Payment Order Creation (690 USD)", "UNEXPECTED", 
-                            f"Got {order_response_2.status_code} instead of 502")
+        if unauth_onboard.status_code == 401:
+            print_result("POST /api/account/onboard (unauthenticated)", "PASS", "Returns 401 as expected")
         else:
-            print_result("Payment Order Creation (120 USD)", "FAIL", 
-                        f"Unexpected status code: {order_response_1.status_code}")
+            print(f"Response Body: {unauth_onboard.text}")
+            print_result("POST /api/account/onboard (unauthenticated)", "FAIL", f"Expected 401, got {unauth_onboard.status_code}")
             
     except Exception as e:
-        print_result("Payment Order Creation (120 USD)", "FAIL", f"Exception: {str(e)}")
+        print_result("POST /api/account/onboard (unauthenticated)", "FAIL", f"Exception: {str(e)}")
     
     # ========================================================================
-    # TEST 4: Verify unauthorized access returns 401
+    # TEST 7: GET /api/account/plans (authenticated, should return empty array)
     # ========================================================================
-    print_section("TEST 4: Unauthorized Access Check")
-    
-    # Create a new session without auth
-    unauth_session = requests.Session()
+    print_section("TEST 7: GET /api/account/plans (authenticated)")
     
     try:
-        # Test GET /api/auth/me without auth
-        unauth_me = unauth_session.get(f"{BASE_URL}/auth/me", timeout=30)
-        print(f"GET /api/auth/me (no auth)")
-        print(f"Status Code: {unauth_me.status_code}")
+        plans_response = session.get(f"{BASE_URL}/account/plans", timeout=30)
+        print(f"Status Code: {plans_response.status_code}")
         
-        if unauth_me.status_code == 401:
-            print_result("Unauthorized /auth/me", "PASS", "Returns 401 as expected")
+        if plans_response.status_code == 200:
+            plans_data = plans_response.json()
+            print(f"Response Body: {json.dumps(plans_data, indent=2)}")
+            
+            if 'plans' in plans_data:
+                plans = plans_data['plans']
+                if isinstance(plans, list):
+                    if len(plans) == 0:
+                        print_result("GET /api/account/plans", "PASS", "Returns {plans: []} (empty array for new user)")
+                    else:
+                        print_result("GET /api/account/plans", "WARN", f"Expected empty array, got {len(plans)} plans (user may have existing data)")
+                else:
+                    print_result("GET /api/account/plans", "FAIL", f"Expected plans to be an array, got {type(plans)}")
+            else:
+                print_result("GET /api/account/plans", "FAIL", "Missing 'plans' key in response")
         else:
-            print_result("Unauthorized /auth/me", "FAIL", f"Expected 401, got {unauth_me.status_code}")
-        
-        # Test POST /api/payments/create-order without auth
-        unauth_order = unauth_session.post(
-            f"{BASE_URL}/payments/create-order",
-            json={"amount_usd": 120, "package_name": "Test"},
-            timeout=30
-        )
-        print(f"\nPOST /api/payments/create-order (no auth)")
-        print(f"Status Code: {unauth_order.status_code}")
-        
-        if unauth_order.status_code == 401:
-            print_result("Unauthorized /payments/create-order", "PASS", "Returns 401 as expected")
-        else:
-            print_result("Unauthorized /payments/create-order", "FAIL", f"Expected 401, got {unauth_order.status_code}")
+            print(f"Response Body: {plans_response.text}")
+            print_result("GET /api/account/plans", "FAIL", f"Expected 200, got {plans_response.status_code}")
             
     except Exception as e:
-        print_result("Unauthorized Access Check", "FAIL", f"Exception: {str(e)}")
+        print_result("GET /api/account/plans", "FAIL", f"Exception: {str(e)}")
+    
+    # ========================================================================
+    # TEST 8: GET /api/account/plans without authentication (should return 401)
+    # ========================================================================
+    print_section("TEST 8: GET /api/account/plans (unauthenticated)")
+    
+    try:
+        unauth_plans = unauth_session.get(f"{BASE_URL}/account/plans", timeout=30)
+        print(f"Status Code: {unauth_plans.status_code}")
+        
+        if unauth_plans.status_code == 401:
+            print_result("GET /api/account/plans (unauthenticated)", "PASS", "Returns 401 as expected")
+        else:
+            print(f"Response Body: {unauth_plans.text}")
+            print_result("GET /api/account/plans (unauthenticated)", "FAIL", f"Expected 401, got {unauth_plans.status_code}")
+            
+    except Exception as e:
+        print_result("GET /api/account/plans (unauthenticated)", "FAIL", f"Exception: {str(e)}")
     
     # ========================================================================
     # SUMMARY
@@ -257,9 +325,16 @@ def test_auth_and_payments():
     print("Test execution completed. Review results above.")
     print(f"Test user email: {test_email}")
     print(f"Test completed at: {datetime.utcnow().isoformat()}Z")
-    print("\nNOTE: This test does NOT attempt to complete, capture, or verify real payments.")
-    print("      Only order creation is tested to avoid charging real money.")
+    print("\nTested Endpoints:")
+    print("  1. POST /api/auth/register - User registration with onboarded: false")
+    print("  2. GET /api/crm/leads (authenticated) - 20 demo leads with stats")
+    print("  3. GET /api/crm/leads (unauthenticated) - 401 response")
+    print("  4. POST /api/account/onboard (authenticated) - Set onboarded to true")
+    print("  5. GET /api/auth/me - Verify onboarded: true")
+    print("  6. POST /api/account/onboard (unauthenticated) - 401 response")
+    print("  7. GET /api/account/plans (authenticated) - Empty array for new user")
+    print("  8. GET /api/account/plans (unauthenticated) - 401 response")
     print("="*80 + "\n")
 
 if __name__ == "__main__":
-    test_auth_and_payments()
+    test_onboarding_and_crm()
