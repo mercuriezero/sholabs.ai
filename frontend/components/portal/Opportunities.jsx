@@ -28,6 +28,12 @@ export default function Opportunities() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ count: 6 }),
       });
+      if (r.status === 402) {
+        setGenerating(false);
+        toast.error("Unlock with any plan to generate pages.");
+        router.push("/fractional-cxo#cxo-packs");
+        return;
+      }
       if (!r.ok) throw new Error();
       await r.json();
       toast.success("Your ranking-ready pages are live");

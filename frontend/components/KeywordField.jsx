@@ -25,7 +25,7 @@ const CHIPS = [
   { t: "Gemini", x: "72%", y: "16%", xm: "66%", ym: "6%", d: 1 },
   { t: "UGC Ads", icon: Users, x: "10%", y: "42%", xm: null, ym: null, d: 1 },
   { t: "Perplexity", x: "8%", y: "78%", xm: "6%", ym: "58%", d: 1 },
-  { t: "AI SDR", icon: Bot, x: "24%", y: "89%", xm: null, ym: null, d: 1.8 },
+  { t: "AI Agents", icon: Bot, x: "24%", y: "89%", xm: null, ym: null, d: 1.8 },
   { t: "GEO", x: "56%", y: "88%", xm: "58%", ym: "92%", d: 1.8 },
   { t: "Voice AI", icon: AudioLines, x: "90%", y: "38%", xm: "80%", ym: "42%", d: 1.8 },
 ];

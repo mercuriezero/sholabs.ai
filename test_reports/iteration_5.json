@@ -1,0 +1,26 @@
+{
+  "summary": "Focused frontend re-test of iteration_4 fixes as the existing unpaid user qav3878783@example.com. ALL 5 requested items PASS. (1) Onboarding overlay is fully gone: [data-testid=onboarding-overlay] count === 0 on /fractional-cxo both on direct navigation and after the paywall redirect; cxo-packs section renders and its 10 buttons/links are unobstructed; a cxo-plan section element was clicked with a normal (non-forced) Playwright click. (2) Paywall path intact: /portal/pages shows pages-locked + visible pages-unlock-cta, clicking it lands on /fractional-cxo#cxo-packs with packs usable and no modal (no real payment attempted). (3) AI SDR fully removed: no 'SDR' string on / or /fractional-cxo; homepage Portal/services tabs = 6 (LLM Revenue, AI Videos, Voice AI, Social Media, UGC Ads, Affiliate & Partners); estimator has exactly estimator-service-{videos,pages,ugc,voice,social,aff} + cxo; expanding 2 service cards + bumping GEO pages qty recomputed total $4,410 -> $5,360 with no errors; NO duplicate-React-key console error ('same key, Voice AI') on homepage load. (4) Studios smoke: /portal/video and /portal/voice both render (no 'Application error'), submits persisted -> 'TEST_QA video retest' shows 'Video generation in progress' in video-list and 'TEST_QA voice retest' shows 'Building your agent' in voice-list. (5) /portal shows portal-dashboard with 6 dashboard cards and sidebar has all 7 nav items (desktop + 7 mobile duplicates).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Portal sidebar (bottom-left)", "issues": ["The Next.js dev-tools floating indicator sits on top of the 'Log out' link in the sidebar footer (dev/preview only, not a production concern, but 'Log out' is partially covered at 1920x1080)."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_5.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "components/Estimator.jsx still carries dead SDR remnants that are not rendered but pollute the data model: PRICE.sdr (line ~15), MARKET.sdr (line ~52) and sdr:0/1 keys inside every GOAL.mix. Harmless today, but should be deleted to finish the cleanup.",
+    "components/Onboarding.jsx is now orphaned (no importers). Delete the file to avoid it being re-wired accidentally.",
+    "Unauthenticated pages log two 401 console errors (session/me probe on marketing pages). Cosmetic noise only, but consider treating 401 as an expected 'anonymous' state instead of surfacing failed requests."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested (frontend-only request)", "frontend": "100% (5/5 requested scenarios passed)"},
+  "seed_data_creation": "Added one video request 'TEST_QA video retest' and one voice agent 'TEST_QA voice retest' under qav3878783@example.com (smoke submits).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "qav3878783@example.com / password123 (unpaid portal user)",
+  "context_for_next_testing_agent": "Login flow: go to /account -> click 'Log in or sign up' -> auth-modal -> auth-mode-login -> auth-email-input/auth-password-input -> auth-submit-button. Landing has heavy animation; use wait_until=domcontentloaded + ~4s wait. Iteration_4's HIGH onboarding-blocking-pricing bug is CONFIRMED FIXED. Do not attempt real Razorpay payment; do not re-run the long LLM scan (user already has 91 opportunities).",
+  "rca_of_the_issue": "Previous HIGH issue root cause was providers.jsx rendering the legacy Onboarding modal in MarketingOverlays for logged-in users, which auto-opened over /fractional-cxo (the paywall redirect target). MarketingOverlays now renders only <ChatBot/> and the Onboarding import is removed, so the overlay never mounts — verified with count===0 and a non-forced click on the packs area."
+}

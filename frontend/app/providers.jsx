@@ -6,7 +6,6 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthCallback from "@/components/AuthCallback";
 import ChatBot from "@/components/ChatBot";
-import Onboarding from "@/components/Onboarding";
 
 function HashGate({ children }) {
   const [isCallback] = useState(
@@ -17,18 +16,14 @@ function HashGate({ children }) {
 }
 
 // Marketing-only overlays: never show inside the portal or on public generated pages.
+// The legacy "growth 360" Onboarding modal is retired — the portal owns onboarding now.
 function MarketingOverlays() {
   const pathname = usePathname();
   const inApp =
     pathname === "/portal" || pathname.startsWith("/portal/") ||
     pathname === "/p" || pathname.startsWith("/p/");
   if (inApp) return null;
-  return (
-    <>
-      <Onboarding />
-      <ChatBot />
-    </>
-  );
+  return <ChatBot />;
 }
 
 export default function Providers({ children }) {

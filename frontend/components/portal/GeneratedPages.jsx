@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ExternalLink, FileText, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, ExternalLink, FileText, Loader2, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
@@ -11,6 +11,7 @@ export default function GeneratedPages() {
   const router = useRouter();
   const [pages, setPages] = useState(undefined);
   const [generating, setGenerating] = useState(false);
+  const [access, setAccess] = useState(null);
 
   const load = () => {
     fetch(`${API}/portal/pages`, { credentials: "include" })
@@ -18,9 +19,20 @@ export default function GeneratedPages() {
       .then((d) => setPages(d?.pages || []))
       .catch(() => setPages([]));
   };
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+    fetch(`${API}/portal/access`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setAccess)
+      .catch(() => setAccess({ llm_unlocked: false }));
+  }, []);
 
   const generate = async () => {
+    if (access && !access.llm_unlocked) {
+      toast.error("Unlock with any plan to generate pages.");
+      router.push("/fractional-cxo#cxo-packs");
+      return;
+    }
     if (pages && pages.length > 0 && !window.confirm("Regenerating replaces all current pages and their live URLs. Continue?")) return;
     setGenerating(true);
     try {
@@ -32,7 +44,12 @@ export default function GeneratedPages() {
       });
       if (r.status === 400) {
         toast.error("Run a scan first.");
-        router.push("/portal");
+        router.push("/portal/llm");
+        return;
+      }
+      if (r.status === 402) {
+        toast.error("Unlock with any plan to generate pages.");
+        router.push("/fractional-cxo#cxo-packs");
         return;
       }
       if (!r.ok) throw new Error();
@@ -47,6 +64,24 @@ export default function GeneratedPages() {
   };
 
   if (pages === undefined) return <div className="flex justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-neutral-400" /></div>;
+
+  if (access && !access.llm_unlocked && pages.length === 0) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center" data-testid="pages-locked">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-orange/10">
+          <Lock className="h-7 w-7 text-brand-orange" />
+        </div>
+        <h1 className="mt-5 font-display text-2xl font-semibold tracking-tight text-black">Publishing is a paid feature</h1>
+        <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+          Your demand scan and opportunity report are free. Unlock AI page generation and publishing with any plan —
+          then turn those opportunities into live, lead-capturing pages.
+        </p>
+        <button onClick={() => router.push("/fractional-cxo#cxo-packs")} data-testid="pages-unlock-cta" className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5">
+          Unlock with any plan <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="pages-page">

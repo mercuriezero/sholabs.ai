@@ -3,14 +3,17 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ExternalLink, FileText, Loader2, LogOut, Search, Sparkles, Users } from "lucide-react";
+import { ExternalLink, FileText, Gauge, Loader2, LogOut, Mic, Sparkles, Users, Video, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const NAV = [
-  { href: "/portal", label: "Discover", icon: Search, testid: "portal-nav-discover" },
-  { href: "/portal/opportunities", label: "Opportunities", icon: Sparkles, testid: "portal-nav-opportunities" },
-  { href: "/portal/pages", label: "Pages", icon: FileText, testid: "portal-nav-pages" },
+  { href: "/portal", label: "Dashboard", icon: Gauge, testid: "portal-nav-dashboard" },
+  { href: "/portal/llm", label: "LLM Citation", icon: Sparkles, testid: "portal-nav-llm" },
+  { href: "/portal/video", label: "AI Video", icon: Video, testid: "portal-nav-video" },
+  { href: "/portal/voice", label: "Voice AI", icon: Mic, testid: "portal-nav-voice" },
   { href: "/portal/leads", label: "Leads", icon: Users, testid: "portal-nav-leads" },
+  { href: "/portal/affiliate", label: "Affiliate", icon: FileText, testid: "portal-nav-affiliate" },
+  { href: "/portal/hours", label: "CXO Hours", icon: Wallet, testid: "portal-nav-hours" },
 ];
 
 export default function PortalShell({ children }) {
@@ -30,7 +33,11 @@ export default function PortalShell({ children }) {
     );
   }
 
-  const isActive = (href) => (href === "/portal" ? pathname === "/portal" : pathname.startsWith(href));
+  const isActive = (href) => {
+    if (href === "/portal") return pathname === "/portal";
+    if (href === "/portal/llm") return pathname.startsWith("/portal/llm") || pathname.startsWith("/portal/opportunities") || pathname.startsWith("/portal/pages");
+    return pathname.startsWith(href);
+  };
 
   return (
     <div className="flex min-h-screen bg-neutral-50">

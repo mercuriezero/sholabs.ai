@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, Clapperboard, AudioLines, Send, Megaphone, Users, Handshake, Check, TrendingUp } from "lucide-react";
+import { Sparkles, Clapperboard, AudioLines, Megaphone, Users, Handshake, Check, TrendingUp } from "lucide-react";
 
 const SERVICES = [
   {
@@ -34,16 +34,6 @@ const SERVICES = [
     icon: AudioLines,
     heading: "Voice AI agents that book real meetings",
     body: "Human-grade voice agents qualify inbound, revive cold lists, and follow up in seconds · every call transcribed, scored, and synced to your CRM.",
-  },
-  {
-    id: "sdr",
-    tab: "AI SDR",
-    color: "#ED1C24",
-    soft: "rgba(237,28,36,0.06)",
-    border: "rgba(237,28,36,0.18)",
-    icon: Send,
-    heading: "Outbound that replies before competitors",
-    body: "Agentic outbound with human review: researched sequences, smart follow-ups, and every reply routed straight into pipeline.",
   },
   {
     id: "social",
@@ -134,7 +124,7 @@ function VoicePanel({ color }) {
   return (
     <div className="flex h-full flex-col gap-4 p-6 md:p-8">
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
-        <AudioLines className="h-3.5 w-3.5" style={{ color }} /> Voice AI SDR · live
+        <AudioLines className="h-3.5 w-3.5" style={{ color }} /> Voice AI · live
       </div>
       <div className="flex flex-1 flex-col justify-center rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
         <div className="flex h-20 items-center justify-center gap-1.5" aria-hidden="true">
@@ -152,31 +142,6 @@ function VoicePanel({ color }) {
       </div>
       <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
         <TrendingUp className="h-4 w-4" /> 18 meetings booked this week
-      </div>
-    </div>
-  );
-}
-
-function SdrPanel({ color }) {
-  return (
-    <div className="flex h-full flex-col gap-4 p-6 md:p-8">
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-neutral-500">
-        <Send className="h-3.5 w-3.5" style={{ color }} /> Outbound sequence · live
-      </div>
-      <div className="flex-1 space-y-2.5 rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
-        {[
-          ["Day 1 · Intro email", "Opened 2h ago"],
-          ["Day 3 · Value bump", "Replied"],
-          ["Day 5 · Case study", "Meeting booked"],
-        ].map(([step, status]) => (
-          <div key={step} className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
-            <span className="text-sm text-neutral-600">{step}</span>
-            <span className="text-xs font-semibold" style={{ color }}>{status}</span>
-          </div>
-        ))}
-      </div>
-      <div className="mt-auto flex items-center gap-2 text-sm font-semibold" style={{ color }}>
-        <TrendingUp className="h-4 w-4" /> 12.4% reply rate this week
       </div>
     </div>
   );
@@ -249,7 +214,7 @@ function PartnerPanel({ color }) {
       <div className="flex-1 space-y-2.5 rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
         {[
           ["New partner signed", "SaaS newsletter · 40k subs"],
-          ["Referral deal closed", "₹1.2L partner-sourced"],
+          ["Referral deal closed", "$1.4k partner-sourced"],
           ["Creator collab shipped", "3 videos this month"],
         ].map(([t, sub]) => (
           <div key={t} className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
@@ -265,7 +230,7 @@ function PartnerPanel({ color }) {
   );
 }
 
-const PANELS = { geo: GeoPanel, video: VideoPanel, voice: VoicePanel, sdr: SdrPanel, social: SocialPanel, ugc: UgcPanel, partners: PartnerPanel };
+const PANELS = { geo: GeoPanel, video: VideoPanel, voice: VoicePanel, social: SocialPanel, ugc: UgcPanel, partners: PartnerPanel };
 
 export default function Portal() {
   const [active, setActive] = useState(0);

@@ -83,7 +83,7 @@ export default function Leads() {
                 <h1 className="font-display text-4xl font-semibold tracking-tight text-black md:text-5xl">
                   Your <span className="glassy-brand-text">leads</span>
                 </h1>
-                <p className="mt-2 text-sm text-neutral-500">Captured across GEO, AI video, Voice AI, SDR and social · updated live.</p>
+                <p className="mt-2 text-sm text-neutral-500">Captured across GEO, AI video, Voice AI and social · updated live.</p>
               </div>
               <span className="rounded-full border border-black/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-400">Demo data</span>
             </div>

@@ -370,7 +370,7 @@ RESEARCH_PROMPT = """You are the High On AI 360 research agent · a senior growt
 A logged-in client gives you their website and/or growth goal. Do an end-to-end marketing read and deliver a one-page snapshot plus an aggressive 90-day plan.
 
 High On AI services and pricing (weave the right ones into the plan by name):
-- Service products, priced per unit: AI Videos $85 per video · GEO/LLM citation pages $950 per 20 pages · UGC ad creatives $115 each (volume tiers drop to $80 at 500+ and $70 at 5000+) · Social media management $700/month · Voice AI agent $1,150 setup per agent plus $0.12/minute usage · AI SDR outbound motion $2,300 plus $0.12/minute usage · Affiliate and Partners program: Starter $175-290/month (up to 25 partners, 2% commission on partner sales), Growth $460-860/month (up to 100 partners, 1.5%), Pro managed $1,450+/month (unlimited, 1%).
+- Service products, priced per unit: AI Videos $85 per video · GEO/LLM citation pages $950 per 20 pages · UGC ad creatives $115 each (volume tiers drop to $80 at 500+ and $70 at 5000+) · Social media management $700/month · Voice AI agent $1,150 setup per agent plus $0.12/minute usage · Affiliate and Partners program: Starter $175-290/month (up to 25 partners, 2% commission on partner sales), Growth $460-860/month (up to 100 partners, 1.5%), Pro managed $1,450+/month (unlimited, 1%).
 - Fractional AI CXO leadership is billed separately, hourly only: flat $30/hour via success packs: Trial 4h $120 · Starter 25h $690 · Momentum 50h $1,290 · Scale 100h $2,400.
 - Pilot tiers: Pilot Sprint $290 · Growth Pilot $580 · Full Engine Pilot $1,150.
 - A one-click 9% launch discount is available to everyone at checkout; the team may also issue special promo codes. Do not invent any other discounts.
@@ -638,6 +638,8 @@ class GenPagesInput(BaseModel):
 @api_router.post("/portal/generate-pages")
 async def portal_generate_pages(input: GenPagesInput, request: Request):
     user = await get_current_user(request)
+    if not await llm_unlocked(user):
+        raise HTTPException(status_code=402, detail="Unlock with any plan to generate and publish pages.")
     analysis = await db.analyses.find_one({"user_id": user["user_id"]}, {"_id": 0})
     if not analysis:
         raise HTTPException(status_code=400, detail="Run a scan first.")
@@ -771,6 +773,124 @@ async def update_portal_lead(lead_id: str, input: LeadUpdate, request: Request):
     if r.matched_count == 0:
         raise HTTPException(status_code=404, detail="Lead not found")
     return {"status": "ok"}
+
+
+# ---------- Portal: access gating, video & voice intake, overview ----------
+async def user_has_paid(user: dict) -> bool:
+    return await db.payments.count_documents({"user_id": user["user_id"], "status": "paid"}) > 0
+
+
+async def llm_unlocked(user: dict) -> bool:
+    return user_is_admin(user) or await user_has_paid(user)
+
+
+@api_router.get("/portal/access")
+async def portal_access(request: Request):
+    user = await get_current_user(request)
+    paid = await user_has_paid(user)
+    return {"is_admin": user_is_admin(user), "has_paid": paid, "llm_unlocked": user_is_admin(user) or paid}
+
+
+class VideoRequestInput(BaseModel):
+    project_name: str = Field(min_length=1, max_length=120)
+    video_type: str = Field(default="", max_length=60)
+    script: str = Field(default="", max_length=5000)
+    avatar: str = Field(default="", max_length=120)
+    language: str = Field(default="", max_length=60)
+    aspect_ratio: str = Field(default="", max_length=30)
+    duration: str = Field(default="", max_length=30)
+    brand_assets: str = Field(default="", max_length=2000)
+    notes: str = Field(default="", max_length=2000)
+
+
+@api_router.post("/portal/video-requests")
+async def create_video_request(input: VideoRequestInput, request: Request):
+    user = await get_current_user(request)
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["user_id"],
+        "email": user.get("email", ""),
+        "name": user.get("name", ""),
+        **input.model_dump(),
+        "status": "In production",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.video_requests.insert_one(doc)
+    if OWNER_EMAIL and EMAIL_KEY:
+        asyncio.create_task(notify_owner(Lead(
+            prompt=f"New AI Video request '{input.project_name}' ({input.video_type}) from {user.get('name','')} ({user.get('email','')})",
+            email=user.get("email", ""), source="video_studio",
+        )))
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.get("/portal/video-requests")
+async def list_video_requests(request: Request):
+    user = await get_current_user(request)
+    items = await db.video_requests.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"requests": items}
+
+
+class VoiceRequestInput(BaseModel):
+    agent_name: str = Field(min_length=1, max_length=120)
+    website: str = Field(default="", max_length=300)
+    purpose: str = Field(default="", max_length=80)
+    voice: str = Field(default="", max_length=60)
+    language: str = Field(default="", max_length=60)
+    greeting: str = Field(default="", max_length=600)
+    knowledge: str = Field(default="", max_length=5000)
+    outcomes: str = Field(default="", max_length=2000)
+    phone: str = Field(default="", max_length=40)
+    notes: str = Field(default="", max_length=2000)
+
+
+@api_router.post("/portal/voice-requests")
+async def create_voice_request(input: VoiceRequestInput, request: Request):
+    user = await get_current_user(request)
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["user_id"],
+        "email": user.get("email", ""),
+        "name": user.get("name", ""),
+        **input.model_dump(),
+        "status": "Building your agent",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.voice_requests.insert_one(doc)
+    if OWNER_EMAIL and EMAIL_KEY:
+        asyncio.create_task(notify_owner(Lead(
+            prompt=f"New Voice AI request '{input.agent_name}' ({input.purpose}) from {user.get('name','')} ({user.get('email','')})",
+            email=user.get("email", ""), source="voice_studio",
+        )))
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.get("/portal/voice-requests")
+async def list_voice_requests(request: Request):
+    user = await get_current_user(request)
+    items = await db.voice_requests.find({"user_id": user["user_id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"requests": items}
+
+
+@api_router.get("/portal/overview")
+async def portal_overview(request: Request):
+    user = await get_current_user(request)
+    payments = await db.payments.find({"user_id": user["user_id"], "status": "paid"}, {"_id": 0}).to_list(100)
+    hours_total = sum(_pack_hours(p.get("package_name", "")) for p in payments)
+    hours_used = sum(p.get("hours_used", 0) for p in payments)
+    analysis = await db.analyses.find_one({"user_id": user["user_id"]}, {"_id": 0})
+    return {
+        "leads": await db.portal_leads.count_documents({"owner_user_id": user["user_id"]}),
+        "pages": await db.pages.count_documents({"user_id": user["user_id"]}),
+        "opportunities": len(analysis.get("queries", [])) if analysis else 0,
+        "video_requests": await db.video_requests.count_documents({"user_id": user["user_id"]}),
+        "voice_requests": await db.voice_requests.count_documents({"user_id": user["user_id"]}),
+        "hours_total": hours_total,
+        "hours_remaining": max(hours_total - hours_used, 0),
+        "llm_unlocked": user_is_admin(user) or len(payments) > 0,
+    }
 
 
 # ---------- Auth endpoints ----------

@@ -26,7 +26,7 @@ const AUDIENCES = [
 const SCOPE = [
   { icon: Compass, title: "Growth strategy & positioning", desc: "Category narrative, ICP, messaging, and the 90-day plan the whole company executes against." },
   { icon: Eye, title: "GEO & AI visibility", desc: "Getting your brand cited by ChatGPT, Gemini, and Perplexity as a core channel · not an afterthought." },
-  { icon: Megaphone, title: "Demand engine", desc: "AI video, agentic outbound, paid, and partnerships run as one system with shared context." },
+  { icon: Megaphone, title: "Demand engine", desc: "AI video, voice agents, paid, and partnerships run as one system with shared context." },
   { icon: Users, title: "Team, agencies & budget", desc: "Hiring plans, vendor management, and budget allocation against pipeline · not impressions." },
   { icon: CalendarClock, title: "Weekly operating cadence", desc: "A growth meeting that ships decisions, async updates in your tools, and zero status-theater." },
   { icon: BarChart3, title: "Board-ready reporting", desc: "One live dashboard mapping every pillar to revenue · ready for investors without a slide rebuild." },
@@ -56,7 +56,7 @@ const FAQS = [
   },
   {
     q: "What does it cost?",
-    a: "Service products have published per-unit pricing · ₹7,000 per AI video, ₹80,000 per 20 GEO pages, and so on. CXO hours are flat ₹2,600/hour via the packs below. Build your scope in the estimator above and the number updates live.",
+    a: "Service products have published per-unit pricing · $85 per AI video, $950 per 20 GEO pages, and so on. CXO hours are flat $30/hour via the packs below. Build your scope in the estimator above and the number updates live.",
   },
 ];
 
@@ -66,7 +66,7 @@ export default function FractionalCxO() {
       <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-xl">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4" aria-label="Page navigation">
           <Link href="/" data-testid="cxo-nav-logo" className="flex items-center gap-3">
-            <img src="/logo.webp" alt="High On AI logo" className="h-10 w-auto rounded-md" />
+            <img src="/logo.webp" alt="High On AI logo" className="h-8 w-auto rounded-md sm:h-10" />
           </Link>
           <div className="flex items-center gap-4">
             <a
@@ -74,9 +74,11 @@ export default function FractionalCxO() {
               target="_blank"
               rel="noopener noreferrer"
               data-testid="cxo-nav-cta"
-              className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              className="inline-flex items-center gap-1.5 rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm"
             >
-              Book a working session <ArrowUpRight className="h-4 w-4" />
+              <span className="sm:hidden">Book a call</span>
+              <span className="hidden sm:inline">Book a working session</span>
+              <ArrowUpRight className="h-4 w-4 shrink-0" />
             </a>
           </div>
         </nav>

@@ -1,0 +1,39 @@
+{
+  "summary": "Frontend-only E2E test of the expanded multi-service PORTAL. Registered new unpaid user qav3878783@example.com. Verified: sidebar nav (all 7 testids), portal-dashboard with 6 dashboard-cards + card navigation, AI Video studio intake + persistence, Voice AI studio intake + persistence, LLM Citation gating (free scan on linear.app -> 91 opportunities, generate-pages -> 402 -> error toast + redirect to /fractional-cxo#cxo-packs, /portal/pages shows pages-locked + pages-unlock-cta), CXO Hours empty state (0 hrs + buy CTA), Affiliate (3 tiers + CTA), full AI SDR removal (homepage Portal tabs=6 no SDR, /fractional-cxo estimator has 6 services + CXO, no 'SDR' string anywhere, totals recompute correctly), mobile pricing header cxo-nav-cta ('Book a call', no overflow), and auth-guard regressions. FOUND + FIXED one CRITICAL crash: /portal/video and /portal/voice were completely dead (white 'Application error: a client-side exception has occurred') because VideoStudio/VoiceStudio used useEffect(load, []) where load returns a Promise -> React threw 'destroy is not a function'. After the fix both studios work end-to-end. One HIGH UX bug remains for the main agent (onboarding modal blocks the pricing page that the paywall redirects to).",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "VideoStudio.jsx / VoiceStudio.jsx", "issue": "FIXED BY TESTER: useEffect(load, []) returned a Promise -> React 19 threw 'destroy is not a function', crashing the whole /portal/video and /portal/voice routes (blank 'Application error' page, video-studio/voice-studio never rendered). Changed to useEffect(() => { load(); }, []). Verified both pages now render, submit and persist.", "selector": "[data-testid=\"video-studio\"], [data-testid=\"voice-studio\"]", "priority": "CRITICAL (fixed)"},
+      {"component": "Onboarding overlay on marketing pages (providers.jsx / Onboarding.jsx)", "issue": "For a logged-in user, the 'Let's scan your business' onboarding modal auto-opens on /fractional-cxo and covers the pricing packs. This is exactly the page the LLM paywall redirects unpaid users to (generate-pages 402 -> /fractional-cxo#cxo-packs, and pages-unlock-cta -> same). Playwright could not click [data-testid=\"cxo-plan\"] while the overlay was up, i.e. the purchase/upgrade path is blocked until the user manually dismisses the modal.", "selector": "[data-testid=\"onboarding-overlay\"]", "priority": "HIGH"},
+      {"component": "VideoStudio.jsx", "issue": "Minor: after a successful submit, text fields reset but the video-type / aspect-ratio selects keep the previous selection (inconsistent reset).", "selector": "[data-testid=\"video-type\"]", "priority": "LOW"},
+      {"component": "KeywordField.jsx (line ~151)", "issue": "Console error on every homepage load: 'Encountered two children with the same key, Voice AI' - CHIPS array has duplicate 't' values used as React key.", "selector": "n/a", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/portal (mobile 390x844)", "issues": ["No horizontal document overflow; mobile nav pill strip scrolls correctly. First click on a mobile nav pill occasionally did not navigate (second attempt worked) - possible hydration timing, low impact."]},
+      {"screen": "/fractional-cxo (mobile 390x844)", "issues": ["cxo-nav-cta reads 'Book a call', 118x32px, right edge 366/390, 148px gap from logo - clean, no overflow. PASS."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "HIGH: Suppress the marketing Onboarding modal for logged-in users (or at least on /fractional-cxo) so the paywall redirect from generate-pages / pages-unlock-cta lands on a usable pricing page.",
+    "LOW: Remove remaining dead AI-SDR code: Estimator.jsx (PRICE.sdr, MARKET.sdr, sdr state + setSdr, GOALS mix.sdr, case 'sdr' stepper, qtyOf/unitLabel entries) and Portal.jsx (unused SdrPanel + PANELS.sdr entry).",
+    "LOW: Fix duplicate React key in KeywordField.jsx CHIPS map.",
+    "LOW: Reset select fields too after a successful video brief submit."
+  ],
+  "critical_code_review_comments": [
+    "Never pass an async/promise-returning function directly to useEffect (useEffect(load, [])) - React treats the return value as the cleanup fn and throws 'destroy is not a function', which crashes the entire route. PortalLeadsBoard.jsx:27 uses the same pattern but is safe only because its load() has a block body returning undefined; wrap it too for safety.",
+    "Portal gating logic is correct: /api/portal/access + 402 on generate-pages are both honoured client-side (error toast + redirect) and server-side; scan/opportunities remain free as specified."
+  ],
+  "updated_files": [
+    "/app/frontend/components/portal/VideoStudio.jsx",
+    "/app/frontend/components/portal/VoiceStudio.jsx"
+  ],
+  "success_rate": { "backend": "not tested (frontend-only request)", "frontend": "9/9 requested flows pass after the 1 tester-applied fix; 1 HIGH UX bug open" },
+  "seed_data_creation": "New unpaid user qav3878783@example.com / password123 with: 1 LLM scan of linear.app (91 opportunities), 1 video request (TEST_QA Video Brief), 1 voice request (TEST_QA Agent). No payment attempted, no pages generated.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "qav3878783@example.com / password123 (unpaid, non-admin - good for re-verifying gating)",
+  "context_for_next_testing_agent": "Video/Voice studio crash was fixed by the tester (useEffect promise return). Gating verified end-to-end for an unpaid user: /portal/llm scan free (took ~60s), opportunities free, generate-pages returns 402 with toast + redirect to /fractional-cxo#cxo-packs, /portal/pages shows pages-locked. Remaining open item: onboarding modal covers /fractional-cxo for logged-in users. Marketing site is fully SDR-free; estimator math verified ($510+$950+$1150=$2610 services, 60x$30=$1800 CXO, total $4410; +1 video -> $4495). Estimator steppers only exist after expanding a service card (estimator-service-<id>).",
+  "rca_of_the_issue": "VideoStudio.jsx/VoiceStudio.jsx defined `const load = () => fetch(...).then(...)` (arrow expression body) and then `useEffect(load, [])`. React stores the returned Promise as the effect cleanup and calls it on unmount/StrictMode double-invoke, raising 'destroy is not a function', which propagated as an unhandled render error and replaced the whole page with Next's client-exception screen. Fix: wrap in `useEffect(() => { load(); }, [])`. Re-tested: both studios render, submit (success toast), list the request with the correct 'Video generation in progress' / 'Building your agent' badge, and persist across reload."
+}

@@ -12,7 +12,7 @@ const PRICE = {
   video: 85, // per video
   pageBlock: 950, // per 20 GEO/LLM citation pages
   voiceSetup: 1150, // per agent + $0.12/min usage on actuals
-  sdr: 2300, // per motion + $0.12/min usage on actuals
+  sdr: 2300, // deprecated · AI SDR removed from offering
   social: 700, // per month
 };
 
@@ -64,9 +64,6 @@ const SERVICES = [
   { id: "voice", name: "Voice AI agents", price: "$1,150 setup / agent", color: "#2BBCC4",
     blurb: "Agents that answer, qualify and book meetings on live calls.",
     includes: ["Custom call flows tuned to your pitch", "Qualification, routing and calendar booking", "$0.12/minute usage billed on actuals"] },
-  { id: "sdr", name: "AI SDR outbound", price: "$2,300 / motion", color: "#1FA84A",
-    blurb: "An outbound motion that finds, enriches and follows up for you.",
-    includes: ["ICP list building and enrichment", "Multi-touch sequences across email and LinkedIn", "$0.12/minute usage billed on actuals"] },
   { id: "social", name: "Social media", price: "$700 / month", color: "#E200C4",
     blurb: "A content engine that keeps your brand loud every week.",
     includes: ["Monthly content calendar and production", "Founder and brand channel management", "Community replies and trend-jacking"] },
@@ -112,7 +109,6 @@ export default function Estimator() {
   const [pages, setPages] = useState(1);
   const [ugc, setUgc] = useState(0);
   const [voice, setVoice] = useState(1);
-  const [sdr, setSdr] = useState(1);
   const [socialMonths, setSocialMonths] = useState(0);
   const [aff, setAff] = useState("none");
   const [cxoHours, setCxOHours] = useState(60);
@@ -131,7 +127,6 @@ export default function Estimator() {
       pages: scale(g.mix.pages),
       ugc: scale(g.mix.ugc),
       voice: g.mix.voice,
-      sdr: g.mix.sdr,
       social: g.mix.social ? t.months : 0,
       aff: g.mix.aff,
       cxo: Math.round(g.cxo * t.mult),
@@ -140,7 +135,6 @@ export default function Estimator() {
     setPages(mix.pages);
     setUgc(mix.ugc);
     setVoice(mix.voice);
-    setSdr(mix.sdr);
     setSocialMonths(mix.social);
     setAff(mix.aff);
     setCxOHours(mix.cxo);
@@ -155,22 +149,21 @@ export default function Estimator() {
     if (pages > 0) lines.push({ label: `GEO pages · ${pages * 20} pages (${pages} × ${inr(PRICE.pageBlock)})`, cost: pages * PRICE.pageBlock });
     if (ugc > 0) lines.push({ label: `UGC ad creatives · ${ugc} × ${inr(ugcUnit(ugc))}`, cost: ugc * ugcUnit(ugc) });
     if (voice > 0) lines.push({ label: `Voice AI · ${voice} agent${voice > 1 ? "s" : ""} setup`, cost: voice * PRICE.voiceSetup, usage: true });
-    if (sdr > 0) lines.push({ label: "AI SDR outbound motion", cost: PRICE.sdr, usage: true });
     if (socialMonths > 0) lines.push({ label: `Social media · ${socialMonths} mo × ${inr(PRICE.social)}`, cost: socialMonths * PRICE.social });
     const tier = AFF_TIERS.find((x) => x.id === aff);
     if (tier && tier.monthly > 0) lines.push({ label: `Affiliate & Partners · ${tier.label} × ${t.months} mo`, cost: tier.monthly * t.months });
     const services = lines.reduce((s, l) => s + l.cost, 0);
     const cxoCost = cxoHours * CXO_RATE;
     const total = services + cxoCost;
-    let market = videos * MARKET.video + pages * MARKET.pageBlock + ugc * MARKET.ugc + voice * MARKET.voice + sdr * MARKET.sdr + socialMonths * MARKET.social + cxoHours * MARKET.cxoHour;
+    let market = videos * MARKET.video + pages * MARKET.pageBlock + ugc * MARKET.ugc + voice * MARKET.voice + socialMonths * MARKET.social + cxoHours * MARKET.cxoHour;
     if (tier && tier.monthly > 0) market += Math.round(tier.monthly * MARKET.affMult) * t.months;
     market = Math.round(market * (t.mult > 1 ? 1 + (t.mult - 1) * 0.5 : 1));
     const savingsPct = total > 0 ? Math.min(75, Math.max(0, Math.round((1 - total / market) * 100))) : 0;
-    return { lines, services, cxoCost, total, market, savingsPct, usage: voice > 0 || sdr > 0, weekly: Math.max(1, Math.round(cxoHours / t.weeks)) };
-  }, [timeline, videos, pages, ugc, voice, sdr, socialMonths, aff, cxoHours]);
+    return { lines, services, cxoCost, total, market, savingsPct, usage: voice > 0, weekly: Math.max(1, Math.round(cxoHours / t.weeks)) };
+  }, [timeline, videos, pages, ugc, voice, socialMonths, aff, cxoHours]);
 
-  const qtyOf = { videos, pages, ugc, voice, sdr, social: socialMonths, cxo: cxoHours };
-  const unitLabel = { videos: "videos", pages: "blocks of 20", ugc: "creatives", voice: "agents", sdr: "motions", social: "months", cxo: "hours" };
+  const qtyOf = { videos, pages, ugc, voice, social: socialMonths, cxo: cxoHours };
+  const unitLabel = { videos: "videos", pages: "blocks of 20", ugc: "creatives", voice: "agents", social: "months", cxo: "hours" };
 
   const cardControl = (id) => {
     switch (id) {
@@ -178,7 +171,6 @@ export default function Estimator() {
       case "pages": return <Stepper value={pages} onChange={setPages} max={10} testid="estimator-pages" />;
       case "ugc": return <Stepper value={ugc} onChange={setUgc} max={5000} step={5} testid="estimator-ugc" />;
       case "voice": return <Stepper value={voice} onChange={setVoice} max={3} testid="estimator-voice" />;
-      case "sdr": return <Stepper value={sdr} onChange={setSdr} max={2} testid="estimator-sdr" />;
       case "social": return <Stepper value={socialMonths} onChange={setSocialMonths} max={12} testid="estimator-social" />;
       case "cxo": return <Stepper value={cxoHours} onChange={setCxOHours} min={0} max={400} step={5} testid="estimator-cxo" />;
       case "aff": return (
@@ -401,7 +393,7 @@ export default function Estimator() {
                     Agencies + tools for this scope: ≈ {inr(estimate.market)} · <span className="font-semibold text-brand-green" data-testid="estimator-savings">you save ~{estimate.savingsPct}%</span>
                   </p>
                   {estimate.usage && (
-                    <p className="mt-2 text-xs text-neutral-400">* Voice AI and AI SDR usage billed on actuals at $0.12/minute.</p>
+                    <p className="mt-2 text-xs text-neutral-400">* Voice AI usage billed on actuals at $0.12/minute.</p>
                   )}
                 </div>
                 <div className="mt-5 flex flex-col items-stretch gap-3">

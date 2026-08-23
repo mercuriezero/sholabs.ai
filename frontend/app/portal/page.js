@@ -1,10 +1,10 @@
 import PortalShell from "@/components/portal/PortalShell";
-import PortalScan from "@/components/portal/PortalScan";
+import PortalDashboard from "@/components/portal/PortalDashboard";
 
 export default function PortalHome() {
   return (
     <PortalShell>
-      <PortalScan />
+      <PortalDashboard />
     </PortalShell>
   );
 }

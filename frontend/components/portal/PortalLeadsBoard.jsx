@@ -24,7 +24,7 @@ export default function PortalLeadsBoard() {
       })
       .catch(() => setData({ leads: [], stats: {} }));
   };
-  useEffect(load, []);
+  useEffect(() => { load(); }, []);
 
   const update = async (id, body) => {
     try {

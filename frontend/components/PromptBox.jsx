@@ -15,7 +15,7 @@ const PHRASES = [
   "Get my brand cited by ChatGPT, Gemini & Perplexity…",
   "Generate 50 marketing-qualified leads with GEO this quarter…",
   "Launch an AI video engine for my category…",
-  "Deploy a Voice AI SDR that books meetings while I sleep…",
+  "Deploy a Voice AI agent that books meetings while I sleep…",
   "Turn one focused pilot into a full growth engine…",
 ];
 
