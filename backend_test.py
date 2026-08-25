@@ -11,7 +11,7 @@ import string
 from datetime import datetime
 
 # Base URL from frontend/.env
-BASE_URL = "https://crm-research-flow.preview.emergentagent.com/api"
+BASE_URL = "https://email-verify-73.preview.emergentagent.com/api"
 
 def random_email():
     """Generate a random test email"""

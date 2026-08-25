@@ -1,0 +1,39 @@
+{
+  "summary": "Tested the new Forgot Password / Reset Password feature end-to-end (backend + frontend). Backend: created /app/backend/tests/test_password_reset.py (7 pytest cases) - all PASS: unknown email -> generic 200 with NO reset_url, registered normal user -> generic 200 with NO reset_url (no link leak), bogus token -> 400 'invalid or already used', token<10 chars / password<8 chars -> 422, and full owner bootstrap E2E (forgot-password returns reset_url for sun@sohighon.ai -> reset-password 200 -> token reuse 400 -> login with new password 200 -> /api/auth/me is_admin=true, no _id leak). Frontend (Playwright, preview URL): (1) Login modal shows auth-forgot-link in Log in mode; clicking it renders auth-forgot-view with auth-forgot-email/auth-forgot-submit/auth-forgot-back; 'Back to log in' returns to the login form; empty email shows auth-error 'Enter your email'. (2) Registered qapw47305@example.com via signup (redirected to /portal), logged out, submitted forgot-password -> auth-forgot-sent shown ('If an account exists for ... a reset link is on its way') and auth-forgot-owner-link count=0 (correctly no link for non-owner). (3) Owner E2E via reset page: browser fetch to /api/auth/forgot-password for sun@sohighon.ai returned reset_url; navigating to it rendered reset-password-page + both inputs; mismatched passwords showed reset-error \"Passwords don't match.\"; valid submit showed reset-done and auto-redirected to '/'; logging in with the NEW password succeeded, redirected to /portal, and /account shows owner-tools (Admin tools - super-owner access) panel. (4) /reset-password with no token shows reset-no-token 'Invalid reset link'; an invalid/expired token surfaces the backend message in reset-error. (5) Also verified the owner email in the forgot modal renders auth-forgot-owner-link ('Set a new password now'). Regression: modal login + signup work, logged-in users bounce from / to /portal.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/forgot-password", "issue": "ForgotInput.email is a plain str (not EmailStr), so a malformed value like 'not-an-email' returns 200 generic instead of 422. Harmless (no enumeration, no email sent) but input validation is weaker than other endpoints."},
+      {"endpoint": "POST /api/auth/forgot-password", "issue": "No rate limiting on this endpoint - it can be hammered for an existing account, and each call deletes the previous token (delete_many), so an attacker could repeatedly invalidate a legitimate user's in-flight reset link. Consider a per-email/IP throttle."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "AuthModal - forgot password view", "issues": ["Footer copy 'Payments are processed securely by Razorpay.' is still rendered in the password-reset view where it is irrelevant/confusing. Consider hiding it when mode === 'forgot'."]},
+      {"screen": "/reset-password form", "issues": ["The <8 char password case never reaches the JS reset-error branch because the input has native minLength=8, so the user only sees the browser's default validation bubble instead of the styled reset-error message. Functionally fine, inconsistent with the mismatch error UX."]},
+      {"screen": "/account admin tools (pre-existing)", "issues": ["Coupon expiry uses the browser's native date input (mm/dd/yyyy) instead of the shadcn calendar component used elsewhere."]},
+      {"screen": "Anonymous marketing pages (pre-existing)", "issues": ["Console shows 401 'Failed to load resource' from the session/me probe on every anonymous page load - cosmetic noise."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_password_reset.py", "/app/test_reports/pytest/pw_reset_results.xml"],
+  "action_items": [
+    "CLEANUP (as planned by main agent): sun@sohighon.ai now has password 'OwnerFresh456' and there is ONE unused live token in db.password_resets for that email (created by the last modal test). Delete the owner account + password_resets docs before handing back to the real user.",
+    "Optional: use EmailStr for ForgotInput.email and add throttling to /api/auth/forgot-password.",
+    "Optional polish: hide the Razorpay footer line in the forgot-password modal view; drop minLength on reset-password-input so the styled reset-error shows for short passwords."
+  ],
+  "critical_code_review_comments": [
+    "reset_password() correctly hashes with bcrypt, marks the token single-use, clears user_sessions and login_attempts - verified via API (reuse -> 400, old password no longer valid).",
+    "The owner-bootstrap branch is properly gated by is_owner_email(email) AND not _email_configured(); confirmed a normal registered user receives no reset_url. Once RESEND_API_KEY is set this path disappears automatically - good.",
+    "AuthModal.jsx and ResetPassword.jsx build the API base from window.location.origin instead of process.env.REACT_APP_BACKEND_URL. It works behind this ingress but deviates from the project convention used elsewhere and will break if the app is ever served from a different origin than the API."
+  ],
+  "updated_files": ["/app/backend/tests/test_password_reset.py"],
+  "success_rate": {"backend": "100% (7/7)", "frontend": "100% (all 5 requested scenarios passed)"},
+  "seed_data_creation": "Registered normal test user qapw47305@example.com / UserPass123 (used for the non-owner forgot-password check). Owner sun@sohighon.ai password is now OwnerFresh456.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "sun@sohighon.ai / OwnerFresh456 (owner, is_admin=true, owner-tools visible on /account); qapw47305@example.com / UserPass123 (normal user)",
+  "context_for_next_testing_agent": "Forgot/reset flow is fully working. Login modal: nav-login-button -> auth-modal -> auth-mode-login -> auth-forgot-link -> auth-forgot-view. Owner reset link can always be obtained in-browser via fetch('/api/auth/forgot-password', {email:'sun@sohighon.ai'}).reset_url while RESEND_API_KEY is unset. Backend regression suite for this feature: /app/backend/tests/test_password_reset.py (safe to re-run; it resets the owner password to 'BrandNew123'). Landing page has heavy animation - use domcontentloaded + ~4s wait.",
+  "rca_of_the_issue": "N/A - no functional defects found. Only minor validation/UX polish items listed above."
+}

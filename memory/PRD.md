@@ -168,7 +168,7 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 
 
 
-- P0: User action — register webhook https://crm-research-flow.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
+- P0: User action — register webhook https://email-verify-73.preview.emergentagent.com/api/payments/webhook (event: payment.captured) in Razorpay dashboard; paste webhook secret into RAZORPAY_WEBHOOK_SECRET for signature verification.
 - P1: Confirm pilot tier pricing (₹24,999/₹49,999/₹99,999 assumed). Auth-protect /dashboard (currently public demo data).
 - P1: Owner UI for logging hours (currently API-only, owner-gated).
 - P1: Case studies / testimonials / client logos section (real proof points from user).
@@ -219,3 +219,13 @@ React SPA (CRA/craco) + FastAPI + MongoDB (provisioned template). SEO-critical c
 - Login routing: logged-in users redirected from home to /portal; /fractional-cxo remains reachable (paywall target). Marketing ChatBot hidden inside /portal and /p.
 - Verified: iteration_4 (9/9 flows incl. gating, studios, dashboard, SDR removal, mobile pricing button) + iteration_5 (5/5, onboarding no longer blocks pricing, SDR fully gone, studios render, no dup-key console error). LIVE Razorpay never charged.
 - KNOWN low-priority: Estimator still has unused PRICE.sdr/MARKET.sdr/GOALS mix.sdr data keys (not rendered); Onboarding.jsx orphaned file kept.
+
+## Rev 30 (2026-06 fork) — Forgot / reset password + admin access recovery
+- PROBLEM: owner (sun@sohighon.ai, a Zoho mailbox → no Google login) couldn't reach admin; no password + no reset flow existed.
+- Added POST /api/auth/forgot-password (hashed single-use token in password_resets, 45-min expiry, generic 200 to avoid enumeration, emails a {SITE_URL}/reset-password?token=... link via send_email) and POST /api/auth/reset-password (validates token, sets bcrypt hash, marks token used, clears sessions + login_attempts).
+- Email: send_email now uses Resend when RESEND_API_KEY is set (SENDER_EMAIL), else the existing Emergent proxy (EMAIL_KEY). _email_configured() gates delivery.
+- OWNER BOOTSTRAP: when NO email provider is configured, forgot-password returns the reset_url directly in the response ONLY for OWNER_EMAIL — so the owner is never locked out. Auto-disappears once RESEND_API_KEY/EMAIL_KEY is set. Normal users never get a link in the response.
+- Frontend: AuthModal 'Forgot password?' link + forgot view (auth-forgot-*, owner sees 'Set a new password now'); new /reset-password page (ResetPassword.jsx).
+- Verified: iteration_6 backend 7/7 + frontend 5/5 (owner E2E reset → login → admin, non-owner no link leak, token reuse blocked, validation). Polish: Razorpay footer hidden in forgot view; native minLength removed so styled error shows.
+- PROD REQUIREMENTS (redeploy): OWNER_EMAIL=sun@sohighon.ai and SITE_URL=https://sohighon.ai must be set in production. Immediate admin recovery on prod: Forgot password → enter sun@sohighon.ai → 'Set a new password now' appears (email unconfigured) → reset → log in. If the owner account doesn't exist yet, just SIGN UP with sun@sohighon.ai (auto-admin). For real customer-facing reset emails, set RESEND_API_KEY (+ verified sohighon.ai sender).
+- KNOWN low-priority: forgot-password uses plain str (not EmailStr) and has no throttle (each call invalidates the prior token).

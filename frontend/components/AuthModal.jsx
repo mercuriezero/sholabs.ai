@@ -15,7 +15,31 @@ export default function AuthModal({ open, onClose, onSuccess }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetUrl, setResetUrl] = useState("");
   useEffect(() => setMounted(true), []);
+
+  const API = typeof window !== "undefined" ? `${window.location.origin}/api` : "/api";
+
+  const sendForgot = async () => {
+    if (!email.trim()) { setError("Enter your email"); return; }
+    setBusy(true);
+    setError("");
+    try {
+      const r = await fetch(`${API}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const d = await r.json();
+      setResetUrl(d.reset_url || "");
+      setResetSent(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const googleLogin = () => {
     const origin = window.location.origin;
@@ -65,10 +89,30 @@ export default function AuthModal({ open, onClose, onSuccess }) {
             </button>
             <img src="/logo.webp" alt="High On AI" className="h-9 w-auto rounded-md" />
             <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight text-black">
-              {mode === "login" ? "Welcome back" : "Create your account"}
+              {mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : "Reset your password"}
             </h2>
-            <p className="mt-1 text-sm text-neutral-500">Sign in to unlock payment and save your growth plan.</p>
+            <p className="mt-1 text-sm text-neutral-500">{mode === "forgot" ? "Enter your email and we'll send you a secure reset link." : "Sign in to unlock payment and save your growth plan."}</p>
 
+            {mode === "forgot" ? (
+              <div className="mt-6 space-y-3" data-testid="auth-forgot-view">
+                {resetSent ? (
+                  <div data-testid="auth-forgot-sent">
+                    <p className="rounded-2xl bg-brand-green/10 px-4 py-3 text-sm text-neutral-700">If an account exists for <b>{email}</b>, a reset link is on its way. Check your inbox and spam.</p>
+                    {resetUrl && (
+                      <a href={resetUrl} data-testid="auth-forgot-owner-link" className="mt-3 flex w-full items-center justify-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5">Set a new password now</a>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} data-testid="auth-forgot-email" placeholder="Email address" className="w-full rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3 text-sm outline-none focus:border-black/40" />
+                    {error && <p className="text-sm font-medium text-brand-red" data-testid="auth-error">{error}</p>}
+                    <button onClick={sendForgot} disabled={busy} data-testid="auth-forgot-submit" className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 disabled:opacity-60">{busy && <Loader2 className="h-4 w-4 animate-spin" />} Send reset link</button>
+                  </>
+                )}
+                <button onClick={() => { setMode("login"); setError(""); setResetSent(false); setResetUrl(""); }} data-testid="auth-forgot-back" className="w-full text-center text-xs font-medium text-neutral-500 hover:text-black">Back to log in</button>
+              </div>
+            ) : (
+            <>
             <button
               onClick={googleLogin}
               data-testid="auth-google-button"
@@ -143,8 +187,15 @@ export default function AuthModal({ open, onClose, onSuccess }) {
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 {mode === "login" ? "Log in" : "Create account"}
               </button>
+              {mode === "login" && (
+                <button type="button" onClick={() => { setMode("forgot"); setError(""); setResetSent(false); }} data-testid="auth-forgot-link" className="w-full pt-1 text-center text-xs font-medium text-neutral-500 hover:text-black">
+                  Forgot password?
+                </button>
+              )}
             </form>
-            <p className="mt-5 text-center text-xs text-neutral-400">Payments are processed securely by Razorpay.</p>
+            </>
+            )}
+            {mode !== "forgot" && <p className="mt-5 text-center text-xs text-neutral-400">Payments are processed securely by Razorpay.</p>}
           </motion.div>
         </motion.div>
       )}

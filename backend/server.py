@@ -14,6 +14,8 @@ import httpx
 import bcrypt
 import jwt
 import razorpay
+import hashlib
+import secrets
 from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
@@ -39,6 +41,8 @@ logger = logging.getLogger(__name__)
 EMAIL_BASE_URL = "https://integrations.emergentagent.com"
 EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "High On AI")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
 OWNER_EMAIL = (os.environ.get("OWNER_EMAIL") or "").strip().lower() or None
 SITE_URL = os.environ.get("SITE_URL", "")
 
@@ -263,6 +267,14 @@ def _assert_safe_email(subject: str, html: str) -> None:
 
 async def send_email(*, to: str, subject: str, html: str) -> str | None:
     _assert_safe_email(subject, html)
+    if RESEND_API_KEY:
+        import resend
+        resend.api_key = RESEND_API_KEY
+        result = await asyncio.to_thread(
+            resend.Emails.send,
+            {"from": f"{EMAIL_FROM_NAME} <{SENDER_EMAIL}>", "to": [to], "subject": subject, "html": html},
+        )
+        return result.get("id") if isinstance(result, dict) else None
     payload = {"to": [to], "subject": subject, "html": html, "from_name": EMAIL_FROM_NAME}
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(
@@ -272,6 +284,10 @@ async def send_email(*, to: str, subject: str, html: str) -> str | None:
         )
     resp.raise_for_status()
     return resp.json().get("id")
+
+
+def _email_configured() -> bool:
+    return bool(RESEND_API_KEY) or bool(EMAIL_KEY)
 
 
 async def notify_owner(lead: Lead):
@@ -930,6 +946,83 @@ async def login(input: LoginInput, request: Request, response: Response):
     await db.login_attempts.delete_many({"identifier": identifier})
     set_auth_cookies(response, user["user_id"], email)
     return public_user(user)
+
+
+class ForgotInput(BaseModel):
+    email: str = Field(min_length=3, max_length=320)
+
+
+class ResetInput(BaseModel):
+    token: str = Field(min_length=10, max_length=200)
+    password: str = Field(min_length=8, max_length=200)
+
+
+def _hash_token(raw: str) -> str:
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(input: ForgotInput, request: Request):
+    email = input.email.strip().lower()
+    generic = {"status": "ok", "message": "If an account exists for that email, a reset link is on its way."}
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        return generic
+    raw = secrets.token_urlsafe(32)
+    await db.password_resets.delete_many({"email": email})
+    await db.password_resets.insert_one({
+        "email": email,
+        "token_hash": _hash_token(raw),
+        "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=45)).isoformat(),
+        "used": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    base = (SITE_URL or str(request.base_url)).rstrip("/")
+    reset_url = f"{base}/reset-password?token={raw}"
+    if _email_configured():
+        html = (
+            f"<p>Hi {user.get('name') or 'there'},</p>"
+            f"<p>We received a request to reset your High On AI password. "
+            f"Click the button below to choose a new one. This link expires in 45 minutes.</p>"
+            f"<p><a href='{reset_url}' style='display:inline-block;background:#0A0A0A;color:#fff;"
+            f"padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:600'>Reset your password</a></p>"
+            f"<p>If you didn't request this, you can safely ignore this email.</p>"
+        )
+        try:
+            await send_email(to=email, subject="Reset your High On AI password", html=html)
+        except Exception:
+            logger.exception("Failed to send reset email")
+    else:
+        logger.warning("Email not configured; password reset link for %s: %s", email, reset_url)
+    # Owner bootstrap: when email delivery isn't configured, return the link directly to the
+    # super-owner (who controls OWNER_EMAIL via env) so they are never locked out of admin.
+    if is_owner_email(email) and not _email_configured():
+        return {**generic, "reset_url": reset_url}
+    return generic
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(input: ResetInput, response: Response):
+    rec = await db.password_resets.find_one({"token_hash": _hash_token(input.token.strip()), "used": False})
+    if not rec:
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has already been used.")
+    try:
+        expired = datetime.fromisoformat(rec["expires_at"]) < datetime.now(timezone.utc)
+    except ValueError:
+        expired = True
+    if expired:
+        raise HTTPException(status_code=400, detail="This reset link has expired. Please request a new one.")
+    user = await db.users.find_one({"email": rec["email"]})
+    if not user:
+        raise HTTPException(status_code=400, detail="Account no longer exists.")
+    await db.users.update_one(
+        {"email": rec["email"]},
+        {"$set": {"password_hash": hash_password(input.password), "auth_provider": "email"}},
+    )
+    await db.password_resets.update_one({"_id": rec["_id"]}, {"$set": {"used": True}})
+    await db.user_sessions.delete_many({"user_id": user["user_id"]})
+    await db.login_attempts.delete_many({"identifier": {"$regex": rec["email"] + "$"}})
+    return {"status": "ok"}
 
 
 @api_router.post("/auth/logout")
