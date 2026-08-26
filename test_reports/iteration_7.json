@@ -1,0 +1,42 @@
+{
+  "summary": "Frontend-only E2E test of the 3 requested changes on preview URL. Login with owner account (sun@sohighon.ai / SunAdmin@2026) works and redirects to /portal. Portal Dashboard renders the new recharts demo analytics (Live badge, 6 gradient KPI tiles, area+line visibility chart, leads/booked bar chart, leads-by-service pie, goal-progress radial gauge) with no runtime/page errors; 'Jump into a service' cards still render below. Portal Leads: 'Demo data' toggle is CHECKED BY DEFAULT, demo note visible, 12 non-spam demo rows in leads-table, stat tiles populate (13/4/3), status change + notes edit update the row locally and fire a 'Lead updated' toast, unchecking shows leads-empty (0 stats), re-checking restores demo rows and preserves the edited status. Marketing homepage: stack-calculator / stack-heading / 'The stack you'd otherwise need' are fully removed while the WhyUs comparison table is still present. Only cosmetic issues found.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Portal Dashboard - 'Goal progress' radial gauge (chart-gauges)",
+        "issues": [
+          "Legend (layout=vertical, align=right, verticalAlign=middle) is drawn ON TOP of the radial rings - label text overlaps the magenta ring and the first characters ('Q3 pipeline goal', 'SoV target', 'Content published') are clipped/unreadable. Fix by giving the legend its own space (e.g. RadialBarChart cx=\"40%\" or legend wrapperStyle right offset / place legend below).",
+          "Legend colour swatch order does not match the rings/values it labels (recharts renders RadialBar cells in reverse order), so 'Q3 pipeline goal' shows a magenta swatch while its fill is green."
+        ]
+      },
+      {
+        "screen": "Portal Leads (demo mode)",
+        "issues": [
+          "Minor data inconsistency: leads-stat-total shows 13 (includes the hidden spam demo lead demo-13) while the table renders 12 rows because spam is filtered out. Consider computing stats over non-spam leads (or over the filtered set) for consistency."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix radial gauge legend overlap/clipping in PortalDashboard.jsx chart-gauges (cosmetic, HIGH visual impact)",
+    "Align gauge legend swatch colours with the corresponding metric (or use custom legend content)",
+    "Optional: exclude spam demo lead from leads-stat-total so tile count matches the visible rows"
+  ],
+  "critical_code_review_comments": [
+    "PortalDashboard.jsx: a <Line> child inside <AreaChart> works today but is not the documented recharts pattern - prefer <ComposedChart> to avoid breakage on recharts upgrades.",
+    "PortalLeadsBoard.jsx: demo lead edits are only in React state (expected for mock mode) - they are lost on reload; acceptable per requirement but worth noting in UI copy.",
+    "PortalDashboard.jsx / PortalLeadsBoard.jsx build API base from window.location.origin instead of process.env.NEXT_PUBLIC/REACT_APP_BACKEND_URL - works behind the same-origin ingress but deviates from the env-var rule."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "not tested", "frontend": "100% of requested flows pass (2 cosmetic issues)" },
+  "seed_data_creation": "None. Demo leads/analytics are frontend-only constants; no DB writes made.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "sun@sohighon.ai / SunAdmin@2026 works (note: /app/memory/test_credentials.md still lists the stale suggested password OwnerPass123! - update it).",
+  "context_for_next_testing_agent": "Preview URL https://email-verify-73.preview.emergentagent.com. Login via nav 'Log in' -> auth-mode-login -> auth-email-input/auth-password-input -> auth-submit-button; redirects to /portal. Homepage networkidle never settles (chat/polling) - use domcontentloaded + timeout waits. A harmless 401 console error appears on the marketing page (unauthenticated /api/auth/me). Portal leads testids: leads-demo-toggle (input inside label), lead-status-demo-N, lead-notes-demo-N, leads-stat-total/new/booked, leads-empty.",
+  "rca_of_the_issue": "Gauge legend overlap: RadialBarChart uses outerRadius=100% with an inline right-aligned vertical Legend, so the legend box is painted over the chart area instead of reserving horizontal space."
+}

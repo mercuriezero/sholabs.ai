@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, X } from "lucide-react";
-import StackCalculator from "@/components/StackCalculator";
 
 const COMPARISON = [
   ["Ownership", "5+ disconnected vendors", "One accountable engine"],
@@ -50,17 +49,6 @@ export default function WhyUs() {
             </tbody>
           </table>
         </div>
-
-        <div className="mt-20 max-w-3xl">
-          <h3 className="font-display text-2xl font-semibold tracking-tight text-black md:text-3xl" data-testid="stack-heading">
-            The stack you'd otherwise need
-          </h3>
-        </div>
-
-        <StackCalculator />
-        <p className="mt-4 text-xs italic text-neutral-400">
-          This calculator works hardest paired with our pilot offer · it turns "trust us" into "here's the exact stack we're replacing."
-        </p>
       </div>
     </section>
   );
